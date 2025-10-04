@@ -4,6 +4,7 @@ import com.example.movie.dto.auth.AuthResponse;
 import com.example.movie.dto.auth.LoginRequest;
 import com.example.movie.dto.auth.RegisterRequest;
 import com.example.movie.dto.user.UserResponse;
+import com.example.movie.exception.EmailAlreadyExistException;
 import com.example.movie.exception.InvalidCredentialException;
 import com.example.movie.exception.UserNotFoundException;
 import com.example.movie.exception.UsernameAlreadyExistException;
@@ -29,6 +30,9 @@ public class AuthServiceImpl implements AuthService {
     public UserResponse register (RegisterRequest registerRequest) {
         if(userRepository.existsByUsername(registerRequest.getUsername()))
                 throw new UsernameAlreadyExistException(registerRequest.getUsername());
+
+        if(userRepository.existsByEmail(registerRequest.getEmail()))
+            throw new EmailAlreadyExistException(registerRequest.getEmail());
 
         User.UserRole role =User.UserRole.CUSTOMER;
 

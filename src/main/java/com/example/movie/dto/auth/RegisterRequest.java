@@ -12,7 +12,6 @@ public class RegisterRequest {
     private String password;
     @NotBlank
     private String address;
-
     @NotBlank
     private String phoneNumber;
 }

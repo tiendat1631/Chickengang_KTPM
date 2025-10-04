@@ -20,4 +20,16 @@ public class GlobalExceptionHandler {
         );
         return new ResponseEntity<>(response, HttpStatus.CONFLICT);
     }
+
+    @ExceptionHandler(EmailAlreadyExistException.class)
+    private ResponseEntity<ApiResponse<Void>> handleEmailAlreadyExistException (EmailAlreadyExistException ex) {
+        ApiResponse<Void> response = new ApiResponse<>(
+                HttpStatus.CONFLICT,
+                null,
+                ex.getMessage(),
+                "EMAIL_ALREADY_EXISTS"
+        );
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
+
 }
