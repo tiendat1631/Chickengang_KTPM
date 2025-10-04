@@ -1,7 +1,7 @@
 package com.example.movie.service.impl;
 
 
-import com.example.movie.dto.user.RegisterUserRequest;
+import com.example.movie.dto.user.CreateUserRequest;
 import com.example.movie.dto.user.UserResponse;
 
 import com.example.movie.model.User;
@@ -15,7 +15,7 @@ import org.springframework.stereotype.Service;
 public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     @Override
-    public UserResponse createUser (RegisterUserRequest userRequest){
+    public UserResponse createUser (CreateUserRequest userRequest){
         // Map từ DTO request sang entity
         User user = new User();
         user.setUsername(userRequest.getUsername());
@@ -23,7 +23,7 @@ public class UserServiceImpl implements UserService {
         user.setPassword(userRequest.getPassword());
         user.setPhoneNumber(userRequest.getPhoneNumber());
         user.setAddress(userRequest.getAddress());
-        user.setRole(User.UserRole.valueOf("USER")); // set default
+        user.setRole(User.UserRole.CUSTOMER); // set default
 
         User savedUser = userRepository.save(user);
 

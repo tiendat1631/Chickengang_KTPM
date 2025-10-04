@@ -1,5 +1,6 @@
 package com.example.movie.dto.user;
 
+import com.example.movie.model.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -19,4 +20,5 @@ public class UserResponse {
     private LocalDateTime updatedAt;
     //private List<BookingDTO> bookings;
     //private List<PaymentDTO> payments;
+
 }

@@ -2,25 +2,21 @@ package com.example.movie.model;
 
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import lombok.RequiredArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
-import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.Collection;
-import java.util.List;
 
-@RequiredArgsConstructor
+
 @NoArgsConstructor
+@AllArgsConstructor
 @Data
 @Entity
-public class User implements UserDetails {
+public class User  {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -41,6 +37,13 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Boolean isActive = true;
 
+    @Column(nullable = false)
+    private String address;
+
+    @CreationTimestamp
+    private LocalDateTime createdAt;
+    @UpdateTimestamp
+    private LocalDateTime updatedAt;
 //    @OneToMany
 //    @JoinColumn(name = "user_id")
 //    @JsonIgnore
@@ -52,11 +55,6 @@ public class User implements UserDetails {
 
     private LocalDate dateOfBirth;
 
-    @CreationTimestamp
-    private LocalDateTime createdAt;
-
-    @UpdateTimestamp
-    private LocalDateTime updatedAt;
 
     public enum UserRole {
         ADMIN,
@@ -64,33 +62,7 @@ public class User implements UserDetails {
         CUSTOMER
     }
 
-    @Override
-    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return List.of(new SimpleGrantedAuthority("ROLE_" + role.name()));
-    }
 
-    @Override
-    public boolean isAccountNonExpired() {
-        return true;
-    }
 
-    @Override
-    public boolean isAccountNonLocked() {
-        return true;
-    }
-
-    @Override
-    public boolean isCredentialsNonExpired() {
-        return true;
-    }
-
-    @Override
-    public boolean isEnabled() {
-        return isActive;
-    }
-
-    public void setAddress(String address) {
-        // No address field, stub for compatibility
-    }
 
 }

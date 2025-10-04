@@ -1,17 +1,21 @@
 package com.example.movie.dto.user;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
+import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
-import java.time.LocalDate;
 @Data
-public class RegisterUserRequest {
+public class CreateUserRequest {
+    @NotBlank
     private String username;
+    @NotBlank
     private String email;
+    @NotBlank
     private String password;
+    @NotBlank
     private String phoneNumber;
+    @NotBlank
     private String address;
-    private String role;
+    //private String role;
 
 //    @JsonFormat(pattern = "yyyy-MM-dd")
 //    private LocalDate dateOfBirth;
