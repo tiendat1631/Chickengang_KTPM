@@ -31,5 +31,15 @@ public class GlobalExceptionHandler {
         );
         return new ResponseEntity<>(response, HttpStatus.CONFLICT);
     }
+    @ExceptionHandler(InvalidRoleException.class)
+    private ResponseEntity<ApiResponse<Void>> handleInvalidRoleException (InvalidRoleException ex) {
+        ApiResponse<Void> response = new ApiResponse<>(
+                HttpStatus.BAD_REQUEST,
+                null,
+                ex.getMessage(),
+                "INVALID_ROLE"
+        );
+        return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
+    }
 
 }

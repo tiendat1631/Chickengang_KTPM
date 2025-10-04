@@ -58,7 +58,7 @@ public class User  {
 
     public enum UserRole {
         ADMIN,
-        THEATER_OWNER,
+
         CUSTOMER
     }
 

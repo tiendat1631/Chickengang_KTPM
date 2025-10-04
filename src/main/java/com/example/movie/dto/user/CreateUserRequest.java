@@ -15,7 +15,8 @@ public class CreateUserRequest {
     private String phoneNumber;
     @NotBlank
     private String address;
-    //private String role;
+    @NotBlank
+    private String role;
 
 //    @JsonFormat(pattern = "yyyy-MM-dd")
 //    private LocalDate dateOfBirth;
