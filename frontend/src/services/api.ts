@@ -1,0 +1,65 @@
+import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
+import Config from 'react-native-config';
+import { getToken, removeToken } from '@/utils/auth';
+
+// API Configuration
+const API_BASE_URL = Config.API_BASE_URL || 'http://localhost:8080/api/v1';
+const API_TIMEOUT = parseInt(Config.API_TIMEOUT || '30000');
+
+// Create axios instance
+const apiClient: AxiosInstance = axios.create({
+  baseURL: API_BASE_URL,
+  timeout: API_TIMEOUT,
+  headers: {
+    'Content-Type': 'application/json',
+  },
+});
+
+// Request interceptor to add JWT token
+apiClient.interceptors.request.use(
+  async (config: AxiosRequestConfig) => {
+    try {
+      const token = await getToken();
+      if (token && config.headers) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
+    } catch (error) {
+      console.warn('Failed to get token:', error);
+    }
+    return config;
+  },
+  (error) => {
+    return Promise.reject(error);
+  }
+);
+
+// Response interceptor for error handling
+apiClient.interceptors.response.use(
+  (response: AxiosResponse) => {
+    return response;
+  },
+  async (error) => {
+    const originalRequest = error.config;
+
+    // Handle 401 Unauthorized
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+      
+      try {
+        // Try to refresh token or redirect to login
+        await removeToken();
+        // Navigate to login screen
+        // navigationRef.current?.reset({
+        //   index: 0,
+        //   routes: [{ name: 'Login' }],
+        // });
+      } catch (refreshError) {
+        console.error('Token refresh failed:', refreshError);
+      }
+    }
+
+    return Promise.reject(error);
+  }
+);
+
+export default apiClient;
