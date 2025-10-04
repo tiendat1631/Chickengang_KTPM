@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class MovieController {
     private final MovieService movieService;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<ApiResponse<MovieResponse>> addMovie(@RequestBody MovieRequest movieRequest) {
         MovieResponse created = movieService.addMovie(movieRequest);
