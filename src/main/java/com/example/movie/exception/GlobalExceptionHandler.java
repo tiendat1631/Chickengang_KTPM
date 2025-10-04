@@ -42,4 +42,37 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.BAD_REQUEST);
     }
 
+    @ExceptionHandler(InvalidCredentialException.class)
+    private ResponseEntity<ApiResponse<Void>> handleInvalidCredentialException (InvalidCredentialException ex) {
+        ApiResponse<Void> response = new ApiResponse<>(
+                HttpStatus.UNAUTHORIZED,
+                null,
+                ex.getMessage(),
+                "INVALID_CREDENTIAL"
+        );
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(UserNotFoundException.class)
+    private ResponseEntity<ApiResponse<Void>> handleUserNotFoundException (UserNotFoundException ex) {
+        ApiResponse<Void> response = new ApiResponse<>(
+                HttpStatus.NOT_FOUND,
+                null,
+                ex.getMessage(),
+                "USER_NOT_FOUND"
+        );
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(InvalidId.class)
+    private ResponseEntity<ApiResponse<Void>> handleInvalidId (InvalidId id) {
+        ApiResponse<Void> response = new ApiResponse<>(
+                HttpStatus.CONFLICT,
+                null,
+                id.getMessage(),
+                "INVALID_ID"
+        );
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
+
 }
