@@ -1,0 +1,104 @@
+import * as Keychain from 'react-native-keychain';
+import Config from 'react-native-config';
+
+const ACCESS_TOKEN_KEY = Config.JWT_ACCESS_TOKEN_KEY || 'access_token';
+const REFRESH_TOKEN_KEY = Config.JWT_REFRESH_TOKEN_KEY || 'refresh_token';
+
+/**
+ * Store JWT tokens securely
+ */
+export const storeTokens = async (accessToken: string, refreshToken: string): Promise<void> => {
+  try {
+    await Keychain.setInternetCredentials(
+      ACCESS_TOKEN_KEY,
+      'user',
+      accessToken
+    );
+    await Keychain.setInternetCredentials(
+      REFRESH_TOKEN_KEY,
+      'user',
+      refreshToken
+    );
+  } catch (error) {
+    console.error('Failed to store tokens:', error);
+    throw error;
+  }
+};
+
+/**
+ * Get access token
+ */
+export const getToken = async (): Promise<string | null> => {
+  try {
+    const credentials = await Keychain.getInternetCredentials(ACCESS_TOKEN_KEY);
+    return credentials ? credentials.password : null;
+  } catch (error) {
+    console.error('Failed to get token:', error);
+    return null;
+  }
+};
+
+/**
+ * Get refresh token
+ */
+export const getRefreshToken = async (): Promise<string | null> => {
+  try {
+    const credentials = await Keychain.getInternetCredentials(REFRESH_TOKEN_KEY);
+    return credentials ? credentials.password : null;
+  } catch (error) {
+    console.error('Failed to get refresh token:', error);
+    return null;
+  }
+};
+
+/**
+ * Remove all stored tokens
+ */
+export const removeToken = async (): Promise<void> => {
+  try {
+    await Keychain.resetInternetCredentials(ACCESS_TOKEN_KEY);
+    await Keychain.resetInternetCredentials(REFRESH_TOKEN_KEY);
+  } catch (error) {
+    console.error('Failed to remove tokens:', error);
+    throw error;
+  }
+};
+
+/**
+ * Check if user is authenticated
+ */
+export const isAuthenticated = async (): Promise<boolean> => {
+  const token = await getToken();
+  return token !== null;
+};
+
+/**
+ * Parse JWT token payload
+ */
+export const parseJWT = (token: string): any => {
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split('')
+        .map((c) => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2))
+        .join('')
+    );
+    return JSON.parse(jsonPayload);
+  } catch (error) {
+    console.error('Failed to parse JWT:', error);
+    return null;
+  }
+};
+
+/**
+ * Check if token is expired
+ */
+export const isTokenExpired = (token: string): boolean => {
+  const payload = parseJWT(token);
+  if (!payload || !payload.exp) return true;
+  
+  const currentTime = Date.now() / 1000;
+  return payload.exp < currentTime;
+};
