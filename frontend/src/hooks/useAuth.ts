@@ -69,13 +69,24 @@ export const useAuth = () => {
 
   const isAuthenticated = !!user && !error;
 
+  const logout = async () => {
+    try {
+      await removeToken();
+      // Clear all cached data
+      const queryClient = useQueryClient();
+      queryClient.clear();
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
+
   return {
     user,
     isLoading,
     isAuthenticated,
     login: loginMutation.mutate,
     register: registerMutation.mutate,
-    logout: logoutMutation.mutate,
+    logout,
     isLoggingIn: loginMutation.isPending,
     isRegistering: registerMutation.isPending,
     isLoggingOut: logoutMutation.isPending,

@@ -1,0 +1,147 @@
+import React, { useState, useEffect } from 'react';
+import { useMovies } from '@/hooks/useMovies';
+import { Movie } from '@/types/movie';
+import Header from '@/components/common/Header';
+import HeroSection from '@/components/home/HeroSection';
+import MovieList from '@/components/home/MovieList';
+import './HomePage.css';
+
+const HomePage: React.FC = () => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(0);
+  const [featuredMovies, setFeaturedMovies] = useState<Movie[]>([]);
+  const [recentMovies, setRecentMovies] = useState<Movie[]>([]);
+
+  // Fetch movies with pagination
+  const {
+    data: moviesData,
+    isLoading: moviesLoading,
+    error: moviesError,
+    refetch: refetchMovies
+  } = useMovies(currentPage, 12, 'releaseDate,DESC');
+
+  // Fetch featured movies (first 4 movies)
+  const {
+    data: featuredData,
+    isLoading: featuredLoading,
+    error: featuredError
+  } = useMovies(0, 4, 'releaseDate,DESC');
+
+  // Update movies when data changes
+  useEffect(() => {
+    if (moviesData) {
+      if (currentPage === 0) {
+        setRecentMovies(moviesData);
+      } else {
+        setRecentMovies(prev => [...prev, ...moviesData]);
+      }
+    }
+  }, [moviesData, currentPage]);
+
+  useEffect(() => {
+    if (featuredData) {
+      setFeaturedMovies(featuredData);
+    }
+  }, [featuredData]);
+
+  const handleSearch = (query: string) => {
+    setSearchQuery(query);
+    // TODO: Implement search functionality
+    console.log('Search query:', query);
+  };
+
+  const handleMovieClick = (movie: Movie) => {
+    // TODO: Navigate to movie detail page
+    console.log('Movie clicked:', movie);
+  };
+
+  const handleLoadMore = () => {
+    setCurrentPage(prev => prev + 1);
+  };
+
+  const handleGetStarted = () => {
+    // Scroll to movies section
+    const moviesSection = document.getElementById('movies-section');
+    if (moviesSection) {
+      moviesSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  return (
+    <div className="home-page">
+      <Header onSearch={handleSearch} />
+      
+      <main className="home-main">
+        <HeroSection onGetStarted={handleGetStarted} />
+        
+        <div id="movies-section" className="movies-section">
+          <div className="container">
+            {/* Featured Movies */}
+            <MovieList
+              movies={featuredMovies}
+              title="Phim Nổi Bật"
+              subtitle="Những bộ phim được yêu thích nhất hiện tại"
+              variant="featured"
+              loading={featuredLoading}
+              error={featuredError?.message}
+              onMovieClick={handleMovieClick}
+            />
+
+            {/* Recent Movies */}
+            <MovieList
+              movies={recentMovies}
+              title="Phim Mới Nhất"
+              subtitle="Khám phá những bộ phim mới được cập nhật"
+              variant="default"
+              loading={moviesLoading}
+              error={moviesError?.message}
+              onMovieClick={handleMovieClick}
+              onLoadMore={handleLoadMore}
+              hasMore={moviesData && moviesData.length === 12}
+            />
+          </div>
+        </div>
+      </main>
+
+      <footer className="home-footer">
+        <div className="container">
+          <div className="footer-content">
+            <div className="footer-section">
+              <h3>🎬 MovieBooking</h3>
+              <p>Nền tảng đặt vé xem phim hàng đầu Việt Nam</p>
+            </div>
+            <div className="footer-section">
+              <h4>Liên kết</h4>
+              <ul>
+                <li><a href="#about">Về chúng tôi</a></li>
+                <li><a href="#contact">Liên hệ</a></li>
+                <li><a href="#help">Hỗ trợ</a></li>
+              </ul>
+            </div>
+            <div className="footer-section">
+              <h4>Dịch vụ</h4>
+              <ul>
+                <li><a href="#movies">Phim</a></li>
+                <li><a href="#cinemas">Rạp chiếu</a></li>
+                <li><a href="#promotions">Khuyến mãi</a></li>
+              </ul>
+            </div>
+            <div className="footer-section">
+              <h4>Kết nối</h4>
+              <div className="social-links">
+                <a href="#" className="social-link">📘 Facebook</a>
+                <a href="#" className="social-link">📷 Instagram</a>
+                <a href="#" className="social-link">🐦 Twitter</a>
+              </div>
+            </div>
+          </div>
+          <div className="footer-bottom">
+            <p>&copy; 2024 MovieBooking. Được phát triển bởi ChickenGang KTPM Team.</p>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+};
+
+export default HomePage;
