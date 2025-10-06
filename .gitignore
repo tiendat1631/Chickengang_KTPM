@@ -31,6 +31,9 @@ node_modules/
 # Maven target (if any at root)
 target/
 
+# Explicit backend Maven target
+backend/target/
+
 # Temporary files
 *.tmp
 *.temp
@@ -38,3 +41,31 @@ target/
 # Documentation builds
 docs/_build/
 docs/.doctrees/
+ 
+# Frontend (React Native) specific
+frontend/node_modules/
+frontend/dist/
+frontend/build/
+frontend/.expo/
+frontend/.expo-shared/
+frontend/.cache/
+frontend/.metro-cache/
+frontend/coverage/
+frontend/ios/build/
+frontend/ios/Pods/
+frontend/android/build/
+frontend/android/app/build/
+
+# Java/Maven artifacts & logs
+*.class
+*.jar
+*.war
+spring.log
+hs_err_pid*
+replay_pid*
+
+# Test reports & coverage
+coverage/
+reports/
+test-results/
+junit.xml
