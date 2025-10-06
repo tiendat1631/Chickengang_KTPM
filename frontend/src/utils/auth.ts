@@ -1,24 +1,14 @@
-import * as Keychain from 'react-native-keychain';
-import Config from 'react-native-config';
-
-const ACCESS_TOKEN_KEY = Config.JWT_ACCESS_TOKEN_KEY || 'access_token';
-const REFRESH_TOKEN_KEY = Config.JWT_REFRESH_TOKEN_KEY || 'refresh_token';
+// Web-based token storage using localStorage
+const ACCESS_TOKEN_KEY = 'access_token';
+const REFRESH_TOKEN_KEY = 'refresh_token';
 
 /**
  * Store JWT tokens securely
  */
 export const storeTokens = async (accessToken: string, refreshToken: string): Promise<void> => {
   try {
-    await Keychain.setInternetCredentials(
-      ACCESS_TOKEN_KEY,
-      'user',
-      accessToken
-    );
-    await Keychain.setInternetCredentials(
-      REFRESH_TOKEN_KEY,
-      'user',
-      refreshToken
-    );
+    localStorage.setItem(ACCESS_TOKEN_KEY, accessToken);
+    localStorage.setItem(REFRESH_TOKEN_KEY, refreshToken);
   } catch (error) {
     console.error('Failed to store tokens:', error);
     throw error;
@@ -30,8 +20,7 @@ export const storeTokens = async (accessToken: string, refreshToken: string): Pr
  */
 export const getToken = async (): Promise<string | null> => {
   try {
-    const credentials = await Keychain.getInternetCredentials(ACCESS_TOKEN_KEY);
-    return credentials ? credentials.password : null;
+    return localStorage.getItem(ACCESS_TOKEN_KEY);
   } catch (error) {
     console.error('Failed to get token:', error);
     return null;
@@ -43,8 +32,7 @@ export const getToken = async (): Promise<string | null> => {
  */
 export const getRefreshToken = async (): Promise<string | null> => {
   try {
-    const credentials = await Keychain.getInternetCredentials(REFRESH_TOKEN_KEY);
-    return credentials ? credentials.password : null;
+    return localStorage.getItem(REFRESH_TOKEN_KEY);
   } catch (error) {
     console.error('Failed to get refresh token:', error);
     return null;
@@ -56,8 +44,8 @@ export const getRefreshToken = async (): Promise<string | null> => {
  */
 export const removeToken = async (): Promise<void> => {
   try {
-    await Keychain.resetInternetCredentials(ACCESS_TOKEN_KEY);
-    await Keychain.resetInternetCredentials(REFRESH_TOKEN_KEY);
+    localStorage.removeItem(ACCESS_TOKEN_KEY);
+    localStorage.removeItem(REFRESH_TOKEN_KEY);
   } catch (error) {
     console.error('Failed to remove tokens:', error);
     throw error;

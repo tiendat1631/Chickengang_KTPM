@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useState, useEffect } from 'react';
 import { AuthService } from '@/services/authService';
 import { storeTokens, removeToken, getToken } from '@/utils/auth';
 import { LoginRequest, RegisterRequest, UserResponse } from '@/types/auth';
@@ -62,20 +63,66 @@ export const useCurrentUser = () => {
 };
 
 export const useAuth = () => {
-  const { data: user, isLoading, error } = useCurrentUser();
+  const [isLoading, setIsLoading] = useState(true);
+  const [user, setUser] = useState<UserResponse | null>(null);
+  
   const loginMutation = useLogin();
   const registerMutation = useRegister();
   const logoutMutation = useLogout();
 
-  const isAuthenticated = !!user && !error;
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const token = await getToken();
+        if (token) {
+          // Try to get user data
+          try {
+            const userData = await AuthService.getCurrentUser();
+            setUser(userData);
+          } catch (error) {
+            // Token might be invalid, remove it
+            await removeToken();
+          }
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
+
+  const isAuthenticated = !!user;
+
+  const login = (data: LoginRequest, options?: any) => {
+    loginMutation.mutate(data, {
+      ...options,
+      onSuccess: (response) => {
+        setUser(response.user);
+        options?.onSuccess?.(response);
+      },
+    });
+  };
+
+  const logout = (options?: any) => {
+    logoutMutation.mutate(undefined, {
+      ...options,
+      onSuccess: () => {
+        setUser(null);
+        options?.onSuccess?.();
+      },
+    });
+  };
 
   return {
     user,
     isLoading,
     isAuthenticated,
-    login: loginMutation.mutate,
+    login,
     register: registerMutation.mutate,
-    logout: logoutMutation.mutate,
+    logout,
     isLoggingIn: loginMutation.isPending,
     isRegistering: registerMutation.isPending,
     isLoggingOut: logoutMutation.isPending,

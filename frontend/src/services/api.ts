@@ -1,10 +1,9 @@
 import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-import Config from 'react-native-config';
 import { getToken, removeToken } from '@/utils/auth';
 
 // API Configuration
-const API_BASE_URL = Config.API_BASE_URL || 'http://localhost:8080/api/v1';
-const API_TIMEOUT = parseInt(Config.API_TIMEOUT || '30000');
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1';
+const API_TIMEOUT = parseInt(import.meta.env.VITE_API_TIMEOUT || '30000');
 
 // Create axios instance
 const apiClient: AxiosInstance = axios.create({
