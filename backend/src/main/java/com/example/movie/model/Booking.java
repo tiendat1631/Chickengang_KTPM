@@ -6,6 +6,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @Entity
@@ -36,8 +37,14 @@ public class Booking {
 
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name="screening_id", nullable = false)
+    @JoinColumn(name = "screening_id", nullable = false)
     private Screening screening;
+
+    @OneToOne(mappedBy = "booking", cascade = CascadeType.ALL)
+    private Payment payment;
+
+    @OneToMany(mappedBy = "booking", cascade = CascadeType.ALL)
+    private List<Ticket> tickets;
 
     public enum BookingStatus {
         PENDING,    // Đang chờ thanh toán

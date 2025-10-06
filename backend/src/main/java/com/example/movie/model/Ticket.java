@@ -26,6 +26,11 @@ public class Ticket {
     @JoinColumn(name = "screening_id", nullable = false)
     private Screening screening;
 
+    // Một vé có thể nằm trong một booking (sau khi đặt)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "booking_id")
+    private Booking booking; // thêm dòng này để biết vé nào thuộc booking nào
+
     public enum Status{
         AVAILABLE,
         SOLD,

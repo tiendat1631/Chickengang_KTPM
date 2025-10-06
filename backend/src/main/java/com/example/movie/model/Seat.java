@@ -26,6 +26,12 @@ public class Seat {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private SeatType seatType;
+
+    // Mỗi ghế thuộc về một phòng
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "auditorium_id", nullable = false)
+    private Auditorium auditorium;
+
     public enum SeatType {
         NORMAL,
         SWEETBOX

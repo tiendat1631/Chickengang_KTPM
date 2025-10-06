@@ -6,6 +6,8 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Data
@@ -34,6 +36,15 @@ public class Screening {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "auditorium_id", nullable = false)
     private Auditorium auditorium;
+
+    //????
+    @OneToMany(mappedBy = "screening")
+    private List<Ticket> tickets = new ArrayList<>();
+
+    //????
+    @OneToMany(mappedBy = "screening", cascade = CascadeType.ALL)
+    private List<Booking> bookings;
+
 
     public enum Format{
          IMAX,
