@@ -13,7 +13,7 @@ public class Ticket {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private String Id;
+    private Long Id;
 
     @Column(nullable = false)
     private Status status;
