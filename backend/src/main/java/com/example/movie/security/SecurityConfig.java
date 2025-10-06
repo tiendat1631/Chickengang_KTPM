@@ -37,6 +37,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST,"/api/v1/users/**").hasRole("ADMIN")
 
 
+                        // AUDITORIUM
+                        .requestMatchers("/api/v1/auditoriums/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
