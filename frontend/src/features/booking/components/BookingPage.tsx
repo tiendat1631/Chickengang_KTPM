@@ -1,6 +1,6 @@
 import { useParams, Link } from 'react-router-dom'
 
-export function BookingPage() {
+export default function BookingPage() {
   const { movieId } = useParams()
 
   return (

@@ -1,7 +1,7 @@
 import React from 'react';
-import { Movie } from '../../types/movie';
-import MovieCard from '../common/MovieCard';
-import './MovieList.css';
+import { Movie } from '@/types/movie';
+import MovieCard from '@/components/common/MovieCard';
+import '@/styles/MovieList.css';
 
 interface MovieListProps {
   movies: Movie[];

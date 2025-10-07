@@ -1,6 +1,6 @@
 import { useParams, Link } from 'react-router-dom'
 
-export function MovieDetailPage() {
+export default function MovieDetailPage() {
   const { id } = useParams()
 
   return (

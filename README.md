@@ -2,7 +2,7 @@
 ## ChickenGang KTPM - Monorepo
 
 [![Backend](https://img.shields.io/badge/Backend-Spring%20Boot%203.5.6-green)](./backend)
-[![Frontend](https://img.shields.io/badge/Frontend-React%20Native%200.72-blue)](./frontend)
+[![Frontend](https://img.shields.io/badge/Frontend-React%20Web%2018-blue)](./frontend)
 [![License](https://img.shields.io/badge/License-MIT-yellow.svg)](./LICENSE)
 
 ---
@@ -11,8 +11,8 @@
 
 **Movie Booking System** là một hệ thống đặt vé xem phim hoàn chỉnh, bao gồm:
 - **Backend**: REST API được phát triển bằng Spring Boot
-- **Frontend**: Mobile app được phát triển bằng React Native
-- **Documentation**: Tài liệu kỹ thuật đầy đủ
+- **Frontend**: Web app được phát triển bằng React + TypeScript
+- **Documentation**: Tài liệu kỹ thuật đầy đủ trong folder `docs/`
 
 ---
 
@@ -22,10 +22,9 @@
 ```
 Chickengang_KTPM/
 ├── backend/          # Spring Boot Backend API
-├── frontend/         # React Native Mobile App
-├── docs/             # Documentation
-├── scripts/          # Build & Deploy Scripts
-└── .github/          # CI/CD Workflows
+├── frontend/         # React Web Application
+├── docs/             # 📚 Documentation Hub
+└── README.md         # This file
 ```
 
 ### Technology Stack
@@ -39,12 +38,12 @@ Chickengang_KTPM/
 - **Build Tool**: Maven
 
 #### Frontend
-- **Framework**: React Native 0.72.6
-- **Language**: TypeScript
+- **Framework**: React 18 + TypeScript
+- **Build Tool**: Vite
 - **State Management**: TanStack Query
-- **Navigation**: React Navigation 6
-- **Forms**: React Hook Form + Yup
-- **Storage**: React Native Keychain
+- **Routing**: React Router v6
+- **Styling**: Tailwind CSS
+- **Forms**: React Hook Form
 
 ---
 
@@ -54,7 +53,6 @@ Chickengang_KTPM/
 - **Java 17+** (for backend)
 - **Node.js 16+** (for frontend)
 - **MySQL 8.0+** (for database)
-- **React Native CLI** (for mobile development)
 
 ### Backend Setup
 ```bash
@@ -79,11 +77,10 @@ npm install
 # Setup environment
 cp env.example .env
 
-# Run on Android
-npm run android
+# Run development server
+npm run dev
 
-# Run on iOS (macOS only)
-npm run ios
+# Access at http://localhost:3000
 ```
 
 ### Database Setup
@@ -96,52 +93,16 @@ FLUSH PRIVILEGES;
 
 ---
 
-## 📁 Project Structure
-
-### Backend
-```
-backend/
-├── src/
-│   ├── main/java/com/chickengang/moviebooking/
-│   │   ├── controller/       # REST Controllers
-│   │   ├── service/          # Business Logic
-│   │   ├── repository/       # Data Access
-│   │   ├── model/            # Entity Models
-│   │   ├── dto/              # Data Transfer Objects
-│   │   ├── security/         # Security Components
-│   │   └── exception/        # Exception Handling
-│   └── main/resources/
-│       └── application.properties
-└── pom.xml
-```
-
-### Frontend
-```
-frontend/
-├── src/
-│   ├── components/           # UI Components
-│   ├── screens/              # Screen Components
-│   ├── navigation/           # Navigation Config
-│   ├── hooks/                # Custom Hooks
-│   ├── services/             # API Services
-│   ├── types/                # TypeScript Types
-│   ├── utils/                # Utilities
-│   └── theme/                # Theme Config
-├── package.json
-└── tsconfig.json
-```
-
----
-
 ## 📚 Documentation
 
-Xem chi tiết tại thư mục [`docs/`](./docs/):
+**Tất cả tài liệu chi tiết được tổ chức trong folder [`docs/`](./docs/):**
 
-- [**System Architecture**](./docs/System_Architecture_Analysis.md) - Phân tích kiến trúc hệ thống
-- [**API Documentation**](./docs/API_Documentation.md) - Tài liệu API endpoints
-- [**Frontend Guide**](./docs/Frontend_Development_Guide.md) - Hướng dẫn phát triển Frontend
-- [**Deployment Guide**](./docs/Deployment_Guide.md) - Hướng dẫn triển khai
-- [**Restructuring Guide**](./docs/Project_Restructuring_Guide.md) - Hướng dẫn tái cấu trúc
+- [**📚 Documentation Hub**](./docs/README.md) - Tổng hợp tất cả tài liệu
+- [**🏗️ System Architecture**](./docs/System_Architecture_Analysis.md) - Phân tích kiến trúc hệ thống
+- [**📡 API Documentation**](./docs/API_Documentation.md) - Tài liệu API endpoints
+- [**🎨 Frontend Guide**](./docs/Frontend_Development_Guide.md) - Hướng dẫn phát triển Frontend
+- [**🚀 Deployment Guide**](./docs/Deployment_Guide.md) - Hướng dẫn triển khai
+- [**🔧 Restructuring Guide**](./docs/Project_Restructuring_Guide.md) - Hướng dẫn tái cấu trúc
 
 ---
 
@@ -153,15 +114,14 @@ Xem chi tiết tại thư mục [`docs/`](./docs/):
 - Movie CRUD operations
 - User management
 - RESTful API design
-- Mobile app structure
+- React Web application
 - TanStack Query integration
-- Secure token storage
+- Responsive design với Tailwind CSS
 
 ### In Progress 🔄
 - Movie booking system
 - Seat selection
 - Payment integration
-- Push notifications
 
 ### Planned 📅
 - Admin dashboard
@@ -176,7 +136,7 @@ Xem chi tiết tại thư mục [`docs/`](./docs/):
 
 - **Authentication**: JWT (JSON Web Tokens)
 - **Password Encryption**: BCrypt
-- **Token Storage**: React Native Keychain (iOS/Android)
+- **Token Storage**: localStorage (Web)
 - **API Security**: Spring Security
 - **Role-based Access Control**: ADMIN/CUSTOMER roles
 
@@ -204,38 +164,14 @@ npm test
 ```bash
 cd backend
 ./mvnw clean package
-java -jar target/moviebooking-backend-0.0.1-SNAPSHOT.jar
+java -jar target/movie-0.0.1-SNAPSHOT.jar
 ```
 
 ### Frontend Production Build
 ```bash
 cd frontend
-# Android
-npm run build:android
-
-# iOS
-npm run build:ios
-```
-
----
-
-## 🔧 Configuration
-
-### Backend Configuration
-```properties
-# application.properties
-spring.datasource.url=jdbc:mysql://localhost:3306/moviebooking
-spring.datasource.username=movieuser
-spring.datasource.password=password
-app.jwt.access.expiration-in-seconds=900
-```
-
-### Frontend Configuration
-```bash
-# .env
-API_BASE_URL=http://localhost:8080/api/v1
-JWT_ACCESS_TOKEN_KEY=access_token
-JWT_REFRESH_TOKEN_KEY=refresh_token
+npm run build
+# Creates optimized build in dist/
 ```
 
 ---
@@ -346,10 +282,10 @@ This project is licensed under the MIT License - see the [LICENSE](./LICENSE) fi
 
 ---
 
-## 🔗 Links
+## 🔗 Quick Links
 
-- [Backend README](./backend/README.md)
-- [Frontend README](./frontend/README.md)
-- [Documentation](./docs/README.md)
-- [API Docs](./docs/API_Documentation.md)
-- [Architecture](./docs/System_Architecture_Analysis.md)
+- [📚 Documentation Hub](./docs/README.md)
+- [🏗️ Backend README](./backend/README.md)
+- [🎨 Frontend README](./frontend/README.md)
+- [📡 API Documentation](./docs/API_Documentation.md)
+- [🏗️ System Architecture](./docs/System_Architecture_Analysis.md)
