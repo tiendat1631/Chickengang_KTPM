@@ -33,6 +33,7 @@ public class MovieController {
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{id}")
     public ResponseEntity<ApiResponse<MovieResponse>> updateMovie(@PathVariable Long id,@Valid @RequestBody  PatchMovie patchMovie) {
         MovieResponse updated = movieService.updateMovie(id, patchMovie);
@@ -44,7 +45,7 @@ public class MovieController {
         );
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
-
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteMovie(@PathVariable Long id){
         movieService.deleteMovie(id);
