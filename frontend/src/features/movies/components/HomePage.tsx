@@ -9,7 +9,7 @@ export default function HomePage() {
     <div className="space-y-8">
       <HeroSection />
       <MovieList 
-        movies={moviesData?.content || []}
+        movies={moviesData || []}
         title="Phim đang chiếu"
         subtitle="Khám phá những bộ phim hay nhất hiện tại"
         loading={isLoading}
