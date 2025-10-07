@@ -9,4 +9,5 @@ public interface MovieService {
     MovieResponse updateMovie(Long id, PatchMovie patchMovie);
     void deleteMovie(Long id);
     MovieResponse getMovieById(Long id);
+    java.util.List<MovieResponse> getMovies(int page, int size, String sort);
 }

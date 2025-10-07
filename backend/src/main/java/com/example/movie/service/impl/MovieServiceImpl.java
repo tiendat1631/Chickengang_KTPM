@@ -10,6 +10,11 @@ import com.example.movie.repository.MovieRepository;
 import com.example.movie.service.MovieService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -73,6 +78,25 @@ public class MovieServiceImpl implements MovieService {
         Movie movie = movieRepository.findById(id)
                 .orElseThrow(()-> new InvalidId(id));
         return movieMapper.toResponse(movie);
+    }
+
+    @Override
+    public List<MovieResponse> getMovies(int page, int size, String sort) {
+        Pageable pageable;
+        if (sort != null && !sort.isBlank()) {
+            // expect format field,ASC|DESC
+            String[] parts = sort.split(",");
+            String field = parts[0];
+            Sort.Direction direction = (parts.length > 1 && parts[1].equalsIgnoreCase("DESC"))
+                    ? Sort.Direction.DESC : Sort.Direction.ASC;
+            pageable = PageRequest.of(page, size, Sort.by(direction, field));
+        } else {
+            pageable = PageRequest.of(page, size);
+        }
+        return movieRepository.findAll(pageable)
+                .stream()
+                .map(movieMapper::toResponse)
+                .collect(Collectors.toList());
     }
 
 

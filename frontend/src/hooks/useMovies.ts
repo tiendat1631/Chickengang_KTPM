@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import apiClient from '@/services/api';
-import { Movie, MovieRequest, PatchMovie } from '@/types/movie';
+import apiClient from '../services/api';
+import { Movie, MovieRequest, PatchMovie } from '../types/movie';
 import { queryKeys } from './useQueryClient';
 
 // Get all movies with pagination

@@ -1,0 +1,245 @@
+/* Movie List Styles */
+.movie-list {
+  margin: 3rem 0;
+  animation: fadeInUp 0.6s ease-out;
+}
+
+.movie-list-header {
+  text-align: center;
+  margin-bottom: 3rem;
+  position: relative;
+}
+
+.movie-list-header::after {
+  content: '';
+  position: absolute;
+  bottom: -1rem;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 60px;
+  height: 3px;
+  background: linear-gradient(45deg, #667eea, #764ba2);
+  border-radius: 2px;
+}
+
+.movie-list-title {
+  font-size: 2.2rem;
+  font-weight: bold;
+  color: #333;
+  margin: 0 0 0.5rem 0;
+  background: linear-gradient(45deg, #667eea, #764ba2, #f093fb);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  background-size: 200% 200%;
+  animation: gradientShift 3s ease infinite;
+}
+
+.movie-list-subtitle {
+  font-size: 1.1rem;
+  color: #666;
+  margin: 0;
+  max-width: 600px;
+  margin: 0 auto;
+  line-height: 1.5;
+}
+
+/* Movie Grid */
+.movie-list-grid {
+  display: grid;
+  gap: 2.5rem;
+  margin-bottom: 3rem;
+  padding: 1rem 0;
+}
+
+.movie-list--default .movie-list-grid {
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+}
+
+.movie-list--featured .movie-list-grid {
+  grid-template-columns: repeat(auto-fill, minmax(380px, 1fr));
+}
+
+.movie-list--compact .movie-list-grid {
+  grid-template-columns: 1fr;
+  gap: 1rem;
+}
+
+/* Loading States */
+.movie-list-loading,
+.movie-list-error,
+.movie-list-empty {
+  text-align: center;
+  padding: 3rem 1rem;
+  color: #666;
+}
+
+.loading-spinner {
+  width: 40px;
+  height: 40px;
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #667eea;
+  border-right: 4px solid #764ba2;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin: 0 auto 1rem;
+}
+
+.loading-spinner.small {
+  width: 20px;
+  height: 20px;
+  border-width: 2px;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.movie-list-loading-more {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  color: #666;
+}
+
+/* Error State */
+.movie-list-error .error-icon {
+  font-size: 3rem;
+  margin-bottom: 1rem;
+}
+
+.movie-list-error h3 {
+  color: #e74c3c;
+  margin: 0 0 0.5rem 0;
+}
+
+.movie-list-error p {
+  margin: 0 0 1.5rem 0;
+  color: #666;
+}
+
+/* Empty State */
+.movie-list-empty .empty-icon {
+  font-size: 4rem;
+  margin-bottom: 1rem;
+  opacity: 0.5;
+}
+
+.movie-list-empty h3 {
+  color: #333;
+  margin: 0 0 0.5rem 0;
+}
+
+.movie-list-empty p {
+  margin: 0;
+  color: #666;
+}
+
+/* Actions */
+.movie-list-actions {
+  text-align: center;
+  margin-top: 2rem;
+}
+
+.btn-large {
+  padding: 1rem 2rem;
+  font-size: 1.1rem;
+}
+
+/* Animations */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes gradientShift {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .movie-list--default .movie-list-grid {
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  }
+
+  .movie-list--featured .movie-list-grid {
+    grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .movie-list {
+    margin: 1.5rem 0;
+  }
+
+  .movie-list-header {
+    margin-bottom: 1.5rem;
+  }
+
+  .movie-list-title {
+    font-size: 1.5rem;
+  }
+
+  .movie-list-subtitle {
+    font-size: 1rem;
+  }
+
+  .movie-list-grid {
+    gap: 1.5rem;
+  }
+
+  .movie-list--default .movie-list-grid,
+  .movie-list--featured .movie-list-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .movie-list {
+    margin: 1rem 0;
+  }
+
+  .movie-list-header {
+    margin-bottom: 1rem;
+  }
+
+  .movie-list-title {
+    font-size: 1.3rem;
+  }
+
+  .movie-list-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .movie-list-grid {
+    gap: 1rem;
+  }
+
+  .movie-list--default .movie-list-grid,
+  .movie-list--featured .movie-list-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .movie-list-loading,
+  .movie-list-error,
+  .movie-list-empty {
+    padding: 2rem 1rem;
+  }
+}
