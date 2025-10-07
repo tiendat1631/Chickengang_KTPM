@@ -1,4 +1,4 @@
-package com.example.movie.Mapper;
+package com.example.movie.mapper;
 
 import com.example.movie.dto.movie.MovieRequest;
 import com.example.movie.dto.movie.MovieResponse;

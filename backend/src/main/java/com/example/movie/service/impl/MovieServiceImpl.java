@@ -1,6 +1,6 @@
 package com.example.movie.service.impl;
 
-import com.example.movie.Mapper.MovieMapper;
+import com.example.movie.mapper.MovieMapper;
 import com.example.movie.dto.movie.MovieRequest;
 import com.example.movie.dto.movie.MovieResponse;
 import com.example.movie.dto.movie.PatchMovie;
