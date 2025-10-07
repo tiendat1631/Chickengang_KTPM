@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { useAuth } from '../../hooks/useAuth';
-import './Header.css';
+import { useAuth } from '@/hooks/useAuth';
+import '@/styles/Header.css';
 
 interface HeaderProps {
   onSearch?: (query: string) => void;
