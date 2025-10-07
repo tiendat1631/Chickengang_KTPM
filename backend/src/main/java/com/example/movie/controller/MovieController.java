@@ -13,9 +13,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import java.util.List;
 
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/movies")
+@CrossOrigin(origins = "http://localhost:3000")
 @RestController
 public class MovieController {
     private final MovieService movieService;
@@ -64,6 +66,22 @@ public class MovieController {
                 HttpStatus.OK,
                 getMovie,
                 "get success",
+                null
+        );
+        return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<MovieResponse>>> getMovies(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(required = false) String sort
+    ) {
+        List<MovieResponse> movies = movieService.getMovies(page, size, sort);
+        ApiResponse<List<MovieResponse>> result = new ApiResponse<>(
+                HttpStatus.OK,
+                movies,
+                "get list success",
                 null
         );
         return ResponseEntity.status(HttpStatus.OK).body(result);

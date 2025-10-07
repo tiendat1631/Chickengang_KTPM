@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useLogin } from '@/hooks/useAuth'
+import { useLogin } from '../../../hooks/useAuth'
 import toast from 'react-hot-toast'
 
 export function LoginPage() {

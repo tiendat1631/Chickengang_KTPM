@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useMovies } from '@/hooks/useMovies';
-import { Movie } from '@/types/movie';
-import Header from '@/components/common/Header';
-import HeroSection from '@/components/home/HeroSection';
-import MovieList from '@/components/home/MovieList';
+import { useMovies } from '../../hooks/useMovies';
+import { Movie } from '../../types/movie';
+import Header from '../../components/common/Header';
+import HeroSection from '../../components/home/HeroSection';
+import MovieList from '../../components/home/MovieList';
 import './HomePage.css';
 
 const HomePage: React.FC = () => {

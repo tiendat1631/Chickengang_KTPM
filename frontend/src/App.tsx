@@ -1,11 +1,11 @@
 import { Routes, Route, Navigate } from 'react-router-dom'
-import { useAuth } from '@/hooks/useAuth'
-import { LoginPage } from '@/features/auth/components/LoginPage'
-import { RegisterPage } from '@/features/auth/components/RegisterPage'
-import { HomePage } from '@/features/movies/components/HomePage'
-import { MovieDetailPage } from '@/features/movies/components/MovieDetailPage'
-import { BookingPage } from '@/features/booking/components/BookingPage'
-import { Layout } from '@/components/Layout'
+import { useAuth } from './hooks/useAuth'
+import { LoginPage } from './features/auth/components/LoginPage'
+import { RegisterPage } from './features/auth/components/RegisterPage'
+import HomePage from './pages/home/HomePage'
+import { MovieDetailPage } from './features/movies/components/MovieDetailPage'
+import { BookingPage } from './features/booking/components/BookingPage'
+import { Layout } from './components/Layout'
 
 function App() {
   const { isAuthenticated, isLoading } = useAuth()
