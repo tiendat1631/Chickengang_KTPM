@@ -8,4 +8,8 @@ public class AuditoriumRequest {
 
     @NotBlank
     private String name;
+    @NotBlank
+    private int rows;
+    @NotBlank
+    private int columns;
 }
