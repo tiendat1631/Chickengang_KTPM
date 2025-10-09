@@ -34,6 +34,12 @@ public class ScreeningServiceImpl implements ScreeningService {
         Auditorium auditorium = auditoriumRepository.findById(screeningRequest.getAuditoriumId())
                 .orElseThrow(()-> new InvalidId(screeningRequest.getAuditoriumId()));
 
+        // kiểm tra movie tồn tại
+        Movie movie = movieRepository.findById(screeningRequest.getMovieId())
+                .orElseThrow(()-> new InvalidId(screeningRequest.getMovieId()));
+
+        screening.setMovie(movie);
+        screening.setAuditorium(auditorium);
         // tao danh sach ticket tuong ung trong voi cac ghe
         List<Ticket> tickets = new ArrayList<>();
         for (Seat seat : auditorium.getSeats()) {

@@ -41,14 +41,17 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/movies/**").hasRole("ADMIN")
 
                         //CREATE USER
-                        .requestMatchers(HttpMethod.POST,"/api/v1/users/**").hasRole("ADMIN")
-
+                        //.requestMatchers(HttpMethod.POST,"/api/v1/users/**").hasRole("ADMIN")
+                        .requestMatchers("api/v1/users/**").permitAll()
 
                         // AUDITORIUM
                         .requestMatchers(HttpMethod.POST,"/api/v1/auditoriums/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH,"/api/v1/auditoriums/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE,"/api/v1/auditoriums/**").hasRole("ADMIN")
 
+
+                        // SCREENING
+                        .requestMatchers("/api/v1/screening/**").permitAll()
 
                         .anyRequest().authenticated()
                 )
