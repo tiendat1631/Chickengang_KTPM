@@ -51,8 +51,10 @@ public class SecurityConfig {
 
 
                         // SCREENING
-                        .requestMatchers("/api/v1/screening/**").permitAll()
+                        .requestMatchers("/api/v1/screenings/**").permitAll()
 
+                        // BOOKING
+                        .requestMatchers("api/v1/bookings/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex->ex

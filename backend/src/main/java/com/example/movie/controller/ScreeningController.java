@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("api/v1/screening")
+@RequestMapping("api/v1/screenings")
 public class ScreeningController {
     private final ScreeningService screeningService;
 
