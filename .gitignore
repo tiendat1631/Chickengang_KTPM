@@ -42,19 +42,7 @@ backend/target/
 docs/_build/
 docs/.doctrees/
  
-# Frontend (React Native) specific
-frontend/node_modules/
-frontend/dist/
-frontend/build/
-frontend/.expo/
-frontend/.expo-shared/
-frontend/.cache/
-frontend/.metro-cache/
-frontend/coverage/
-frontend/ios/build/
-frontend/ios/Pods/
-frontend/android/build/
-frontend/android/app/build/
+
 
 # Java/Maven artifacts & logs
 *.class
@@ -69,3 +57,6 @@ coverage/
 reports/
 test-results/
 junit.xml
+
+# Local development data (not for production)
+backend/src/main/resources/data.sql
