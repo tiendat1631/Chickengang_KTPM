@@ -1,169 +1,115 @@
-# Movie Booking Frontend
+# Frontend - React Web App
 
-React Native application for the Movie Booking System.
+React Web application cho Movie Booking System.
 
 ## 🚀 Quick Start
 
-### Prerequisites
-- Node.js 16+
-- React Native CLI
-- Android Studio (for Android development)
-- Xcode (for iOS development)
-
-### Installation
-
-1. **Install dependencies**
 ```bash
+# Install dependencies
 npm install
-# or
-yarn install
-```
 
-2. **Setup environment**
-```bash
+# Setup environment
 cp env.example .env
-# Edit .env with your configuration
+
+# Run development server
+npm run dev
+
+# Access at http://localhost:3000
 ```
 
-3. **iOS Setup** (macOS only)
-```bash
-cd ios && pod install && cd ..
+## 📚 Documentation
+
+Chi tiết tại [docs/](../docs/README.md):
+- [Frontend Development Guide](../docs/Frontend_Development_Guide.md)
+- [System Architecture](../docs/System_Architecture_Analysis.md)
+- [API Documentation](../docs/API_Documentation.md)
+
+## 🏗️ Architecture
+
+### Feature-First Structure
 ```
-
-4. **Run the application**
-```bash
-# Start Metro bundler
-npm start
-
-# Run on Android
-npm run android
-
-# Run on iOS
-npm run ios
-```
-
-## 📁 Project Structure
-
-```
-frontend/
-├── src/
-│   ├── components/          # Reusable UI components
-│   ├── pages/              # Screen components
-│   ├── hooks/              # Custom React hooks
-│   ├── services/           # API services
-│   ├── utils/              # Utility functions
-│   ├── types/              # TypeScript type definitions
-│   └── assets/             # Images, fonts, etc.
-├── android/               # Android-specific code
-├── ios/                   # iOS-specific code
-├── package.json
-├── tsconfig.json
-└── README.md
+src/
+├── features/          # Feature modules
+│   ├── auth/         # Authentication
+│   ├── movies/       # Movies management
+│   └── booking/      # Booking system
+├── components/        # Shared components
+├── hooks/            # Custom hooks
+├── lib/              # Utilities & configs
+├── navigation/       # Routing
+├── services/         # API services
+├── styles/           # CSS files
+└── types/            # TypeScript types
 ```
 
 ## 🛠️ Technology Stack
 
-- **Framework**: React Native 0.72.6
-- **Language**: TypeScript
-- **State Management**: TanStack Query (React Query)
-- **Navigation**: React Navigation 6
-- **Forms**: React Hook Form + Yup
-- **Storage**: React Native Keychain
-- **HTTP Client**: Axios
-- **Styling**: React Native StyleSheet
+- **Framework**: React 18 + TypeScript
+- **Build Tool**: Vite
+- **State Management**: TanStack Query
+- **Routing**: React Router v6
+- **Styling**: Tailwind CSS
+- **Forms**: React Hook Form
 
 ## 🔧 Configuration
 
-### Environment Variables
-Copy `env.example` to `.env` and configure:
-
 ```bash
-API_BASE_URL=http://localhost:8080/api/v1
+# Environment Variables
+VITE_API_BASE_URL=http://localhost:8080/api/v1
+VITE_API_TIMEOUT=30000
 JWT_ACCESS_TOKEN_KEY=access_token
 JWT_REFRESH_TOKEN_KEY=refresh_token
 ```
 
-### API Integration
-The app integrates with the Spring Boot backend API:
-- Base URL: `http://localhost:8080/api/v1`
-- Authentication: JWT Bearer tokens
-- Error handling: Global error interceptor
-
 ## 📱 Features
 
-### Implemented
-- ✅ Authentication (Login/Register)
-- ✅ Movie listing and details
-- ✅ User profile management
-- ✅ Secure token storage
-- ✅ TypeScript support
-- ✅ API integration with TanStack Query
+### ✅ Implemented
+- Authentication (Login/Register)
+- Movie listing and details
+- User profile management
+- Responsive design
+- TypeScript support
+- API integration
 
-### Planned
-- 🔄 Movie booking system
-- 🔄 Seat selection
-- 🔄 Payment integration
-- 🔄 Push notifications
-- 🔄 Offline support
+### 🔄 Planned
+- Movie booking system
+- Seat selection
+- Payment integration
+- Admin dashboard
 
-## 🧪 Testing
+## 🧪 Development
 
 ```bash
-# Run tests
-npm test
+# Development server
+npm run dev
 
-# Run linting
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+
+# Linting
 npm run lint
+npm run lint:fix
 
 # Type checking
 npm run type-check
 ```
 
-## 📦 Build
+## 📦 Build & Deploy
 
-### Android
 ```bash
-npm run build:android
+# Development
+npm run dev
+
+# Production build
+npm run build
+
+# Preview
+npm run preview
 ```
 
-### iOS
-```bash
-npm run build:ios
-```
+---
 
-## 🔐 Security
-
-- JWT tokens stored securely using React Native Keychain
-- Automatic token refresh
-- Secure API communication
-- Input validation with Yup schemas
-
-## 🚀 Deployment
-
-### Development
-- Use Metro bundler for development
-- Hot reload enabled
-- Debug mode with React Native Debugger
-
-### Production
-- Optimized builds
-- Code splitting
-- Asset optimization
-
-## 📚 API Documentation
-
-See the main project documentation:
-- [API Documentation](../docs/API_Documentation.md)
-- [System Architecture](../docs/System_Architecture_Analysis.md)
-
-## 🤝 Contributing
-
-1. Follow the Git Flow workflow
-2. Create feature branches from `develop`
-3. Use TypeScript for all new code
-4. Write tests for new features
-5. Follow the established code style
-
-## 📄 License
-
-MIT License - see LICENSE file for details.
+**Made with ❤️ by ChickenGang KTPM Team**

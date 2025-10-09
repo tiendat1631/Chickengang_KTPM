@@ -1,5 +1,5 @@
-import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
-import { getToken, removeToken } from '../utils/auth';
+import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+import { getToken, removeToken } from '@/lib/auth';
 
 // API Configuration
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8080/api/v1';
@@ -16,7 +16,7 @@ const apiClient: AxiosInstance = axios.create({
 
 // Request interceptor to add JWT token
 apiClient.interceptors.request.use(
-  async (config: AxiosRequestConfig) => {
+  async (config: InternalAxiosRequestConfig) => {
     try {
       const token = await getToken();
       if (token && config.headers) {

@@ -1,5 +1,5 @@
 import apiClient from './api';
-import { LoginRequest, RegisterRequest, AuthResponse, UserResponse } from '../types/auth';
+import { LoginRequest, RegisterRequest, AuthResponse, UserResponse } from '@/types/auth';
 
 export class AuthService {
   /**

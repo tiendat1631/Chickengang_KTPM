@@ -3,10 +3,11 @@ import { Link, useNavigate } from 'react-router-dom'
 import { useLogin } from '../../../hooks/useAuth'
 import toast from 'react-hot-toast'
 
-export function LoginPage() {
+export default function LoginPage() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const { login, isLoggingIn } = useLogin()
+  const loginMutation = useLogin()
+  const { mutate: login, isPending: isLoggingIn } = loginMutation
   const navigate = useNavigate()
 
   const handleSubmit = async (e: React.FormEvent) => {

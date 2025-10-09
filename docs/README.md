@@ -1,291 +1,211 @@
-# Movie Booking System - Documentation
+# Movie Booking System - Documentation Hub
 
-Thư mục này chứa tài liệu kỹ thuật đầy đủ cho hệ thống Movie Booking System.
-
----
-
-## 📚 Danh Sách Tài Liệu
-
-### 1. [System Architecture Analysis](./System_Architecture_Analysis.md)
-**Tài liệu phân tích thiết kế hệ thống kiến trúc**
-
-- Tổng quan hệ thống và công nghệ sử dụng
-- Kiến trúc phân lớp (Layered Architecture)
-- Các thành phần chính (Models, Controllers, Services)
-- Cấu hình bảo mật với JWT
-- Thiết kế database
-- Sơ đồ kiến trúc và luồng dữ liệu
-- Đánh giá khả năng mở rộng và cải thiện
-
-### 2. [API Documentation](./API_Documentation.md)
-**Tài liệu API chi tiết**
-
-- Tổng quan API và authentication
-- Authentication APIs (Register, Login)
-- Movie Management APIs (CRUD operations)
-- User Management APIs
-- Error handling và response formats
-- Testing với cURL và Postman
-- Rate limiting và versioning
-
-### 3. [Deployment Guide](./Deployment_Guide.md)
-**Hướng dẫn triển khai hệ thống**
-
-- Yêu cầu hệ thống và chuẩn bị môi trường
-- Cài đặt Java, MySQL, và dependencies
-- Build và package application
-- Configuration management
-- Deployment methods (Standalone, Docker, Kubernetes)
-- Monitoring và logging
-- Security considerations
-- Backup và recovery procedures
-- Performance tuning
-- Troubleshooting và maintenance
+Thư mục tập trung tất cả documentation cho hệ thống Movie Booking System.
 
 ---
 
-## 🏗️ Kiến Trúc Tổng Quan
+## 📚 **Tài Liệu Chính**
 
-```
-┌─────────────────────────────────────┐
-│           Client Layer              │
-│    (Web/Mobile Applications)        │
-├─────────────────────────────────────┤
-│           API Gateway                │
-│         (REST Endpoints)             │
-├─────────────────────────────────────┤
-│        Application Layer             │
-│    (Controllers + Services)         │
-├─────────────────────────────────────┤
-│         Security Layer               │
-│      (JWT Authentication)          │
-├─────────────────────────────────────┤
-│         Data Access Layer            │
-│       (Repositories + JPA)          │
-├─────────────────────────────────────┤
-│         Database Layer               │
-│           (MySQL 8.0)               │
-└─────────────────────────────────────┘
+### 🏗️ **Architecture & Design**
+- [**System Architecture Analysis**](./System_Architecture_Analysis.md) - Phân tích kiến trúc hệ thống
+- [**Project Restructuring Guide**](./Project_Restructuring_Guide.md) - Hướng dẫn tái cấu trúc dự án
+
+### 🔧 **Development Guides**
+- [**Frontend Development Guide**](./Frontend_Development_Guide.md) - Hướng dẫn phát triển Frontend
+- [**API Documentation**](./API_Documentation.md) - Tài liệu API chi tiết
+
+### 🚀 **Deployment & Operations**
+- [**Deployment Guide**](./Deployment_Guide.md) - Hướng dẫn triển khai hệ thống
+
+---
+
+## 🎯 **Quick Reference**
+
+### **Backend (Spring Boot)**
+```bash
+# Setup & Run
+cd backend
+./mvnw clean install
+./mvnw spring-boot:run
+
+# API Base URL
+http://localhost:8080/api/v1
 ```
 
----
+### **Frontend (React Web)**
+```bash
+# Setup & Run
+cd frontend
+npm install
+npm run dev
 
-## 🚀 Quick Start
+# Development Server
+http://localhost:3000
+```
 
-### 1. Prerequisites
-- Java 17+
-- MySQL 8.0+
-- Maven 3.6+
-
-### 2. Setup Database
+### **Database (MySQL)**
 ```sql
 CREATE DATABASE moviebooking CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 CREATE USER 'movieuser'@'localhost' IDENTIFIED BY 'password';
 GRANT ALL PRIVILEGES ON moviebooking.* TO 'movieuser'@'localhost';
 ```
 
-### 3. Build và Run
-```bash
-# Build application
-mvn clean package
+---
 
-# Run application
-java -jar target/movie-0.0.1-SNAPSHOT.jar
+## 📁 **Project Structure Overview**
+
 ```
-
-### 4. Test API
-```bash
-# Register user
-curl -X POST http://localhost:8080/api/v1/auth/register \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"password123","phoneNumber":"0123456789","username":"testuser","address":"123 Test St"}'
-
-# Login
-curl -X POST http://localhost:8080/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -d '{"email":"test@example.com","password":"password123"}'
+Chickengang_KTPM/
+├── backend/                 # Spring Boot API
+│   ├── src/main/java/      # Java source code
+│   ├── src/main/resources/ # Configuration files
+│   └── pom.xml             # Maven configuration
+├── frontend/               # React Web App
+│   ├── src/                # React source code
+│   ├── package.json        # Node.js dependencies
+│   └── vite.config.ts      # Vite configuration
+├── docs/                   # 📚 Documentation Hub
+│   ├── README.md           # This file
+│   ├── System_Architecture_Analysis.md
+│   ├── API_Documentation.md
+│   ├── Frontend_Development_Guide.md
+│   ├── Deployment_Guide.md
+│   └── Project_Restructuring_Guide.md
+└── README.md               # Main project README
 ```
 
 ---
 
-## 📋 Features
+## 🛠️ **Technology Stack**
 
-### ✅ Implemented
-- User registration và authentication
+| Component | Technology | Version |
+|-----------|------------|---------|
+| **Backend** | Spring Boot | 3.5.6 |
+| **Language** | Java | 17 |
+| **Database** | MySQL | 8.0 |
+| **Frontend** | React | 18 |
+| **Build Tool** | Vite | 5.0+ |
+| **Language** | TypeScript | 5.2+ |
+| **State Management** | TanStack Query | 5.8+ |
+| **Styling** | Tailwind CSS | 3.3+ |
+
+---
+
+## 🔐 **Security Features**
+
+- **JWT Authentication** - Stateless authentication với access/refresh tokens
+- **Password Encryption** - BCrypt hashing
+- **Role-based Access Control** - ADMIN và CUSTOMER roles
+- **Input Validation** - Comprehensive validation cho tất cả inputs
+- **CORS Configuration** - Cross-origin request handling
+
+---
+
+## 📊 **Current Status**
+
+### ✅ **Implemented Features**
+- User authentication (Login/Register)
 - JWT-based security
 - Movie CRUD operations
 - User management
 - RESTful API design
-- Database integration với JPA
-- Exception handling
-- Input validation
+- React Web application
+- TanStack Query integration
+- Responsive design với Tailwind CSS
 
-### 🔄 In Progress
-- Booking system
+### 🔄 **In Progress**
+- Movie booking system
+- Seat selection
 - Payment integration
-- Seat management
-- Showtime scheduling
 
-### 📅 Planned
-- Email notifications
+### 📅 **Planned**
 - Admin dashboard
-- Mobile app
-- Caching layer
-- API rate limiting
+- Movie recommendations
+- User reviews
+- Email notifications
+- Analytics dashboard
 
 ---
 
-## 🛠️ Technology Stack
+## 🧪 **Testing**
 
-| Layer | Technology |
-|-------|------------|
-| **Framework** | Spring Boot 3.5.6 |
-| **Language** | Java 17 |
-| **Database** | MySQL 8.0 |
-| **ORM** | Spring Data JPA + Hibernate |
-| **Security** | Spring Security + JWT |
-| **Build Tool** | Maven |
-| **Validation** | Spring Boot Validation |
-| **Utilities** | Lombok |
-
----
-
-## 📊 Project Structure
-
-```
-src/main/java/com/example/movie/
-├── controller/          # REST Controllers
-│   ├── AuthController.java
-│   ├── MovieController.java
-│   └── UserController.java
-├── service/            # Business Logic
-│   ├── AuthService.java
-│   ├── MovieService.java
-│   ├── UserService.java
-│   └── impl/          # Service Implementations
-├── repository/         # Data Access Layer
-│   ├── MovieRepository.java
-│   └── UserRepository.java
-├── model/             # Entity Models
-│   ├── Movie.java
-│   └── User.java
-├── dto/               # Data Transfer Objects
-│   ├── auth/          # Authentication DTOs
-│   ├── movie/         # Movie DTOs
-│   ├── user/          # User DTOs
-│   └── response/      # Response DTOs
-├── security/          # Security Configuration
-│   ├── SecurityConfig.java
-│   ├── JwtConfig.java
-│   ├── JwtAuthenticationFilter.java
-│   └── SecurityUtil.java
-├── exception/         # Custom Exceptions
-│   └── GlobalExceptionHandler.java
-└── Mapper/           # Entity-DTO Mappers
-    └── MovieMapper.java
-```
-
----
-
-## 🔐 Security Features
-
-- **JWT Authentication**: Stateless authentication với access/refresh tokens
-- **Password Encryption**: BCrypt hashing
-- **Role-based Access Control**: ADMIN và CUSTOMER roles
-- **Input Validation**: Comprehensive validation cho tất cả inputs
-- **SQL Injection Protection**: JPA/Hibernate protection
-- **CORS Configuration**: Cross-origin request handling
-
----
-
-## 📈 Performance Considerations
-
-### Current
-- Single database instance
-- No caching layer
-- Stateless JWT authentication
-- Connection pooling với HikariCP
-
-### Future Improvements
-- Redis caching
-- Database replication
-- Load balancing
-- Microservices architecture
-- CDN integration
-
----
-
-## 🧪 Testing
-
-### Test Coverage
-- Unit tests cho service layer
-- Integration tests cho controllers
-- Security tests cho authentication
-- Database tests với H2 in-memory
-
-### Test Commands
+### Backend Tests
 ```bash
-# Run all tests
-mvn test
+cd backend
+./mvnw test
+```
 
-# Run with coverage
-mvn test jacoco:report
-
-# Run specific test class
-mvn test -Dtest=AuthServiceTest
+### Frontend Tests
+```bash
+cd frontend
+npm test
 ```
 
 ---
 
-## 📝 Contributing
+## 📦 **Build & Deployment**
 
-### Development Workflow
-1. Fork repository
-2. Create feature branch
-3. Implement changes
-4. Add tests
-5. Update documentation
-6. Submit pull request
+### Backend Production
+```bash
+cd backend
+./mvnw clean package
+java -jar target/movie-0.0.1-SNAPSHOT.jar
+```
 
-### Code Standards
-- Follow Java naming conventions
-- Use meaningful variable names
-- Add Javadoc comments
-- Write unit tests
-- Follow Spring Boot best practices
-
----
-
-## 📞 Support
-
-### Documentation Issues
-- Create issue trong repository
-- Provide detailed description
-- Include error messages và logs
-
-### Technical Questions
-- Check existing documentation
-- Review code comments
-- Contact development team
+### Frontend Production
+```bash
+cd frontend
+npm run build
+# Creates optimized build in dist/
+```
 
 ---
 
-## 📄 License
+## 🤝 **Contributing**
+
+1. Follow Git Flow workflow
+2. Create feature branches from `develop`
+3. Use TypeScript cho Frontend, Java cho Backend
+4. Write tests cho new features
+5. Update documentation khi cần thiết
+6. Follow established code style
+
+### Commit Message Convention
+```
+type(scope): description
+
+feat: Add new feature
+fix: Fix bug
+docs: Update documentation
+style: Format code
+refactor: Refactor code
+test: Add tests
+chore: Update dependencies
+```
+
+---
+
+## 📞 **Support & Resources**
+
+### Documentation
+- [Spring Boot Documentation](https://spring.io/projects/spring-boot)
+- [React Documentation](https://react.dev/)
+- [Vite Documentation](https://vitejs.dev/)
+- [TanStack Query Documentation](https://tanstack.com/query)
+
+### Project Resources
+- [GitHub Repository](https://github.com/chickengang/movie-booking)
+- [API Postman Collection](./MovieBookingAPI.postman_collection.json)
+- [Database Schema](./database-schema.sql)
+
+---
+
+## 📄 **License**
 
 This project is licensed under the MIT License - see the [LICENSE](../LICENSE) file for details.
 
 ---
 
-## 🔗 Related Links
-
-- [Spring Boot Documentation](https://spring.io/projects/spring-boot)
-- [Spring Security Documentation](https://spring.io/projects/spring-security)
-- [MySQL Documentation](https://dev.mysql.com/doc/)
-- [JWT.io](https://jwt.io/) - JWT Debugger
-- [Postman Collection](./MovieBookingAPI.postman_collection.json)
-
----
-
-**Last Updated**: January 2024  
+**Last Updated**: January 2025  
 **Version**: 1.0.0  
-**Maintainer**: Development Team
+**Maintainer**: ChickenGang KTPM Team

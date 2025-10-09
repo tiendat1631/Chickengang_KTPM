@@ -1,8 +1,8 @@
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom'
-import { useAuth } from '../hooks/useAuth'
+import { useAuth } from '@/hooks/useAuth'
 import toast from 'react-hot-toast'
 
-export function Layout() {
+export default function Layout() {
   const { isAuthenticated, logout, user } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()

@@ -1,8 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
-import { AuthService } from '../services/authService';
-import { storeTokens, removeToken, getToken } from '../utils/auth';
-import { LoginRequest, RegisterRequest, UserResponse } from '../types/auth';
+import { AuthService } from '@/services/authService';
+import { storeTokens, removeToken, getToken } from '@/lib/auth';
+import { LoginRequest, RegisterRequest, UserResponse } from '@/types/auth';
 import { queryKeys } from './useQueryClient';
 
 export const useLogin = () => {
