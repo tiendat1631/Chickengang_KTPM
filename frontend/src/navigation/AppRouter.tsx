@@ -8,6 +8,8 @@ import Layout from '@/components/Layout';
 // Pages
 import HomePage from '@/features/movies/components/HomePage';
 import MovieDetailPage from '@/features/movies/components/MovieDetailPage';
+import ScreeningListPage from '@/features/screenings/components/ScreeningListPage';
+import SeatSelectionPage from '@/features/booking/components/SeatSelectionPage';
 import LoginPage from '@/features/auth/components/LoginPage';
 import RegisterPage from '@/features/auth/components/RegisterPage';
 import BookingPage from '@/features/booking/components/BookingPage';
@@ -46,6 +48,7 @@ const AppRouter = () => {
             {/* Public Routes */}
             <Route index element={<HomePage />} />
             <Route path="movies/:id" element={<MovieDetailPage />} />
+            <Route path="movies/:movieId/screenings" element={<ScreeningListPage />} />
             
             {/* Auth Routes */}
             <Route 
@@ -66,6 +69,14 @@ const AppRouter = () => {
             />
             
             {/* Protected Routes */}
+            <Route 
+              path="booking/:movieId/screening/:screeningId" 
+              element={
+                <ProtectedRoute>
+                  <SeatSelectionPage />
+                </ProtectedRoute>
+              } 
+            />
             <Route 
               path="booking/:movieId" 
               element={

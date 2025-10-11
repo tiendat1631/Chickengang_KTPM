@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useMovies } from '@/hooks/useMovies'
 import { Movie } from '@/types/movie'
 import Header from '@/components/common/Header'
@@ -7,6 +8,7 @@ import MovieList from './MovieList'
 import './HomePage.css'
 
 export default function HomePage() {
+  const navigate = useNavigate()
   const [currentPage, setCurrentPage] = useState(0)
   const [featuredMovies, setFeaturedMovies] = useState<Movie[]>([])
   const [recentMovies, setRecentMovies] = useState<Movie[]>([])
@@ -39,13 +41,15 @@ export default function HomePage() {
     }
   }, [featuredData])
 
-  const handleSearch = (_query: string) => {
-    // Intentionally unused for now; search UI kept for layout parity
+  const handleSearch = (query: string) => {
+    if (query.trim()) {
+      // Navigate to search results page (will implement later)
+      navigate(`/movies/search?q=${encodeURIComponent(query)}`)
+    }
   }
 
-  const handleMovieClick = (_movie: Movie) => {
-    // TODO: Navigate to movie detail page
-    // console.log('Movie clicked:', movie)
+  const handleMovieClick = (movie: Movie) => {
+    navigate(`/movies/${movie.id}`)
   }
 
   const handleLoadMore = () => {

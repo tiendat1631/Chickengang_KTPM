@@ -1,55 +1,225 @@
+import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
+import Header from '@/components/common/Header'
+import './MovieDetailPage.css'
+
+interface Movie {
+  id: number
+  title: string
+  description: string
+  duration: number
+  releaseDate: string
+  genre: string
+  director: string
+  cast: string
+  posterUrl: string
+  trailerUrl: string
+  rating: number
+  status: string
+}
+
+interface Screening {
+  id: number
+  startTime: string
+  endTime: string
+  format: '2D' | '3D'
+  status: 'ACTIVE' | 'INACTIVE'
+  auditorium: {
+    id: number
+    name: string
+  }
+  price: number
+}
 
 export default function MovieDetailPage() {
-  const { id } = useParams()
+  const { id } = useParams<{ id: string }>()
+  const [movie, setMovie] = useState<Movie | null>(null)
+  const [screenings, setScreenings] = useState<Screening[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        
+        // Mock movie data
+        const mockMovie: Movie = {
+          id: parseInt(id || '1'),
+          title: 'Avengers: Endgame',
+          description: 'After the devastating events of Avengers: Infinity War, the universe is in ruins. With the help of remaining allies, the Avengers assemble once more in order to reverse Thanos\' actions and restore balance to the universe.',
+          duration: 181,
+          releaseDate: '2019-04-26',
+          genre: 'Action, Adventure, Drama',
+          director: 'Anthony Russo, Joe Russo',
+          cast: 'Robert Downey Jr., Chris Evans, Mark Ruffalo, Chris Hemsworth',
+          posterUrl: 'https://via.placeholder.com/300x450',
+          trailerUrl: 'https://www.youtube.com/watch?v=TcMBFSGVi1c',
+          rating: 8.4,
+          status: 'ACTIVE'
+        }
+        
+        // Mock screenings data
+        const mockScreenings: Screening[] = [
+          {
+            id: 1,
+            startTime: '2024-01-15T10:00:00',
+            endTime: '2024-01-15T13:01:00',
+            format: '2D',
+            status: 'ACTIVE',
+            auditorium: { id: 1, name: 'Phòng 1' },
+            price: 120000
+          },
+          {
+            id: 2,
+            startTime: '2024-01-15T14:00:00',
+            endTime: '2024-01-15T17:01:00',
+            format: '3D',
+            status: 'ACTIVE',
+            auditorium: { id: 2, name: 'Phòng 2' },
+            price: 150000
+          },
+          {
+            id: 3,
+            startTime: '2024-01-15T18:00:00',
+            endTime: '2024-01-15T21:01:00',
+            format: '2D',
+            status: 'ACTIVE',
+            auditorium: { id: 1, name: 'Phòng 1' },
+            price: 120000
+          }
+        ]
+        
+        setMovie(mockMovie)
+        setScreenings(mockScreenings)
+        setError(null)
+      } catch (err) {
+        setError('Không thể tải dữ liệu phim')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    if (id) {
+      fetchData()
+    }
+  }, [id])
+
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString)
+    return date.toLocaleTimeString('vi-VN', { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    })
+  }
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('vi-VN', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+  }
+
+  if (loading) {
+    return (
+      <div className="movie-detail-page">
+        <Header onSearch={() => {}} />
+        <div className="container">
+          <div className="loading">Đang tải...</div>
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !movie) {
+    return (
+      <div className="movie-detail-page">
+        <Header onSearch={() => {}} />
+        <div className="container">
+          <div className="error">{error || 'Không tìm thấy phim'}</div>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-        <div className="md:flex">
-          <div className="md:w-1/3">
-            <div className="h-96 bg-gray-200 flex items-center justify-center">
-              <span className="text-gray-500 text-lg">Movie Poster</span>
+    <div className="movie-detail-page">
+      <Header onSearch={() => {}} />
+      <div className="container">
+        <div className="movie-detail">
+          <div className="movie-poster">
+            <img src={movie.posterUrl} alt={movie.title} />
+          </div>
+          <div className="movie-info">
+            <h1>{movie.title}</h1>
+            <div className="movie-rating">
+              <span className="rating">⭐ {movie.rating}/10</span>
+              <span className="status">{movie.status}</span>
+            </div>
+            <p className="movie-description">{movie.description}</p>
+            <div className="movie-meta">
+              <div className="meta-item">
+                <strong>Thể loại:</strong> {movie.genre}
+              </div>
+              <div className="meta-item">
+                <strong>Thời lượng:</strong> {movie.duration} phút
+              </div>
+              <div className="meta-item">
+                <strong>Ngày phát hành:</strong> {formatDate(movie.releaseDate)}
+              </div>
+              <div className="meta-item">
+                <strong>Đạo diễn:</strong> {movie.director}
+              </div>
+              <div className="meta-item">
+                <strong>Diễn viên:</strong> {movie.cast}
+              </div>
+            </div>
+            <div className="trailer-section">
+              <h3>Trailer</h3>
+              <div className="trailer-placeholder">
+                <a href={movie.trailerUrl} target="_blank" rel="noopener noreferrer">
+                  ▶️ Xem trailer
+                </a>
+              </div>
             </div>
           </div>
-          <div className="md:w-2/3 p-6">
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">
-              Movie Title {id}
-            </h1>
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-700">Thông tin phim</h3>
-                <p className="text-gray-600">
-                  Đây là mô tả chi tiết về bộ phim. Phim kể về câu chuyện hấp dẫn với những tình tiết bất ngờ.
-                </p>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <span className="font-medium text-gray-700">Thể loại:</span>
-                  <p className="text-gray-600">Action, Adventure</p>
+        </div>
+
+        <div className="screenings-section">
+          <h2>Suất chiếu</h2>
+          {screenings.length > 0 ? (
+            <div className="screenings-grid">
+              {screenings.map((screening) => (
+                <div key={screening.id} className="screening-card">
+                  <div className="screening-time">
+                    <div className="time">{formatTime(screening.startTime)}</div>
+                    <div className="format">{screening.format}</div>
+                  </div>
+                  <div className="screening-details">
+                    <div className="auditorium">{screening.auditorium.name}</div>
+                    <div className="price">{screening.price.toLocaleString('vi-VN')} VNĐ</div>
+                  </div>
+                  <div className="screening-status">
+                    <span className={`status ${screening.status.toLowerCase()}`}>
+                      {screening.status === 'ACTIVE' ? 'Có vé' : 'Hết vé'}
+                    </span>
+                  </div>
                 </div>
-                <div>
-                  <span className="font-medium text-gray-700">Thời lượng:</span>
-                  <p className="text-gray-600">2h 30m</p>
-                </div>
-                <div>
-                  <span className="font-medium text-gray-700">Đạo diễn:</span>
-                  <p className="text-gray-600">Director Name</p>
-                </div>
-                <div>
-                  <span className="font-medium text-gray-700">Diễn viên:</span>
-                  <p className="text-gray-600">Actor 1, Actor 2</p>
-                </div>
-              </div>
-              <div className="pt-4">
-                <Link
-                  to={`/booking/${id}`}
-                  className="bg-blue-600 text-white px-6 py-3 rounded-md text-lg font-medium hover:bg-blue-700 inline-block"
-                >
-                  Đặt vé ngay
-                </Link>
-              </div>
+              ))}
             </div>
+          ) : (
+            <p className="no-screenings">Chưa có suất chiếu nào</p>
+          )}
+          
+          <div className="action-buttons">
+            <Link to="/" className="btn btn-secondary">
+              ← Quay lại trang chủ
+            </Link>
+            <Link to={`/movies/${movie.id}/screenings`} className="btn btn-primary">
+              Xem tất cả suất chiếu
+            </Link>
           </div>
         </div>
       </div>
