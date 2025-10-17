@@ -105,4 +105,12 @@ public class ScreeningServiceImpl implements ScreeningService {
                 .orElseThrow(()-> new InvalidId(id));
         return screeningMapper.toResponse(existingScreening);
     }
+
+    @Override
+    public List<ScreeningResponse> getScreeningsByMovieId(Long movieId) {
+        List<Screening> screenings = screeningRepository.findByMovieIdAndStatusActive(movieId);
+        return screenings.stream()
+                .map(screeningMapper::toResponse)
+                .toList();
+    }
 }
