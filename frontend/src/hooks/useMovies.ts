@@ -14,7 +14,7 @@ export const useMovies = (page: number = 0, size: number = 10, sort?: string) =>
         ...(sort && { sort }),
       });
       
-      const response = await apiClient.get(`/movies?${params}`);
+      const response = await apiClient.get(`/v1/movies?${params}`);
       return response.data.data;
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
@@ -26,7 +26,7 @@ export const useMovie = (id: number) => {
   return useQuery({
     queryKey: queryKeys.movies.detail(id),
     queryFn: async () => {
-      const response = await apiClient.get(`/movies/${id}`);
+      const response = await apiClient.get(`/v1/movies/${id}`);
       return response.data.data;
     },
     enabled: !!id,
@@ -38,7 +38,7 @@ export const useSearchMovies = (query: string) => {
   return useQuery({
     queryKey: queryKeys.movies.search(query),
     queryFn: async () => {
-      const response = await apiClient.get(`/movies/search?q=${encodeURIComponent(query)}`);
+      const response = await apiClient.get(`/v1/movies/search?q=${encodeURIComponent(query)}`);
       return response.data.data;
     },
     enabled: !!query && query.length > 2,
@@ -52,7 +52,7 @@ export const useAddMovie = () => {
 
   return useMutation({
     mutationFn: (data: MovieRequest) => {
-      return apiClient.post('/movies', data);
+      return apiClient.post('/v1/movies', data);
     },
     onSuccess: () => {
       // Invalidate movies list to refetch
@@ -70,7 +70,7 @@ export const useUpdateMovie = () => {
 
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: PatchMovie }) => {
-      return apiClient.patch(`/movies/${id}`, data);
+      return apiClient.patch(`/v1/movies/${id}`, data);
     },
     onSuccess: (_, { id }) => {
       // Invalidate specific movie and movies list
@@ -89,7 +89,7 @@ export const useDeleteMovie = () => {
 
   return useMutation({
     mutationFn: (id: number) => {
-      return apiClient.delete(`/movies/${id}`);
+      return apiClient.delete(`/v1/movies/${id}`);
     },
     onSuccess: () => {
       // Invalidate movies list

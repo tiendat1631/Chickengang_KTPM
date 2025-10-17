@@ -1,15 +1,18 @@
 import { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useMovies } from '@/hooks/useMovies'
+import { useScreenings } from '@/hooks/useScreenings'
 import { Movie } from '@/types/movie'
 import Header from '@/components/common/Header'
+import Breadcrumb from '@/components/ui/Breadcrumb'
+import { formatVND } from '@/utils/formatCurrency'
 import './ScreeningListPage.css'
 
 interface Screening {
   id: number
   startTime: string
   endTime: string
-  format: '2D' | '3D'
+  format: '2D' | '3D' | 'IMAX'
   status: 'ACTIVE' | 'INACTIVE'
   auditorium: {
     id: number
@@ -20,87 +23,59 @@ interface Screening {
 
 export default function ScreeningListPage() {
   const { movieId } = useParams<{ movieId: string }>()
+  const navigate = useNavigate()
   const [movie, setMovie] = useState<Movie | null>(null)
   const [screenings, setScreenings] = useState<Screening[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  // Mock data for now - will replace with actual API calls
+  const movieIdNum = movieId ? parseInt(movieId) : 0
+
+  const {
+    data: movieData,
+    isLoading: movieLoading,
+    error: movieError,
+  } = useMovies(0, 100, 'releaseDate,DESC') // Get all movies to find the specific one
+
+  const {
+    data: screeningsData,
+    isLoading: screeningsLoading,
+    error: screeningsError,
+  } = useScreenings(movieIdNum)
+
   useEffect(() => {
-    const fetchData = async () => {
-      try {
-        setLoading(true)
-        
-        // Mock movie data
-        const mockMovie: Movie = {
-          id: parseInt(movieId || '1'),
-          title: 'Avengers: Endgame',
-          description: 'After the devastating events of Avengers: Infinity War, the universe is in ruins.',
-          duration: 181,
-          releaseDate: '2019-04-26',
-          genre: 'Action, Adventure, Drama',
-          director: 'Anthony Russo, Joe Russo',
-          cast: 'Robert Downey Jr., Chris Evans, Mark Ruffalo',
-          posterUrl: 'https://via.placeholder.com/300x450',
-          trailerUrl: 'https://www.youtube.com/watch?v=TcMBFSGVi1c',
-          rating: 8.4,
-          status: 'ACTIVE'
-        }
-        
-        // Mock screenings data
-        const mockScreenings: Screening[] = [
-          {
-            id: 1,
-            startTime: '2024-01-15T10:00:00',
-            endTime: '2024-01-15T13:01:00',
-            format: '2D',
-            status: 'ACTIVE',
-            auditorium: { id: 1, name: 'Phòng 1' },
-            price: 120000
-          },
-          {
-            id: 2,
-            startTime: '2024-01-15T14:00:00',
-            endTime: '2024-01-15T17:01:00',
-            format: '3D',
-            status: 'ACTIVE',
-            auditorium: { id: 2, name: 'Phòng 2' },
-            price: 150000
-          },
-          {
-            id: 3,
-            startTime: '2024-01-15T18:00:00',
-            endTime: '2024-01-15T21:01:00',
-            format: '2D',
-            status: 'ACTIVE',
-            auditorium: { id: 1, name: 'Phòng 1' },
-            price: 120000
-          },
-          {
-            id: 4,
-            startTime: '2024-01-15T20:00:00',
-            endTime: '2024-01-15T23:01:00',
-            format: '3D',
-            status: 'ACTIVE',
-            auditorium: { id: 3, name: 'Phòng 3' },
-            price: 150000
-          }
-        ]
-        
-        setMovie(mockMovie)
-        setScreenings(mockScreenings)
-        setError(null)
-      } catch (err) {
-        setError('Không thể tải dữ liệu suất chiếu')
-      } finally {
-        setLoading(false)
+    if (movieData && movieIdNum) {
+      // Find the specific movie by ID
+      const foundMovie = movieData.find((m: Movie) => m.id === movieIdNum)
+      if (foundMovie) {
+        setMovie(foundMovie)
       }
     }
+  }, [movieData, movieIdNum])
 
-    if (movieId) {
-      fetchData()
+  useEffect(() => {
+    if (screeningsData) {
+      // Transform API data to match our interface
+      const transformedScreenings: Screening[] = screeningsData.map((screening: any) => ({
+        id: screening.id,
+        startTime: screening.startTime,
+        endTime: screening.endTime,
+        format: screening.format === 'TwoD' ? '2D' : screening.format === 'ThreeD' ? '3D' : screening.format,
+        status: screening.status === 'ACTIVE' ? 'ACTIVE' : 'INACTIVE',
+        auditorium: {
+          id: screening.auditoriumId,
+          name: screening.auditoriumName
+        },
+        price: 120000 // Default price - you might want to add this to the API response
+      }))
+      setScreenings(transformedScreenings)
     }
-  }, [movieId])
+  }, [screeningsData])
+
+  useEffect(() => {
+    setLoading(movieLoading || screeningsLoading)
+    setError(movieError?.message || screeningsError?.message || null)
+  }, [movieLoading, screeningsLoading, movieError, screeningsError])
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString)
@@ -121,8 +96,8 @@ export default function ScreeningListPage() {
   }
 
   const handleScreeningClick = (screening: Screening) => {
-    // Navigate to seat selection page
-    window.location.href = `/booking/${movieId}/screening/${screening.id}`
+    // Navigate to seat selection page using React Router
+    navigate(`/booking/${movieId}/screening/${screening.id}`)
   }
 
   if (loading) {
@@ -151,18 +126,28 @@ export default function ScreeningListPage() {
     <div className="screening-list-page">
       <Header onSearch={() => {}} />
       <div className="container">
+        {/* Breadcrumb */}
+        <Breadcrumb 
+          items={[
+            { label: "Trang chủ", to: "/" },
+            { label: movie.title, to: `/movies/${movieId}` },
+            { label: "Chọn suất" }
+          ]}
+          className="mb-6"
+        />
+
         <div className="movie-info">
           <div className="movie-poster">
-            <img src={movie.posterUrl} alt={movie.title} />
+            <div className="movie-poster-placeholder">🎬</div>
           </div>
           <div className="movie-details">
             <h1>{movie.title}</h1>
             <p className="movie-description">{movie.description}</p>
             <div className="movie-meta">
-              <span><strong>Thể loại:</strong> {movie.genre}</span>
+              <span><strong>Thể loại:</strong> {movie.genres}</span>
               <span><strong>Thời lượng:</strong> {movie.duration} phút</span>
               <span><strong>Đạo diễn:</strong> {movie.director}</span>
-              <span><strong>Diễn viên:</strong> {movie.cast}</span>
+              <span><strong>Diễn viên:</strong> {movie.actors}</span>
             </div>
           </div>
         </div>
@@ -183,7 +168,7 @@ export default function ScreeningListPage() {
                 <div className="screening-details">
                   <div className="format">{screening.format}</div>
                   <div className="auditorium">{screening.auditorium.name}</div>
-                  <div className="price">{screening.price.toLocaleString('vi-VN')} VNĐ</div>
+                  <div className="price"><span className="whitespace-nowrap">{formatVND(screening.price)}</span></div>
                 </div>
                 <div className="screening-status">
                   <span className={`status ${screening.status.toLowerCase()}`}>

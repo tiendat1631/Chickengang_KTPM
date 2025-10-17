@@ -1,22 +1,12 @@
 import { useState, useEffect } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useParams, Link, Navigate, useNavigate } from 'react-router-dom'
 import Header from '@/components/common/Header'
+import Breadcrumb from '@/components/ui/Breadcrumb'
+import apiClient from '@/services/api'
+import { useScreenings } from '@/hooks/useScreenings'
+import { Movie } from '@/types/movie'
+import { formatVND } from '@/utils/formatCurrency'
 import './MovieDetailPage.css'
-
-interface Movie {
-  id: number
-  title: string
-  description: string
-  duration: number
-  releaseDate: string
-  genre: string
-  director: string
-  cast: string
-  posterUrl: string
-  trailerUrl: string
-  rating: number
-  status: string
-}
 
 interface Screening {
   id: number
@@ -33,77 +23,94 @@ interface Screening {
 
 export default function MovieDetailPage() {
   const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
   const [movie, setMovie] = useState<Movie | null>(null)
   const [screenings, setScreenings] = useState<Screening[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
+  const movieId = id ? parseInt(id) : 0
+
+  const {
+    data: screeningsData,
+    isLoading: screeningsLoading,
+    error: screeningsError,
+  } = useScreenings(movieId)
+
+  useEffect(() => {
+    if (screeningsData) {
+      // Transform API data to match our interface
+      const transformedScreenings: Screening[] = screeningsData.map((screening: any) => ({
+        id: screening.id,
+        startTime: screening.startTime,
+        endTime: screening.endTime,
+        format: screening.format === 'TwoD' ? '2D' : screening.format === 'ThreeD' ? '3D' : screening.format,
+        status: screening.status === 'ACTIVE' ? 'ACTIVE' : 'INACTIVE',
+        auditorium: {
+          id: screening.auditoriumId,
+          name: screening.auditoriumName
+        },
+        price: 120000 // Default price - you might want to add this to the API response
+      }))
+      setScreenings(transformedScreenings)
+    }
+  }, [screeningsData])
+
+  useEffect(() => {
+    setLoading(screeningsLoading)
+    if (screeningsError) {
+      setError(screeningsError.message)
+    }
+  }, [screeningsLoading, screeningsError])
+
+  // Validate movie ID parameter
+  if (!movieId || movieId <= 0) {
+    return <Navigate to="/404" replace />
+  }
+
+  // Fetch movie data with fallback to mock data
   useEffect(() => {
     const fetchData = async () => {
       try {
         setLoading(true)
+        setError(null)
         
-        // Mock movie data
-        const mockMovie: Movie = {
-          id: parseInt(id || '1'),
-          title: 'Avengers: Endgame',
-          description: 'After the devastating events of Avengers: Infinity War, the universe is in ruins. With the help of remaining allies, the Avengers assemble once more in order to reverse Thanos\' actions and restore balance to the universe.',
-          duration: 181,
-          releaseDate: '2019-04-26',
-          genre: 'Action, Adventure, Drama',
-          director: 'Anthony Russo, Joe Russo',
-          cast: 'Robert Downey Jr., Chris Evans, Mark Ruffalo, Chris Hemsworth',
-          posterUrl: 'https://via.placeholder.com/300x450',
-          trailerUrl: 'https://www.youtube.com/watch?v=TcMBFSGVi1c',
-          rating: 8.4,
-          status: 'ACTIVE'
+        // Try to fetch from API first
+        try {
+          console.log(`Fetching movie with ID: ${movieId}`)
+          const response = await apiClient.get(`/v1/movies/${movieId}`)
+          console.log('API Response:', response.data)
+          
+          if (response.data && response.data.data) {
+            const movieData = response.data.data
+            // Convert releaseDate from LocalDate to string if needed
+            const formattedMovie: Movie = {
+              ...movieData,
+              releaseDate: typeof movieData.releaseDate === 'string' 
+                ? movieData.releaseDate 
+                : movieData.releaseDate?.toString() || ''
+            }
+            setMovie(formattedMovie)
+            console.log('Movie data set:', formattedMovie)
+          } else {
+            throw new Error('Invalid API response structure')
+          }
+        } catch (apiError) {
+          console.error('API Error:', apiError)
+          setError('Không thể tải dữ liệu phim')
         }
         
-        // Mock screenings data
-        const mockScreenings: Screening[] = [
-          {
-            id: 1,
-            startTime: '2024-01-15T10:00:00',
-            endTime: '2024-01-15T13:01:00',
-            format: '2D',
-            status: 'ACTIVE',
-            auditorium: { id: 1, name: 'Phòng 1' },
-            price: 120000
-          },
-          {
-            id: 2,
-            startTime: '2024-01-15T14:00:00',
-            endTime: '2024-01-15T17:01:00',
-            format: '3D',
-            status: 'ACTIVE',
-            auditorium: { id: 2, name: 'Phòng 2' },
-            price: 150000
-          },
-          {
-            id: 3,
-            startTime: '2024-01-15T18:00:00',
-            endTime: '2024-01-15T21:01:00',
-            format: '2D',
-            status: 'ACTIVE',
-            auditorium: { id: 1, name: 'Phòng 1' },
-            price: 120000
-          }
-        ]
-        
-        setMovie(mockMovie)
-        setScreenings(mockScreenings)
-        setError(null)
+        // Note: Screenings will be loaded separately via useScreenings hook
       } catch (err) {
+        console.error('Fetch error:', err)
         setError('Không thể tải dữ liệu phim')
       } finally {
         setLoading(false)
       }
     }
 
-    if (id) {
-      fetchData()
-    }
-  }, [id])
+    fetchData()
+  }, [movieId])
 
   const formatTime = (dateString: string) => {
     const date = new Date(dateString)
@@ -122,13 +129,21 @@ export default function MovieDetailPage() {
     })
   }
 
+  const handleScreeningClick = (screening: Screening) => {
+    // Navigate to seat selection page using React Router
+    navigate(`/booking/${movieId}/screening/${screening.id}`)
+  }
+
   if (loading) {
     return (
       <div className="movie-detail-page">
         <Header onSearch={() => {}} />
-        <div className="container">
-          <div className="loading">Đang tải...</div>
-        </div>
+          <div className="container">
+            <div className="loading-container">
+              <div className="loading-spinner"></div>
+              <p>Đang tải thông tin phim...</p>
+            </div>
+          </div>
       </div>
     )
   }
@@ -137,9 +152,21 @@ export default function MovieDetailPage() {
     return (
       <div className="movie-detail-page">
         <Header onSearch={() => {}} />
-        <div className="container">
-          <div className="error">{error || 'Không tìm thấy phim'}</div>
-        </div>
+          <div className="container">
+            <div className="error-container">
+            <div className="error-icon">🎬</div>
+            <h2>Không tìm thấy phim</h2>
+            <p>Phim bạn đang tìm kiếm không tồn tại hoặc đã bị xóa.</p>
+            <div className="error-actions">
+              <Link to="/" className="btn btn-primary">
+                ← Về trang chủ
+              </Link>
+              <Link to="/movies/search" className="btn btn-secondary">
+                🔍 Tìm kiếm phim khác
+              </Link>
+            </div>
+            </div>
+          </div>
       </div>
     )
   }
@@ -147,67 +174,170 @@ export default function MovieDetailPage() {
   return (
     <div className="movie-detail-page">
       <Header onSearch={() => {}} />
-      <div className="container">
-        <div className="movie-detail">
-          <div className="movie-poster">
-            <img src={movie.posterUrl} alt={movie.title} />
+        <div className="container">
+        {/* Breadcrumb */}
+        <Breadcrumb 
+          items={[
+            { label: "Trang chủ", to: "/" },
+            { label: movie.title }
+          ]}
+          className="mb-6"
+        />
+
+        {/* Hero Section - CGV Style */}
+        <div className="movie-hero-section">
+          <div className="hero-background">
+            <div className="hero-overlay"></div>
           </div>
-          <div className="movie-info">
-            <h1>{movie.title}</h1>
-            <div className="movie-rating">
-              <span className="rating">⭐ {movie.rating}/10</span>
-              <span className="status">{movie.status}</span>
+
+          <div className="hero-content">
+            <div className="hero-layout">
+              {/* Movie Poster */}
+              <div className="hero-poster">
+                {movie.posterUrl && movie.posterUrl !== 'https://via.placeholder.com/300x450' ? (
+                  <img src={movie.posterUrl} alt={movie.title} />
+                ) : (
+                  <div className="movie-poster-placeholder" data-title={movie.title}></div>
+                )}
+                
+                {/* Featured Badge */}
+                <div className="featured-badge">Nổi bật</div>
+                
+                {/* Rating Badge */}
+                <div className="rating-badge-hero">T16</div>
             </div>
-            <p className="movie-description">{movie.description}</p>
-            <div className="movie-meta">
-              <div className="meta-item">
-                <strong>Thể loại:</strong> {movie.genre}
-              </div>
-              <div className="meta-item">
-                <strong>Thời lượng:</strong> {movie.duration} phút
-              </div>
-              <div className="meta-item">
-                <strong>Ngày phát hành:</strong> {formatDate(movie.releaseDate)}
-              </div>
-              <div className="meta-item">
-                <strong>Đạo diễn:</strong> {movie.director}
-              </div>
-              <div className="meta-item">
-                <strong>Diễn viên:</strong> {movie.cast}
-              </div>
-            </div>
-            <div className="trailer-section">
-              <h3>Trailer</h3>
-              <div className="trailer-placeholder">
-                <a href={movie.trailerUrl} target="_blank" rel="noopener noreferrer">
-                  ▶️ Xem trailer
-                </a>
+
+              {/* Movie Info */}
+              <div className="hero-info">
+                <h1 className="hero-title">{movie.title}</h1>
+                
+                <div className="hero-quick-info">
+                  <div className="quick-info-item">
+                    <span className="info-label">Đạo diễn:</span>
+                    <span className="info-value">{movie.director}</span>
+                  </div>
+                  <div className="quick-info-item">
+                    <span className="info-label">Thời lượng:</span>
+                    <span className="info-value">{movie.duration} phút</span>
+                  </div>
+                  <div className="quick-info-item">
+                    <span className="info-label">Khởi chiếu:</span>
+                    <span className="info-value">{formatDate(movie.releaseDate)}</span>
+                  </div>
+                </div>
+
+                {/* Genre Tags */}
+                <div className="genre-tags">
+                  {movie.genres.split(',').map((genre: string, index: number) => (
+                    <span key={`${movie.id}-genre-${index}`} className="genre-tag">{genre.trim()}</span>
+                  ))}
+                </div>
+
+                {/* Action Buttons */}
+                <div className="hero-actions">
+                  <button className="btn-trailer">
+                    <span className="trailer-icon">▶️</span>
+                    Xem Trailer
+                  </button>
+                  <button className="btn-buy-ticket-hero">
+                    <span className="ticket-icon">🎫</span>
+                    MUA VÉ NGAY
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
+        {/* Detailed Information Section */}
+        <div className="movie-details-section">
+          <div className="details-layout">
+            {/* Left Column - Detailed Info */}
+            <div className="details-info">
+              <h2 className="section-title">Thông tin chi tiết</h2>
+              
+              <div className="movie-details-grid">
+                <div className="detail-item">
+                  <span className="detail-label">Diễn viên:</span>
+                  <span className="detail-value">{movie.actors}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">Ngôn ngữ:</span>
+                  <span className="detail-value">Tiếng Anh - Phụ đề Tiếng Việt</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">Rated:</span>
+                  <span className="detail-value">T16 - PHIM ĐƯỢC PHỔ BIẾN ĐẾN NGƯỜI XEM TỪ ĐỦ 16 TUỔI TRỞ LÊN (16+)</span>
+                </div>
+              </div>
+
+              {/* Movie Synopsis */}
+              <div className="movie-synopsis">
+                <h3>Nội dung phim</h3>
+                <p>{movie.description}</p>
+              </div>
+
+              {/* Social Actions */}
+              <div className="social-actions">
+                <button className="btn-facebook">
+                  <span className="facebook-icon">📘</span>
+                  Like 0
+                </button>
+                <button className="btn-share">
+                  <span className="share-icon">📤</span>
+                  Chia sẻ
+                </button>
+              </div>
+            </div>
+
+            {/* Right Column - Promotions */}
+            <div className="promotions-sidebar">
+              <h3 className="sidebar-title">Ưu đãi đặc biệt</h3>
+              
+              <div className="promotion-cards">
+                <div className="promotion-card">
+                  <div className="promo-badge">HOT</div>
+                  <h4>Combo 2 vé + nước</h4>
+                  <p>Tiết kiệm 20% khi mua combo</p>
+                  <div className="promo-price"><span className="whitespace-nowrap">{formatVND(199000)}</span></div>
+                </div>
+                
+                <div className="promotion-card">
+                  <div className="promo-badge">NEW</div>
+                  <h4>Thành viên VIP</h4>
+                  <p>Giảm giá 15% cho thành viên</p>
+                  <button className="btn-promo">Đăng ký ngay</button>
+                </div>
+              </div>
+              </div>
+            </div>
+          </div>
+
         <div className="screenings-section">
           <h2>Suất chiếu</h2>
           {screenings.length > 0 ? (
-            <div className="screenings-grid">
+              <div className="screenings-grid">
               {screenings.map((screening) => (
-                <div key={screening.id} className="screening-card">
-                  <div className="screening-time">
+                  <div 
+                    key={screening.id} 
+                    className="screening-card"
+                    onClick={() => handleScreeningClick(screening)}
+                  >
+                    <div className="screening-time">
                     <div className="time">{formatTime(screening.startTime)}</div>
                     <div className="format">{screening.format}</div>
-                  </div>
-                  <div className="screening-details">
+                    </div>
+                    <div className="screening-details">
                     <div className="auditorium">{screening.auditorium.name}</div>
-                    <div className="price">{screening.price.toLocaleString('vi-VN')} VNĐ</div>
-                  </div>
+                    <div className="price"><span className="whitespace-nowrap">{formatVND(screening.price)}</span></div>
+                      </div>
                   <div className="screening-status">
                     <span className={`status ${screening.status.toLowerCase()}`}>
                       {screening.status === 'ACTIVE' ? 'Có vé' : 'Hết vé'}
                     </span>
+                    </div>
                   </div>
-                </div>
-              ))}
+                ))}
             </div>
           ) : (
             <p className="no-screenings">Chưa có suất chiếu nào</p>

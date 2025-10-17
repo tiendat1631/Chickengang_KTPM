@@ -64,6 +64,18 @@
   font-weight: bold;
   color: #1a1a1a;
   margin-bottom: 25px;
+  text-align: center;
+  position: relative;
+}
+
+.screenings-section h2::after {
+  content: "";
+  display: block;
+  width: 120px;
+  height: 4px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, #7c3aed, #a78bfa);
+  margin: 10px auto 0 auto;
 }
 
 .screenings-grid {
@@ -75,16 +87,18 @@
 .screening-card {
   border: 2px solid #e5e7eb;
   border-radius: 12px;
-  padding: 20px;
+  padding: 24px;
   cursor: pointer;
   transition: all 0.3s ease;
   background: white;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.03);
 }
 
 .screening-card:hover {
-  border-color: #3b82f6;
+  border-color: #a78bfa;
   transform: translateY(-2px);
-  box-shadow: 0 8px 25px rgba(59, 130, 246, 0.15);
+  box-shadow: 0 8px 25px rgba(124, 58, 237, 0.15);
 }
 
 .screening-time {
@@ -93,9 +107,9 @@
 }
 
 .time {
-  font-size: 1.5rem;
-  font-weight: bold;
-  color: #1a1a1a;
+  font-size: 2rem;
+  font-weight: 800;
+  color: #7c3aed;
 }
 
 .date {
@@ -105,32 +119,30 @@
 }
 
 .screening-details {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 15px;
+  margin-bottom: 16px;
 }
 
 .format {
-  background: #3b82f6;
-  color: white;
-  padding: 4px 12px;
-  border-radius: 20px;
+  display: inline-block;
+  background: linear-gradient(180deg, #3b82f6, #2563eb);
+  color: #ffffff;
+  padding: 6px 12px;
+  border-radius: 9999px;
   font-size: 0.9rem;
-  font-weight: bold;
+  font-weight: 700;
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.25);
 }
 
-.auditorium {
+.auditorium, .price {
+  display: inline-block;
+  width: 48%;
+  margin-top: 16px;
   font-size: 1rem;
-  color: #333;
-  font-weight: 500;
+  color: #1f2937;
 }
 
-.price {
-  font-size: 1.1rem;
-  font-weight: bold;
-  color: #059669;
-}
+.auditorium { text-align: left; }
+.price { text-align: right; font-weight: 600; color: #374151; }
 
 .screening-status {
   text-align: center;
@@ -141,11 +153,12 @@
   border-radius: 20px;
   font-size: 0.9rem;
   font-weight: bold;
+  display: inline-block;
 }
 
 .status.active {
-  background: #d1fae5;
-  color: #059669;
+  background: #dcfce7;
+  color: #16a34a;
 }
 
 .status.inactive {

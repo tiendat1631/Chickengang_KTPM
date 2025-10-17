@@ -1,97 +1,202 @@
-import { useParams, Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useParams, Link, useNavigate, useLocation } from 'react-router-dom'
+import Header from '@/components/common/Header'
+import Breadcrumb from '@/components/ui/Breadcrumb'
+import { formatVND } from '@/utils/formatCurrency'
+import './BookingPage.css'
+
+interface Seat {
+  id: number
+  rowLabel: string
+  number: number
+  seatType: 'NORMAL' | 'SWEETBOX'
+  price: number
+}
+
+interface Screening {
+  id: number
+  startTime: string
+  endTime: string
+  format: '2D' | '3D'
+  auditorium: {
+    id: number
+    name: string
+  }
+  movie: {
+    id: number
+    title: string
+  }
+}
+
+interface BookingData {
+  screening: Screening
+  selectedSeats: Seat[]
+  totalPrice: number
+}
 
 export default function BookingPage() {
-  const { movieId } = useParams()
+  const { movieId } = useParams<{ movieId: string }>()
+  const navigate = useNavigate()
+  const location = useLocation()
+  const [bookingData, setBookingData] = useState<BookingData | null>(null)
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  useEffect(() => {
+    // Get booking data from location state or localStorage
+    const stateData = location.state as BookingData
+    const storedData = localStorage.getItem('bookingData')
+    
+    try {
+      if (stateData) {
+        setBookingData(stateData)
+        localStorage.setItem('bookingData', JSON.stringify(stateData))
+      } else if (storedData) {
+        setBookingData(JSON.parse(storedData))
+      } else {
+        setError('Không tìm thấy thông tin đặt vé')
+      }
+    } catch (err) {
+      setError('Dữ liệu đặt vé không hợp lệ')
+    } finally {
+      setLoading(false)
+    }
+  }, [location.state])
+
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString)
+    return date.toLocaleTimeString('vi-VN', { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    })
+  }
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('vi-VN', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+  }
+
+  const handlePayment = () => {
+    // TODO: Implement payment integration
+    alert('Chức năng thanh toán sẽ được triển khai sớm!')
+  }
+
+  const handleBackToSeatSelection = () => {
+    navigate(`/booking/${movieId}/screening/${bookingData?.screening.id}`)
+  }
+
+  if (loading) {
+    return (
+      <div className="booking-page">
+        <Header onSearch={() => {}} />
+        <div className="container">
+          <div className="loading">Đang tải...</div>
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !bookingData) {
+    return (
+      <div className="booking-page">
+        <Header onSearch={() => {}} />
+        <div className="container">
+          <div className="error">{error || 'Không tìm thấy thông tin đặt vé'}</div>
+          <Link to={`/movies/${movieId}`} className="btn btn-primary">
+            Quay lại trang phim
+          </Link>
+        </div>
+      </div>
+    )
+  }
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="bg-white rounded-lg shadow-lg p-6">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">
-          Đặt vé xem phim
-        </h1>
-        
-        <div className="space-y-6">
-          <div>
-            <h2 className="text-xl font-semibold text-gray-700 mb-4">
-              Chọn suất chiếu
-            </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              {['10:00', '13:00', '16:00', '19:00'].map((time) => (
-                <button
-                  key={time}
-                  className="p-3 border border-gray-300 rounded-md hover:bg-blue-50 hover:border-blue-500 text-center"
-                >
-                  {time}
-                </button>
+    <div className="booking-page">
+      <Header onSearch={() => {}} />
+      <div className="container">
+        {/* Breadcrumb */}
+        <Breadcrumb 
+          items={[
+            { label: "Trang chủ", to: "/" },
+            { label: bookingData.screening.movie.title, to: `/movies/${movieId}` },
+            { label: "Chọn suất", to: `/movies/${movieId}/screenings` },
+            { label: "Chọn ghế", to: `/booking/${movieId}/screening/${bookingData.screening.id}` },
+            { label: "Thanh toán" }
+          ]}
+          className="mb-6"
+        />
+
+        <div className="booking-header">
+          <h1>Xác nhận đặt vé</h1>
+          <p>Vui lòng kiểm tra lại thông tin trước khi thanh toán</p>
+        </div>
+
+        <div className="booking-content">
+          <div className="movie-info-section">
+            <h2>Thông tin phim</h2>
+            <div className="movie-details">
+              <div className="movie-poster">
+                <div className="movie-poster-placeholder">🎬</div>
+              </div>
+              <div className="movie-info">
+                <h3>{bookingData.screening.movie.title}</h3>
+                <div className="movie-meta">
+                  <span><strong>Suất chiếu:</strong> {formatTime(bookingData.screening.startTime)}</span>
+                  <span><strong>Ngày:</strong> {formatDate(bookingData.screening.startTime)}</span>
+                  <span><strong>Phòng:</strong> {bookingData.screening.auditorium.name}</span>
+                  <span><strong>Định dạng:</strong> {bookingData.screening.format}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div className="seats-info-section">
+            <h2>Ghế đã chọn</h2>
+            <div className="selected-seats">
+              {bookingData.selectedSeats.map((seat) => (
+                <div key={seat.id} className="seat-item">
+                  <span className="seat-label">{seat.rowLabel}{seat.number}</span>
+                  <span className="seat-type">{seat.seatType === 'SWEETBOX' ? 'Sweetbox' : 'Thường'}</span>
+                  <span className="seat-price"><span className="whitespace-nowrap">{formatVND(seat.price)}</span></span>
+                </div>
               ))}
             </div>
           </div>
 
-          <div>
-            <h2 className="text-xl font-semibold text-gray-700 mb-4">
-              Chọn ghế
-            </h2>
-            <div className="bg-gray-100 p-4 rounded-lg">
-              <div className="grid grid-cols-8 gap-2 mb-4">
-                {Array.from({ length: 48 }, (_, i) => (
-                  <button
-                    key={i}
-                    className={`w-8 h-8 rounded text-xs ${
-                      i % 8 === 0 || i % 8 === 7
-                        ? 'bg-gray-400 cursor-not-allowed'
-                        : 'bg-green-500 hover:bg-green-600 text-white'
-                    }`}
-                    disabled={i % 8 === 0 || i % 8 === 7}
-                  >
-                    {i + 1}
-                  </button>
-                ))}
-              </div>
-              <div className="flex justify-center space-x-4 text-sm">
-                <div className="flex items-center">
-                  <div className="w-4 h-4 bg-green-500 rounded mr-2"></div>
-                  <span>Có thể chọn</span>
-                </div>
-                <div className="flex items-center">
-                  <div className="w-4 h-4 bg-gray-400 rounded mr-2"></div>
-                  <span>Không có</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div>
-            <h2 className="text-xl font-semibold text-gray-700 mb-4">
-              Thông tin đặt vé
-            </h2>
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <div className="flex justify-between items-center mb-2">
-                <span>Phim:</span>
-                <span className="font-medium">Movie Title {movieId}</span>
-              </div>
-              <div className="flex justify-between items-center mb-2">
-                <span>Suất chiếu:</span>
-                <span className="font-medium">19:00</span>
-              </div>
-              <div className="flex justify-between items-center mb-2">
+          <div className="payment-section">
+            <h2>Thông tin thanh toán</h2>
+            <div className="payment-summary">
+              <div className="summary-row">
                 <span>Số ghế:</span>
-                <span className="font-medium">A1, A2</span>
+                <span>{bookingData.selectedSeats.length} ghế</span>
               </div>
-              <div className="flex justify-between items-center text-lg font-bold">
-                <span>Tổng tiền:</span>
-                <span className="text-blue-600">200,000 VNĐ</span>
+              <div className="summary-row">
+                <span>Giá vé:</span>
+                <span className="whitespace-nowrap">{formatVND(bookingData.totalPrice)}</span>
+              </div>
+              <div className="summary-row total">
+                <span>Tổng cộng:</span>
+                <span className="whitespace-nowrap">{formatVND(bookingData.totalPrice)}</span>
               </div>
             </div>
           </div>
 
-          <div className="flex space-x-4">
-            <Link
-              to={`/movie/${movieId}`}
-              className="bg-gray-500 text-white px-6 py-3 rounded-md font-medium hover:bg-gray-600"
+          <div className="action-buttons">
+            <button 
+              className="btn btn-secondary"
+              onClick={handleBackToSeatSelection}
             >
-              Quay lại
-            </Link>
-            <button className="bg-blue-600 text-white px-6 py-3 rounded-md font-medium hover:bg-blue-700">
+              ← Chọn lại ghế
+            </button>
+            <button 
+              className="btn btn-primary"
+              onClick={handlePayment}
+            >
               Thanh toán
             </button>
           </div>

@@ -6,7 +6,7 @@ export class AuthService {
    * Register new user
    */
   static async register(data: RegisterRequest): Promise<UserResponse> {
-    const response = await apiClient.post('/auth/register', data);
+    const response = await apiClient.post('/v1/auth/register', data);
     return response.data.data;
   }
 
@@ -14,7 +14,7 @@ export class AuthService {
    * Login user
    */
   static async login(data: LoginRequest): Promise<AuthResponse> {
-    const response = await apiClient.post('/auth/login', data);
+    const response = await apiClient.post('/v1/auth/login', data);
     return response.data.data;
   }
 
@@ -30,17 +30,10 @@ export class AuthService {
    * Refresh access token
    */
   static async refreshToken(refreshToken: string): Promise<AuthResponse> {
-    const response = await apiClient.post('/auth/refresh', {
+    const response = await apiClient.post('/v1/auth/refresh', {
       refreshToken,
     });
     return response.data.data;
   }
 
-  /**
-   * Get current user profile
-   */
-  static async getCurrentUser(): Promise<UserResponse> {
-    const response = await apiClient.get('/users/profile');
-    return response.data.data;
-  }
 }

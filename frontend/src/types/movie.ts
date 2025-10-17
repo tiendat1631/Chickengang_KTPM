@@ -10,6 +10,7 @@ export interface Movie {
   language: string;
   rated: string;
   description: string;
+  posterUrl?: string;
 }
 
 export interface MovieRequest {
@@ -35,6 +36,7 @@ export interface MovieResponse {
   language: string;
   rated: string;
   description: string;
+  posterUrl?: string;
 }
 
 export interface PatchMovie {

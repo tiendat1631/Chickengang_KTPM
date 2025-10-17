@@ -41,6 +41,19 @@ export const queryKeys = {
     detail: (id: number) => ['users', 'detail', id] as const,
   },
   
+  // Screening queries
+  screenings: {
+    all: ['screenings'] as const,
+    list: (movieId: number) => ['screenings', 'list', movieId] as const,
+    detail: (id: number) => ['screenings', 'detail', id] as const,
+  },
+  
+  // Seat queries
+  seats: {
+    all: ['seats'] as const,
+    list: (screeningId: number) => ['seats', 'list', screeningId] as const,
+  },
+  
   // Booking queries (for future implementation)
   bookings: {
     all: ['bookings'] as const,

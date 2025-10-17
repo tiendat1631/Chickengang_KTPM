@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth';
 import '@/styles/Header.css';
 
@@ -27,9 +28,12 @@ const Header: React.FC<HeaderProps> = ({ onSearch }) => {
     <header className="header">
       <div className="header-container">
         {/* Logo */}
-        <div className="header-logo">
-          <h1>🎬 MovieBooking</h1>
-        </div>
+        <Link to="/" aria-label="Trang chủ" className="header-logo-link">
+          <div className="header-logo">
+            <span className="logo-icon">🎬</span>
+            <span className="logo-text">MovieBooking</span>
+          </div>
+        </Link>
 
         {/* Search Bar */}
         <form className="header-search" onSubmit={handleSearch}>
@@ -73,8 +77,8 @@ const Header: React.FC<HeaderProps> = ({ onSearch }) => {
             </div>
           ) : (
             <div className="auth-buttons">
-              <button className="btn btn-outline">Đăng nhập</button>
-              <button className="btn btn-primary">Đăng ký</button>
+              <Link to="/login" className="btn btn-outline">Đăng nhập</Link>
+              <Link to="/register" className="btn btn-primary">Đăng ký</Link>
             </div>
           )}
         </div>

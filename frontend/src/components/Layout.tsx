@@ -13,12 +13,12 @@ export default function Layout() {
     navigate('/login')
   }
 
-  // Không hiển thị header khi ở trang chủ (HomePage có header riêng)
-  const isHomePage = location.pathname === '/'
+  // Không hiển thị header khi ở trang chủ hoặc trang có header riêng
+  const hasOwnHeader = ['/', '/movies'].some(path => location.pathname.startsWith(path))
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {!isHomePage && (
+      {!hasOwnHeader && (
         <nav className="bg-white shadow-sm border-b">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex justify-between h-16">
@@ -63,7 +63,7 @@ export default function Layout() {
         </nav>
       )}
       
-      <main className={isHomePage ? "" : "max-w-7xl mx-auto py-6 sm:px-6 lg:px-8"}>
+      <main className={hasOwnHeader ? "" : "max-w-7xl mx-auto py-6 sm:px-6 lg:px-8"}>
         <Outlet />
       </main>
     </div>

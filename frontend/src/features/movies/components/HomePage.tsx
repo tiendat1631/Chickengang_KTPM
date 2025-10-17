@@ -49,7 +49,11 @@ export default function HomePage() {
   }
 
   const handleMovieClick = (movie: Movie) => {
-    navigate(`/movies/${movie.id}`)
+    if (movie.id && movie.id > 0) {
+      navigate(`/movies/${movie.id}`)
+    } else {
+      console.error('Invalid movie ID:', movie.id)
+    }
   }
 
   const handleLoadMore = () => {
@@ -126,7 +130,7 @@ export default function HomePage() {
             </div>
           </div>
           <div className="footer-bottom">
-            <p>&copy; 2024 MovieBooking. Được phát triển bởi ChickenGang KTPM Team.</p>
+            <p>&copy; 2025 MovieBooking. Được phát triển bởi ChickenGang KTPM Team.</p>
           </div>
         </div>
       </footer>

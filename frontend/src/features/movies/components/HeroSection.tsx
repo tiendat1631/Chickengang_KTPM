@@ -31,7 +31,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ onGetStarted }) => {
               >
                 🎬 Đặt vé ngay
               </button>
-              <button className="btn btn-outline btn-large">
+              <button className="btn btn-secondary btn-large">
                 📽️ Xem trailer
               </button>
             </div>
