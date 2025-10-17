@@ -1,0 +1,319 @@
+import { useState, useEffect } from 'react'
+import { useParams, Link, useNavigate } from 'react-router-dom'
+import { useScreening, useSeats } from '@/hooks/useScreenings'
+import Header from '@/components/common/Header'
+import Breadcrumb from '@/components/ui/Breadcrumb'
+import './SeatSelectionPage.css'
+
+// Utility function for currency formatting
+const formatVND = (amount: number): string => {
+  return new Intl.NumberFormat('vi-VN', {
+    style: 'currency',
+    currency: 'VND',
+  }).format(amount)
+}
+
+interface Seat {
+  id: number
+  rowLabel: string
+  number: number
+  seatType: 'NORMAL' | 'SWEETBOX'
+  status: 'AVAILABLE' | 'SOLD' | 'RESERVED'
+}
+
+interface Screening {
+  id: number
+  startTime: string
+  endTime: string
+  format: '2D' | '3D'
+  auditorium: {
+    id: number
+    name: string
+  }
+  movie: {
+    id: number
+    title: string
+  }
+}
+
+export default function SeatSelectionPage() {
+  const { movieId, screeningId } = useParams<{ movieId: string; screeningId: string }>()
+  const navigate = useNavigate()
+  const [screening, setScreening] = useState<Screening | null>(null)
+  const [seats, setSeats] = useState<Seat[]>([])
+  const [selectedSeats, setSelectedSeats] = useState<Seat[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+
+  // const movieIdNum = movieId ? parseInt(movieId) : 0 // Not used currently
+  const screeningIdNum = screeningId ? parseInt(screeningId) : 0
+
+  const {
+    data: screeningData,
+    isLoading: screeningLoading,
+    error: screeningError,
+  } = useScreening(screeningIdNum)
+
+  const {
+    data: seatsData,
+    isLoading: seatsLoading,
+    error: seatsError,
+  } = useSeats(screeningIdNum)
+
+  useEffect(() => {
+    if (screeningData) {
+      // Transform API data to match our interface
+      const transformedScreening: Screening = {
+        id: screeningData.id,
+        startTime: screeningData.startTime,
+        endTime: screeningData.endTime,
+        format: screeningData.format === 'TwoD' ? '2D' : screeningData.format === 'ThreeD' ? '3D' : screeningData.format,
+        auditorium: {
+          id: screeningData.auditoriumId,
+          name: screeningData.auditoriumName
+        },
+        movie: {
+          id: screeningData.movieId,
+          title: screeningData.movieTitle
+        }
+      }
+      setScreening(transformedScreening)
+    }
+  }, [screeningData])
+
+  useEffect(() => {
+    if (seatsData && seatsData.length > 0) {
+      console.log('Raw seats data from API:', seatsData);
+      // Transform API data to match our interface
+      const transformedSeats: Seat[] = seatsData.map((seat: any) => ({
+        id: seat.id,
+        rowLabel: seat.rowLabel,
+        number: seat.number,
+        seatType: seat.seatType,
+        status: seat.status
+      }))
+      console.log('Transformed seats:', transformedSeats);
+      setSeats(transformedSeats)
+    } else {
+      console.log('No seats data received');
+      // Fallback: generate a default 8x10 layout for UI demo
+      const generated: Seat[] = []
+      const rows = 8
+      const cols = 10
+      for (let r = 0; r < rows; r++) {
+        const rowLabel = String.fromCharCode(65 + r) // A-H
+        for (let c = 1; c <= cols; c++) {
+          const isSweetbox = r >= rows - 2 // last 2 rows are sweetbox
+          generated.push({
+            id: r * 100 + c,
+            rowLabel,
+            number: c,
+            seatType: isSweetbox ? 'SWEETBOX' : 'NORMAL',
+            status: 'AVAILABLE',
+          })
+        }
+      }
+      setSeats(generated)
+    }
+  }, [seatsData])
+
+  useEffect(() => {
+    setLoading(screeningLoading || seatsLoading)
+    setError(screeningError?.message || seatsError?.message || null)
+  }, [screeningLoading, seatsLoading, screeningError, seatsError])
+
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString)
+    return date.toLocaleTimeString('vi-VN', { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    })
+  }
+
+  const handleSeatClick = (seat: Seat) => {
+    if (seat.status !== 'AVAILABLE') return
+
+    setSelectedSeats(prev => {
+      const isSelected = prev.some(s => s.id === seat.id)
+      if (isSelected) {
+        return prev.filter(s => s.id !== seat.id)
+      } else {
+        return [...prev, seat]
+      }
+    })
+  }
+
+  const getSeatPrice = (seat: Seat) => {
+    return seat.seatType === 'SWEETBOX' ? 150000 : 120000
+  }
+
+  const getTotalPrice = () => {
+    return selectedSeats.reduce((total, seat) => total + getSeatPrice(seat), 0)
+  }
+
+  const handleProceedToBooking = () => {
+    if (selectedSeats.length === 0) {
+      alert('Vui lòng chọn ít nhất một ghế')
+      return
+    }
+    
+    if (!screening) {
+      alert('Không tìm thấy thông tin suất chiếu')
+      return
+    }
+    
+    // Prepare booking data
+    const bookingData = {
+      screening: screening,
+      selectedSeats: selectedSeats.map(seat => ({
+        ...seat,
+        price: getSeatPrice(seat)
+      })),
+      totalPrice: getTotalPrice()
+    }
+    
+    // Navigate to booking page with data
+    navigate(`/booking/${movieId}`, { 
+      state: bookingData 
+    })
+  }
+
+  if (loading) {
+    return (
+      <div className="seat-selection-page">
+        <Header onSearch={() => {}} />
+        <div className="container">
+          <div className="loading">Đang tải...</div>
+        </div>
+      </div>
+    )
+  }
+
+  if (error || !screening) {
+    return (
+      <div className="seat-selection-page">
+        <Header onSearch={() => {}} />
+        <div className="container">
+          <div className="error">{error || 'Không tìm thấy suất chiếu'}</div>
+        </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="seat-selection-page">
+      <Header onSearch={() => {}} />
+      <div className="container">
+        {/* Breadcrumb */}
+        <Breadcrumb 
+          items={[
+            { label: "Trang chủ", to: "/" },
+            { label: screening.movie.title, to: `/movies/${movieId}` },
+            { label: "Chọn suất", to: `/movies/${movieId}/screenings` },
+            { label: "Chọn ghế" }
+          ]}
+          className="mb-6"
+        />
+
+        <div className="screening-info">
+          <h1>{screening.movie.title}</h1>
+          <div className="screening-details">
+            <span><strong>Suất chiếu:</strong> {formatTime(screening.startTime)}</span>
+            <span><strong>Phòng:</strong> {screening.auditorium.name}</span>
+            <span><strong>Định dạng:</strong> {screening.format}</span>
+          </div>
+        </div>
+
+        <div className="seat-selection-container">
+          <div className="screen-indicator">
+            <div className="screen">MÀN HÌNH</div>
+          </div>
+
+          <div className="seats-container">
+            {Array.from({ length: 8 }, (_, rowIndex) => {
+              const rowLabel = String.fromCharCode(65 + rowIndex) // A, B, C, D, E, F, G, H
+              const rowSeats = seats.filter(seat => seat.rowLabel === rowLabel)
+              
+              return (
+                <div key={rowLabel} className="seat-row">
+                  <div className="row-label">{rowLabel}</div>
+                  <div className="seat-row-grid">
+                    {rowSeats.map((seat) => (
+                      <button
+                        key={seat.id}
+                        className={`seat ${seat.status.toLowerCase()} ${seat.seatType.toLowerCase()} ${
+                          selectedSeats.some(s => s.id === seat.id) ? 'selected' : ''
+                        }`}
+                        onClick={() => handleSeatClick(seat)}
+                        disabled={seat.status !== 'AVAILABLE'}
+                        title={`${seat.rowLabel}${seat.number} - ${formatVND(getSeatPrice(seat))}`}
+                      >
+                        {seat.number}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )
+            })}
+          </div>
+
+          <div className="seat-legend">
+            <div className="legend-item">
+              <div className="seat-icon available"></div>
+              <span>Có thể chọn</span>
+            </div>
+            <div className="legend-item">
+              <div className="seat-icon sold"></div>
+              <span>Đã bán</span>
+            </div>
+            <div className="legend-item">
+              <div className="seat-icon selected"></div>
+              <span>Đã chọn</span>
+            </div>
+            <div className="legend-item">
+              <div className="seat-icon sweetbox"></div>
+              <span>Sweetbox</span>
+            </div>
+          </div>
+        </div>
+
+        <div className="booking-summary">
+          <div className="selected-seats">
+            <h3>Ghế đã chọn:</h3>
+            {selectedSeats.length > 0 ? (
+              <div className="seat-list">
+                {selectedSeats.map((seat) => (
+                  <span key={seat.id} className="seat-tag">
+                    {seat.rowLabel}{seat.number} (<span className="whitespace-nowrap">{formatVND(getSeatPrice(seat))}</span>)
+                  </span>
+                ))}
+              </div>
+            ) : (
+              <p>Chưa chọn ghế nào</p>
+            )}
+          </div>
+          
+          <div className="total-price">
+            <h3>Tổng tiền: <span className="whitespace-nowrap">{formatVND(getTotalPrice())}</span></h3>
+          </div>
+
+          <div className="action-buttons">
+            <Link 
+              to={`/movies/${movieId}/screenings`} 
+              className="btn btn-secondary"
+            >
+              ← Quay lại
+            </Link>
+            <button 
+              className="btn btn-primary"
+              onClick={handleProceedToBooking}
+              disabled={selectedSeats.length === 0}
+            >
+              Tiếp tục đặt vé
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  )
+}

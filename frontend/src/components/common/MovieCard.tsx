@@ -6,15 +6,17 @@ interface MovieCardProps {
   movie: Movie;
   onClick?: (movie: Movie) => void;
   variant?: 'default' | 'featured' | 'compact';
+  rankTag?: string; // CGV-style ranking ribbon (e.g., "No.1", "Hot")
 }
 
 const MovieCard: React.FC<MovieCardProps> = ({ 
   movie, 
   onClick, 
-  variant = 'default' 
+  variant = 'default',
+  rankTag 
 }) => {
   const handleClick = () => {
-    if (onClick) {
+    if (onClick && movie.id) {
       onClick(movie);
     }
   };
@@ -36,64 +38,69 @@ const MovieCard: React.FC<MovieCardProps> = ({
       className={`movie-card movie-card--${variant}`}
       onClick={handleClick}
     >
-      {/* Movie Poster Placeholder */}
-      <div className="movie-poster">
-        <div className="poster-placeholder">
-          🎬
+      {/* CGV-style Poster Container */}
+      <div className="movie-card__poster">
+        <div className="movie-card__poster-image">
+          <div className="movie-card__poster-placeholder">
+            🎬
+          </div>
         </div>
-        <div className="movie-rating">
-          <span className="rated-badge">{movie.rated}</span>
+        
+        {/* Age Rating Badge - Top Left */}
+        <div 
+          className="movie-card__badge movie-card__badge--age"
+          aria-label={`Phim dành cho độ tuổi ${movie.rated}`}
+        >
+          <span className="movie-card__badge-text">{movie.rated}</span>
         </div>
-        {variant === 'featured' && (
-          <div className="featured-overlay">
-            <span className="featured-text">Nổi bật</span>
+        
+        {/* Ranking Ribbon - Top Right */}
+        {rankTag && (
+          <div 
+            className="movie-card__ribbon"
+            aria-label={`Phim ${rankTag}`}
+          >
+            <span className="movie-card__ribbon-icon">🏆</span>
+            <span className="movie-card__ribbon-text">{rankTag}</span>
           </div>
         )}
       </div>
 
-      {/* Movie Info */}
-      <div className="movie-info">
-        <h3 className="movie-title" title={movie.title}>
+      {/* Movie Content */}
+      <div className="movie-card__content">
+        {/* Title */}
+        <h3 className="movie-card__title" title={movie.title}>
           {movie.title}
         </h3>
         
-        <div className="movie-meta">
-          <div className="movie-director">
-            <span className="meta-label">Đạo diễn:</span>
-            <span className="meta-value">{movie.director}</span>
+        {/* Meta Information - 3 Lines */}
+        <div className="movie-card__meta">
+          <div className="movie-card__meta-item">
+            <span className="movie-card__meta-label">Thể loại:</span>
+            <span className="movie-card__meta-value">{getGenres(movie.genres).join(', ')}</span>
           </div>
           
-          <div className="movie-duration">
-            <span className="meta-label">Thời lượng:</span>
-            <span className="meta-value">{movie.duration}</span>
+          <div className="movie-card__meta-item">
+            <span className="movie-card__meta-label">Thời lượng:</span>
+            <span className="movie-card__meta-value">{movie.duration}</span>
           </div>
           
-          <div className="movie-release">
-            <span className="meta-label">Khởi chiếu:</span>
-            <span className="meta-value">{formatDate(movie.releaseDate)}</span>
+          <div className="movie-card__meta-item">
+            <span className="movie-card__meta-label">Khởi chiếu:</span>
+            <span className="movie-card__meta-value">{formatDate(movie.releaseDate)}</span>
           </div>
         </div>
 
-        <div className="movie-genres">
-          {getGenres(movie.genres).map((genre, index) => (
-            <span key={index} className="genre-tag">
-              {genre}
-            </span>
-          ))}
-        </div>
-
-        {variant !== 'compact' && (
-          <div className="movie-description">
-            <p>{movie.description}</p>
-          </div>
-        )}
-
-        <div className="movie-actions">
-          <button className="btn btn-primary btn-sm">
-            Xem chi tiết
-          </button>
-          <button className="btn btn-outline btn-sm">
-            Đặt vé
+        {/* CTA Button */}
+        <div className="movie-card__cta">
+          <button 
+            className="movie-card__cta-button"
+            onClick={(e) => {
+              e.stopPropagation();
+              // Handle booking
+            }}
+          >
+            MUA VÉ
           </button>
         </div>
       </div>
@@ -102,3 +109,4 @@ const MovieCard: React.FC<MovieCardProps> = ({
 };
 
 export default MovieCard;
+

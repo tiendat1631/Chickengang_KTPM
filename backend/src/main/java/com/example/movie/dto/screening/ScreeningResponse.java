@@ -1,5 +1,6 @@
 package com.example.movie.dto.screening;
 
+import com.example.movie.dto.seat.SeatResponse;
 import com.example.movie.model.Screening;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,6 +8,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -22,4 +24,5 @@ public class ScreeningResponse {
     private String movieTitle;
     private Long auditoriumId;
     private String auditoriumName;
+    private List<SeatResponse> seats; // Optional seats data
 }

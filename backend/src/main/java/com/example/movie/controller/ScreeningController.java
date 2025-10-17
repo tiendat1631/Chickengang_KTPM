@@ -13,6 +13,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("api/v1/screenings")
@@ -38,6 +40,18 @@ public class ScreeningController {
                 HttpStatus.OK,
                 getScreening,
                 "get screening success",
+                null
+        );
+        return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
+
+    @GetMapping("/movie/{movieId}")
+    public ResponseEntity<ApiResponse<List<ScreeningResponse>>> getScreeningsByMovieId(@PathVariable Long movieId) {
+        List<ScreeningResponse> screenings = screeningService.getScreeningsByMovieId(movieId);
+        ApiResponse<List<ScreeningResponse>> result = new ApiResponse<>(
+                HttpStatus.OK,
+                screenings,
+                "get screenings by movie success",
                 null
         );
         return ResponseEntity.status(HttpStatus.OK).body(result);

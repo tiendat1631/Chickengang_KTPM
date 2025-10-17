@@ -1,7 +1,7 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
 import { AuthService } from '@/services/authService';
-import { storeTokens, removeToken, getToken } from '@/lib/auth';
+import { storeTokens, removeToken, getToken, getUserData } from '@/lib/auth';
 import { LoginRequest, RegisterRequest, UserResponse } from '@/types/auth';
 import { queryKeys } from './useQueryClient';
 
@@ -11,11 +11,24 @@ export const useLogin = () => {
   return useMutation({
     mutationFn: (data: LoginRequest) => AuthService.login(data),
     onSuccess: async (response) => {
-      // Store tokens securely
-      await storeTokens(response.accessToken, response.refreshToken);
+      // Create user object from response
+      const userData = {
+        id: response.id,
+        email: response.email,
+        username: response.username,
+        phoneNumber: response.phoneNumber,
+        role: response.role as any,
+        isActive: true,
+        address: response.address,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      
+      // Store tokens and user data securely
+      await storeTokens(response.accessToken, response.refreshToken, userData);
       
       // Update current user in cache
-      queryClient.setQueryData(queryKeys.auth.currentUser, response.user);
+      queryClient.setQueryData(queryKeys.auth.currentUser, userData);
       
       // Invalidate and refetch user-related queries
       queryClient.invalidateQueries({ queryKey: queryKeys.auth.currentUser });
@@ -53,14 +66,6 @@ export const useLogout = () => {
   });
 };
 
-export const useCurrentUser = () => {
-  return useQuery({
-    queryKey: queryKeys.auth.currentUser,
-    queryFn: () => AuthService.getCurrentUser(),
-    enabled: false, // Will be enabled when user is authenticated
-    retry: false,
-  });
-};
 
 export const useAuth = () => {
   const [isLoading, setIsLoading] = useState(true);
@@ -75,17 +80,19 @@ export const useAuth = () => {
       try {
         const token = await getToken();
         if (token) {
-          // Try to get user data
-          try {
-            const userData = await AuthService.getCurrentUser();
+          // Get user data from localStorage
+          const userData = await getUserData();
+          if (userData) {
             setUser(userData);
-          } catch (error) {
-            // Token might be invalid, remove it
+          } else {
+            // If no user data found, remove invalid token
             await removeToken();
           }
         }
       } catch (error) {
         console.error('Auth check failed:', error);
+        // Remove invalid tokens on error
+        await removeToken();
       } finally {
         setIsLoading(false);
       }
@@ -100,7 +107,19 @@ export const useAuth = () => {
     loginMutation.mutate(data, {
       ...options,
       onSuccess: (response) => {
-        setUser(response.user);
+        // Create user object from response
+        const userData = {
+          id: response.id,
+          email: response.email,
+          username: response.username,
+          phoneNumber: response.phoneNumber,
+          role: response.role as any,
+          isActive: true,
+          address: response.address,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        };
+        setUser(userData);
         options?.onSuccess?.(response);
       },
     });

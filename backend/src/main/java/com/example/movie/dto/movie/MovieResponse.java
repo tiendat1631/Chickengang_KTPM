@@ -11,6 +11,7 @@ import java.time.LocalDate;
 @AllArgsConstructor
 @Data
 public class MovieResponse {
+    private Long id;
     private String title;
     private String director;
     private String actors;

@@ -1,6 +1,6 @@
 // Authentication Types
 export interface LoginRequest {
-  email: string;
+  username: string;
   password: string;
 }
 
@@ -14,11 +14,14 @@ export interface RegisterRequest {
 }
 
 export interface AuthResponse {
+  id: number;
+  username: string;
+  email: string;
+  phoneNumber: string;
+  address: string;
+  role: string;
   accessToken: string;
   refreshToken: string;
-  tokenType: string;
-  expiresIn: number;
-  user: UserResponse;
 }
 
 export interface UserResponse {

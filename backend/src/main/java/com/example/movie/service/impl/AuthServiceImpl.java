@@ -68,12 +68,16 @@ public class AuthServiceImpl implements AuthService {
         String accessToken = securityUtil.createAccessToken(user);
         String refreshToken = securityUtil.createRefreshToken(user.getUsername());
 
-        return new AuthResponse(
-                user.getUsername(),
-                user.getEmail(),
-                accessToken,
-                refreshToken
-        );
+        return AuthResponse.builder()
+                .id(user.getId())
+                .username(user.getUsername())
+                .email(user.getEmail())
+                .phoneNumber(user.getPhoneNumber())
+                .address(user.getAddress())
+                .role(user.getRole().name())
+                .accessToken(accessToken)
+                .refreshToken(refreshToken)
+                .build();
 
     }
 }

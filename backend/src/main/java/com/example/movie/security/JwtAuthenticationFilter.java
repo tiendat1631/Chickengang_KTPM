@@ -27,7 +27,15 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
         String path = request.getServletPath();
 
-        //  Bỏ qua filter cho các endpoint public
+        // Skip JWT validation for public endpoints
+        if (path.startsWith("/api/v1/auth/") || 
+            path.startsWith("/api/v1/screenings/") ||
+            (path.startsWith("/api/v1/movies") && "GET".equals(request.getMethod())) ||
+            path.startsWith("/api/v1/users/") ||
+            path.startsWith("/api/v1/bookings/")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
 
         String header = request.getHeader("Authorization");
 
@@ -50,6 +58,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             } catch (JwtException e) {
                 System.out.println("Invalid JWT: " + e.getMessage());
+                // For public endpoints, don't fail the request if JWT is invalid
+                // Just continue without authentication
             }
         }
 

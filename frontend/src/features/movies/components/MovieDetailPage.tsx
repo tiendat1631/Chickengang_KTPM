@@ -1,55 +1,355 @@
-import { useParams, Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { useParams, Link, Navigate, useNavigate } from 'react-router-dom'
+import Header from '@/components/common/Header'
+import Breadcrumb from '@/components/ui/Breadcrumb'
+import apiClient from '@/services/api'
+import { useScreenings } from '@/hooks/useScreenings'
+import { Movie } from '@/types/movie'
+import { formatVND } from '@/utils/formatCurrency'
+import './MovieDetailPage.css'
+
+interface Screening {
+  id: number
+  startTime: string
+  endTime: string
+  format: '2D' | '3D'
+  status: 'ACTIVE' | 'INACTIVE'
+  auditorium: {
+    id: number
+    name: string
+  }
+  price: number
+}
 
 export default function MovieDetailPage() {
-  const { id } = useParams()
+  const { id } = useParams<{ id: string }>()
+  const navigate = useNavigate()
+  const [movie, setMovie] = useState<Movie | null>(null)
+  const [screenings, setScreenings] = useState<Screening[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState<string | null>(null)
 
-  return (
-    <div className="max-w-4xl mx-auto">
-      <div className="bg-white rounded-lg shadow-lg overflow-hidden">
-        <div className="md:flex">
-          <div className="md:w-1/3">
-            <div className="h-96 bg-gray-200 flex items-center justify-center">
-              <span className="text-gray-500 text-lg">Movie Poster</span>
+  const movieId = id ? parseInt(id) : 0
+
+  const {
+    data: screeningsData,
+    isLoading: screeningsLoading,
+    error: screeningsError,
+  } = useScreenings(movieId)
+
+  useEffect(() => {
+    if (screeningsData) {
+      // Transform API data to match our interface
+      const transformedScreenings: Screening[] = screeningsData.map((screening: any) => ({
+        id: screening.id,
+        startTime: screening.startTime,
+        endTime: screening.endTime,
+        format: screening.format === 'TwoD' ? '2D' : screening.format === 'ThreeD' ? '3D' : screening.format,
+        status: screening.status === 'ACTIVE' ? 'ACTIVE' : 'INACTIVE',
+        auditorium: {
+          id: screening.auditoriumId,
+          name: screening.auditoriumName
+        },
+        price: 120000 // Default price - you might want to add this to the API response
+      }))
+      setScreenings(transformedScreenings)
+    }
+  }, [screeningsData])
+
+  useEffect(() => {
+    setLoading(screeningsLoading)
+    if (screeningsError) {
+      setError(screeningsError.message)
+    }
+  }, [screeningsLoading, screeningsError])
+
+  // Validate movie ID parameter
+  if (!movieId || movieId <= 0) {
+    return <Navigate to="/404" replace />
+  }
+
+  // Fetch movie data with fallback to mock data
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        setLoading(true)
+        setError(null)
+        
+        // Try to fetch from API first
+        try {
+          console.log(`Fetching movie with ID: ${movieId}`)
+          const response = await apiClient.get(`/v1/movies/${movieId}`)
+          console.log('API Response:', response.data)
+          
+          if (response.data && response.data.data) {
+            const movieData = response.data.data
+            // Convert releaseDate from LocalDate to string if needed
+            const formattedMovie: Movie = {
+              ...movieData,
+              releaseDate: typeof movieData.releaseDate === 'string' 
+                ? movieData.releaseDate 
+                : movieData.releaseDate?.toString() || ''
+            }
+            setMovie(formattedMovie)
+            console.log('Movie data set:', formattedMovie)
+          } else {
+            throw new Error('Invalid API response structure')
+          }
+        } catch (apiError) {
+          console.error('API Error:', apiError)
+          setError('Không thể tải dữ liệu phim')
+        }
+        
+        // Note: Screenings will be loaded separately via useScreenings hook
+      } catch (err) {
+        console.error('Fetch error:', err)
+        setError('Không thể tải dữ liệu phim')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchData()
+  }, [movieId])
+
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString)
+    return date.toLocaleTimeString('vi-VN', { 
+      hour: '2-digit', 
+      minute: '2-digit' 
+    })
+  }
+
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString)
+    return date.toLocaleDateString('vi-VN', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+  }
+
+  const handleScreeningClick = (screening: Screening) => {
+    // Navigate to seat selection page using React Router
+    navigate(`/booking/${movieId}/screening/${screening.id}`)
+  }
+
+  if (loading) {
+    return (
+      <div className="movie-detail-page">
+        <Header onSearch={() => {}} />
+          <div className="container">
+            <div className="loading-container">
+              <div className="loading-spinner"></div>
+              <p>Đang tải thông tin phim...</p>
             </div>
           </div>
-          <div className="md:w-2/3 p-6">
-            <h1 className="text-3xl font-bold text-gray-900 mb-4">
-              Movie Title {id}
-            </h1>
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-semibold text-gray-700">Thông tin phim</h3>
-                <p className="text-gray-600">
-                  Đây là mô tả chi tiết về bộ phim. Phim kể về câu chuyện hấp dẫn với những tình tiết bất ngờ.
-                </p>
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <span className="font-medium text-gray-700">Thể loại:</span>
-                  <p className="text-gray-600">Action, Adventure</p>
+      </div>
+    )
+  }
+
+  if (error || !movie) {
+    return (
+      <div className="movie-detail-page">
+        <Header onSearch={() => {}} />
+          <div className="container">
+            <div className="error-container">
+            <div className="error-icon">🎬</div>
+            <h2>Không tìm thấy phim</h2>
+            <p>Phim bạn đang tìm kiếm không tồn tại hoặc đã bị xóa.</p>
+            <div className="error-actions">
+              <Link to="/" className="btn btn-primary">
+                ← Về trang chủ
+              </Link>
+              <Link to="/movies/search" className="btn btn-secondary">
+                🔍 Tìm kiếm phim khác
+              </Link>
+            </div>
+            </div>
+          </div>
+      </div>
+    )
+  }
+
+  return (
+    <div className="movie-detail-page">
+      <Header onSearch={() => {}} />
+        <div className="container">
+        {/* Breadcrumb */}
+        <Breadcrumb 
+          items={[
+            { label: "Trang chủ", to: "/" },
+            { label: movie.title }
+          ]}
+          className="mb-6"
+        />
+
+        {/* Hero Section - CGV Style */}
+        <div className="movie-hero-section">
+          <div className="hero-background">
+            <div className="hero-overlay"></div>
+          </div>
+
+          <div className="hero-content">
+            <div className="hero-layout">
+              {/* Movie Poster */}
+              <div className="hero-poster">
+                {movie.posterUrl && movie.posterUrl !== 'https://via.placeholder.com/300x450' ? (
+                  <img src={movie.posterUrl} alt={movie.title} />
+                ) : (
+                  <div className="movie-poster-placeholder" data-title={movie.title}></div>
+                )}
+                
+                {/* Featured Badge */}
+                <div className="featured-badge">Nổi bật</div>
+                
+                {/* Rating Badge */}
+                <div className="rating-badge-hero">T16</div>
+            </div>
+
+              {/* Movie Info */}
+              <div className="hero-info">
+                <h1 className="hero-title">{movie.title}</h1>
+                
+                <div className="hero-quick-info">
+                  <div className="quick-info-item">
+                    <span className="info-label">Đạo diễn:</span>
+                    <span className="info-value">{movie.director}</span>
+                  </div>
+                  <div className="quick-info-item">
+                    <span className="info-label">Thời lượng:</span>
+                    <span className="info-value">{movie.duration} phút</span>
+                  </div>
+                  <div className="quick-info-item">
+                    <span className="info-label">Khởi chiếu:</span>
+                    <span className="info-value">{formatDate(movie.releaseDate)}</span>
+                  </div>
                 </div>
-                <div>
-                  <span className="font-medium text-gray-700">Thời lượng:</span>
-                  <p className="text-gray-600">2h 30m</p>
+
+                {/* Genre Tags */}
+                <div className="genre-tags">
+                  {movie.genres.split(',').map((genre: string, index: number) => (
+                    <span key={`${movie.id}-genre-${index}`} className="genre-tag">{genre.trim()}</span>
+                  ))}
                 </div>
-                <div>
-                  <span className="font-medium text-gray-700">Đạo diễn:</span>
-                  <p className="text-gray-600">Director Name</p>
+
+                {/* Action Buttons */}
+                <div className="hero-actions">
+                  <button className="btn-trailer">
+                    <span className="trailer-icon">▶️</span>
+                    Xem Trailer
+                  </button>
+                  <button className="btn-buy-ticket-hero">
+                    <span className="ticket-icon">🎫</span>
+                    MUA VÉ NGAY
+                  </button>
                 </div>
-                <div>
-                  <span className="font-medium text-gray-700">Diễn viên:</span>
-                  <p className="text-gray-600">Actor 1, Actor 2</p>
-                </div>
-              </div>
-              <div className="pt-4">
-                <Link
-                  to={`/booking/${id}`}
-                  className="bg-blue-600 text-white px-6 py-3 rounded-md text-lg font-medium hover:bg-blue-700 inline-block"
-                >
-                  Đặt vé ngay
-                </Link>
               </div>
             </div>
+          </div>
+        </div>
+
+        {/* Detailed Information Section */}
+        <div className="movie-details-section">
+          <div className="details-layout">
+            {/* Left Column - Detailed Info */}
+            <div className="details-info">
+              <h2 className="section-title">Thông tin chi tiết</h2>
+              
+              <div className="movie-details-grid">
+                <div className="detail-item">
+                  <span className="detail-label">Diễn viên:</span>
+                  <span className="detail-value">{movie.actors}</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">Ngôn ngữ:</span>
+                  <span className="detail-value">Tiếng Anh - Phụ đề Tiếng Việt</span>
+                </div>
+                <div className="detail-item">
+                  <span className="detail-label">Rated:</span>
+                  <span className="detail-value">T16 - PHIM ĐƯỢC PHỔ BIẾN ĐẾN NGƯỜI XEM TỪ ĐỦ 16 TUỔI TRỞ LÊN (16+)</span>
+                </div>
+              </div>
+
+              {/* Movie Synopsis */}
+              <div className="movie-synopsis">
+                <h3>Nội dung phim</h3>
+                <p>{movie.description}</p>
+              </div>
+
+              {/* Social Actions */}
+              <div className="social-actions">
+                <button className="btn-facebook">
+                  <span className="facebook-icon">📘</span>
+                  Like 0
+                </button>
+                <button className="btn-share">
+                  <span className="share-icon">📤</span>
+                  Chia sẻ
+                </button>
+              </div>
+            </div>
+
+            {/* Right Column - Promotions */}
+            <div className="promotions-sidebar">
+              <h3 className="sidebar-title">Ưu đãi đặc biệt</h3>
+              
+              <div className="promotion-cards">
+                <div className="promotion-card">
+                  <div className="promo-badge">HOT</div>
+                  <h4>Combo 2 vé + nước</h4>
+                  <p>Tiết kiệm 20% khi mua combo</p>
+                  <div className="promo-price"><span className="whitespace-nowrap">{formatVND(199000)}</span></div>
+                </div>
+                
+                <div className="promotion-card">
+                  <div className="promo-badge">NEW</div>
+                  <h4>Thành viên VIP</h4>
+                  <p>Giảm giá 15% cho thành viên</p>
+                  <button className="btn-promo">Đăng ký ngay</button>
+                </div>
+              </div>
+              </div>
+            </div>
+          </div>
+
+        <div className="screenings-section">
+          <h2>Suất chiếu</h2>
+          {screenings.length > 0 ? (
+              <div className="screenings-grid">
+              {screenings.map((screening) => (
+                  <div 
+                    key={screening.id} 
+                    className="screening-card"
+                    onClick={() => handleScreeningClick(screening)}
+                  >
+                    <div className="screening-time">
+                    <div className="time">{formatTime(screening.startTime)}</div>
+                    <div className="format">{screening.format}</div>
+                    </div>
+                    <div className="screening-details">
+                    <div className="auditorium">{screening.auditorium.name}</div>
+                    <div className="price"><span className="whitespace-nowrap">{formatVND(screening.price)}</span></div>
+                      </div>
+                  <div className="screening-status">
+                    <span className={`status ${screening.status.toLowerCase()}`}>
+                      {screening.status === 'ACTIVE' ? 'Có vé' : 'Hết vé'}
+                    </span>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          ) : (
+            <p className="no-screenings">Chưa có suất chiếu nào</p>
+          )}
+          
+          <div className="action-buttons">
+            <Link to="/" className="btn btn-secondary">
+              ← Quay lại trang chủ
+            </Link>
+            <Link to={`/movies/${movie.id}/screenings`} className="btn btn-primary">
+              Xem tất cả suất chiếu
+            </Link>
           </div>
         </div>
       </div>

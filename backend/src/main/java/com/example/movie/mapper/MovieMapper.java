@@ -22,6 +22,7 @@ public class MovieMapper {
     }
     public MovieResponse toResponse(Movie movie) {
         return MovieResponse.builder()
+                .id(movie.getId())
                 .title(movie.getTitle())
                 .director(movie.getDirector())
                 .actors(movie.getActors())
