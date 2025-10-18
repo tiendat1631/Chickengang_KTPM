@@ -1,17 +1,15 @@
-import React from 'react';
+// @ts-check
+import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
 
-interface BreadcrumbItem {
-  label: string;
-  to?: string;
-}
-
-interface BreadcrumbProps {
-  items: BreadcrumbItem[];
-  className?: string;
-}
-
-const Breadcrumb: React.FC<BreadcrumbProps> = ({ items, className }) => {
+/**
+ * Breadcrumb component for navigation
+ * @param {Object} props - Component props
+ * @param {Array} props.items - Array of breadcrumb items
+ * @param {string} [props.className] - Additional CSS class
+ * @returns {JSX.Element}
+ */
+const Breadcrumb = ({ items, className }) => {
   return (
     <nav className={`breadcrumb ${className || ''}`} aria-label="Breadcrumb">
       <ol className="breadcrumb-list">
@@ -36,6 +34,14 @@ const Breadcrumb: React.FC<BreadcrumbProps> = ({ items, className }) => {
       </ol>
     </nav>
   );
+};
+
+Breadcrumb.propTypes = {
+  items: PropTypes.arrayOf(PropTypes.shape({
+    label: PropTypes.string.isRequired,
+    to: PropTypes.string
+  })).isRequired,
+  className: PropTypes.string
 };
 
 export default Breadcrumb;

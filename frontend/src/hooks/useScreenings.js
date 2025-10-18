@@ -1,9 +1,14 @@
+// @ts-check
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '@/services/api';
 import { queryKeys } from './useQueryClient';
 
-// Get screenings for a movie
-export const useScreenings = (movieId: number) => {
+/**
+ * Hook to get screenings for a movie
+ * @param {number} movieId - Movie ID
+ * @returns {Object} Screenings query result
+ */
+export const useScreenings = (movieId) => {
   return useQuery({
     queryKey: queryKeys.screenings.list(movieId),
     queryFn: async () => {
@@ -15,8 +20,12 @@ export const useScreenings = (movieId: number) => {
   });
 };
 
-// Get single screening by ID
-export const useScreening = (screeningId: number) => {
+/**
+ * Hook to get single screening by ID
+ * @param {number} screeningId - Screening ID
+ * @returns {Object} Screening query result
+ */
+export const useScreening = (screeningId) => {
   return useQuery({
     queryKey: queryKeys.screenings.detail(screeningId),
     queryFn: async () => {
@@ -27,8 +36,12 @@ export const useScreening = (screeningId: number) => {
   });
 };
 
-// Get seats for a screening
-export const useSeats = (screeningId: number) => {
+/**
+ * Hook to get seats for a screening
+ * @param {number} screeningId - Screening ID
+ * @returns {Object} Seats query result
+ */
+export const useSeats = (screeningId) => {
   return useQuery({
     queryKey: queryKeys.seats.list(screeningId),
     queryFn: async () => {
@@ -41,12 +54,15 @@ export const useSeats = (screeningId: number) => {
   });
 };
 
-// Reserve seats
+/**
+ * Hook to reserve seats
+ * @returns {Object} Reserve seats mutation
+ */
 export const useReserveSeats = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ screeningId, seatIds }: { screeningId: number; seatIds: number[] }) => {
+    mutationFn: ({ screeningId, seatIds }) => {
       return apiClient.post(`/v1/screenings/${screeningId}/reserve`, { seatIds });
     },
     onSuccess: (_, { screeningId }) => {

@@ -1,6 +1,8 @@
+// @ts-check
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
+import PropTypes from 'prop-types';
 
 // Layout
 import Layout from '@/components/Layout';
@@ -60,7 +62,7 @@ const queryClient = new QueryClient({
 });
 
 // Protected Route Component
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
   
   if (isLoading) {
@@ -79,8 +81,12 @@ const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
 };
 
+ProtectedRoute.propTypes = {
+  children: PropTypes.node.isRequired
+};
+
 // Public Route Component (redirect if authenticated)
-const PublicRoute = ({ children }: { children: React.ReactNode }) => {
+const PublicRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
   
   if (isLoading) {
@@ -99,6 +105,14 @@ const PublicRoute = ({ children }: { children: React.ReactNode }) => {
   return !isAuthenticated ? <>{children}</> : <Navigate to="/" replace />;
 };
 
+PublicRoute.propTypes = {
+  children: PropTypes.node.isRequired
+};
+
+/**
+ * Main App Router component
+ * @returns {JSX.Element}
+ */
 const AppRouter = () => {
   return (
     <QueryClientProvider client={queryClient}>

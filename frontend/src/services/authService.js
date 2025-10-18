@@ -1,35 +1,42 @@
+// @ts-check
 import apiClient from './api';
-import { LoginRequest, RegisterRequest, AuthResponse, UserResponse } from '@/types/auth';
 
 export class AuthService {
   /**
    * Register new user
+   * @param {Object} data - Registration data
+   * @returns {Promise<Object>} User response
    */
-  static async register(data: RegisterRequest): Promise<UserResponse> {
+  static async register(data) {
     const response = await apiClient.post('/v1/auth/register', data);
     return response.data.data;
   }
 
   /**
    * Login user
+   * @param {Object} data - Login credentials
+   * @returns {Promise<Object>} Auth response
    */
-  static async login(data: LoginRequest): Promise<AuthResponse> {
+  static async login(data) {
     const response = await apiClient.post('/v1/auth/login', data);
     return response.data.data;
   }
 
   /**
    * Logout user (client-side only)
+   * @returns {Promise<void>}
    */
-  static async logout(): Promise<void> {
+  static async logout() {
     // Clear tokens from storage
     // Additional cleanup can be added here
   }
 
   /**
    * Refresh access token
+   * @param {string} refreshToken - Refresh token
+   * @returns {Promise<Object>} Auth response
    */
-  static async refreshToken(refreshToken: string): Promise<AuthResponse> {
+  static async refreshToken(refreshToken) {
     const response = await apiClient.post('/v1/auth/refresh', {
       refreshToken,
     });

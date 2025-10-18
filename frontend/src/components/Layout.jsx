@@ -1,12 +1,20 @@
+// @ts-check
 import { Outlet, Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '@/hooks/useAuth'
 import toast from 'react-hot-toast'
 
+/**
+ * Layout component with navigation and authentication
+ * @returns {JSX.Element}
+ */
 export default function Layout() {
   const { isAuthenticated, logout, user } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
 
+  /**
+   * Handle user logout
+   */
   const handleLogout = () => {
     logout()
     toast.success('Đăng xuất thành công')

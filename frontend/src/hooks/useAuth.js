@@ -1,15 +1,19 @@
+// @ts-check
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
 import { AuthService } from '@/services/authService';
 import { storeTokens, removeToken, getToken, getUserData } from '@/lib/auth';
-import { LoginRequest, RegisterRequest, UserResponse } from '@/types/auth';
 import { queryKeys } from './useQueryClient';
 
+/**
+ * Hook for handling login mutation
+ * @returns {Object} Login mutation object
+ */
 export const useLogin = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: LoginRequest) => AuthService.login(data),
+    mutationFn: (data) => AuthService.login(data),
     onSuccess: async (response) => {
       // Create user object from response
       const userData = {
@@ -17,7 +21,7 @@ export const useLogin = () => {
         email: response.email,
         username: response.username,
         phoneNumber: response.phoneNumber,
-        role: response.role as any,
+        role: response.role,
         isActive: true,
         address: response.address,
         createdAt: new Date().toISOString(),
@@ -39,15 +43,23 @@ export const useLogin = () => {
   });
 };
 
+/**
+ * Hook for handling registration mutation
+ * @returns {Object} Registration mutation object
+ */
 export const useRegister = () => {
   return useMutation({
-    mutationFn: (data: RegisterRequest) => AuthService.register(data),
+    mutationFn: (data) => AuthService.register(data),
     onError: (error) => {
       console.error('Registration failed:', error);
     },
   });
 };
 
+/**
+ * Hook for handling logout mutation
+ * @returns {Object} Logout mutation object
+ */
 export const useLogout = () => {
   const queryClient = useQueryClient();
 
@@ -66,10 +78,13 @@ export const useLogout = () => {
   });
 };
 
-
+/**
+ * Main authentication hook
+ * @returns {Object} Authentication state and methods
+ */
 export const useAuth = () => {
   const [isLoading, setIsLoading] = useState(true);
-  const [user, setUser] = useState<UserResponse | null>(null);
+  const [user, setUser] = useState(null);
   
   const loginMutation = useLogin();
   const registerMutation = useRegister();
@@ -103,7 +118,12 @@ export const useAuth = () => {
 
   const isAuthenticated = !!user;
 
-  const login = (data: LoginRequest, options?: any) => {
+  /**
+   * Login function
+   * @param {Object} data - Login credentials
+   * @param {Object} [options] - Additional options
+   */
+  const login = (data, options) => {
     loginMutation.mutate(data, {
       ...options,
       onSuccess: (response) => {
@@ -113,7 +133,7 @@ export const useAuth = () => {
           email: response.email,
           username: response.username,
           phoneNumber: response.phoneNumber,
-          role: response.role as any,
+          role: response.role,
           isActive: true,
           address: response.address,
           createdAt: new Date().toISOString(),
@@ -125,7 +145,11 @@ export const useAuth = () => {
     });
   };
 
-  const logout = (options?: any) => {
+  /**
+   * Logout function
+   * @param {Object} [options] - Additional options
+   */
+  const logout = (options) => {
     logoutMutation.mutate(undefined, {
       ...options,
       onSuccess: () => {

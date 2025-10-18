@@ -1,4 +1,5 @@
-import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
+// @ts-check
+import axios from 'axios';
 import { getToken, removeToken } from '@/lib/auth';
 
 // API Configuration - Always use proxy in development
@@ -6,7 +7,7 @@ const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 const API_TIMEOUT = parseInt(import.meta.env.VITE_API_TIMEOUT || '30000');
 
 // Create axios instance
-const apiClient: AxiosInstance = axios.create({
+const apiClient = axios.create({
   baseURL: API_BASE_URL,
   timeout: API_TIMEOUT,
   withCredentials: true, // Enable credentials for CORS
@@ -17,7 +18,7 @@ const apiClient: AxiosInstance = axios.create({
 
 // Request interceptor to add JWT token
 apiClient.interceptors.request.use(
-  async (config: InternalAxiosRequestConfig) => {
+  async (config) => {
     try {
       const token = await getToken();
       if (token && config.headers) {
@@ -35,7 +36,7 @@ apiClient.interceptors.request.use(
 
 // Response interceptor for error handling
 apiClient.interceptors.response.use(
-  (response: AxiosResponse) => {
+  (response) => {
     return response;
   },
   async (error) => {

@@ -1,27 +1,37 @@
-import React from 'react';
-import { Movie } from '@/types/movie';
+// @ts-check
+import PropTypes from 'prop-types';
 import '@/styles/MovieCard.css';
 
-interface MovieCardProps {
-  movie: Movie;
-  onClick?: (movie: Movie) => void;
-  variant?: 'default' | 'featured' | 'compact';
-  rankTag?: string; // CGV-style ranking ribbon (e.g., "No.1", "Hot")
-}
-
-const MovieCard: React.FC<MovieCardProps> = ({ 
+/**
+ * MovieCard component for displaying movie information
+ * @param {Object} props - Component props
+ * @param {Object} props.movie - Movie object
+ * @param {Function} [props.onClick] - Click handler for movie card
+ * @param {'default' | 'featured' | 'compact'} [props.variant='default'] - Card variant
+ * @param {string} [props.rankTag] - Ranking tag (e.g., "No.1", "Hot")
+ * @returns {JSX.Element}
+ */
+const MovieCard = ({ 
   movie, 
   onClick, 
   variant = 'default',
   rankTag 
 }) => {
+  /**
+   * Handle movie card click
+   */
   const handleClick = () => {
     if (onClick && movie.id) {
       onClick(movie);
     }
   };
 
-  const formatDate = (dateString: string) => {
+  /**
+   * Format date string to Vietnamese locale
+   * @param {string} dateString - Date string to format
+   * @returns {string} Formatted date
+   */
+  const formatDate = (dateString) => {
     return new Date(dateString).toLocaleDateString('vi-VN', {
       year: 'numeric',
       month: 'long',
@@ -29,7 +39,12 @@ const MovieCard: React.FC<MovieCardProps> = ({
     });
   };
 
-  const getGenres = (genres: string) => {
+  /**
+   * Parse genres string into array
+   * @param {string} genres - Comma-separated genres string
+   * @returns {string[]} Array of genre strings
+   */
+  const getGenres = (genres) => {
     return genres.split(',').map(genre => genre.trim());
   };
 
@@ -108,5 +123,23 @@ const MovieCard: React.FC<MovieCardProps> = ({
   );
 };
 
-export default MovieCard;
+MovieCard.propTypes = {
+  movie: PropTypes.shape({
+    id: PropTypes.number.isRequired,
+    title: PropTypes.string.isRequired,
+    director: PropTypes.string.isRequired,
+    actors: PropTypes.string.isRequired,
+    genres: PropTypes.string.isRequired,
+    releaseDate: PropTypes.string.isRequired,
+    duration: PropTypes.string.isRequired,
+    language: PropTypes.string.isRequired,
+    rated: PropTypes.string.isRequired,
+    description: PropTypes.string.isRequired,
+    posterUrl: PropTypes.string
+  }).isRequired,
+  onClick: PropTypes.func,
+  variant: PropTypes.oneOf(['default', 'featured', 'compact']),
+  rankTag: PropTypes.string
+};
 
+export default MovieCard;

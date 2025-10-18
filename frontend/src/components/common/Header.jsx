@@ -1,24 +1,35 @@
+// @ts-check
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import PropTypes from 'prop-types';
 import { useAuth } from '@/hooks/useAuth';
 import '@/styles/Header.css';
 
-interface HeaderProps {
-  onSearch?: (query: string) => void;
-}
-
-const Header: React.FC<HeaderProps> = ({ onSearch }) => {
+/**
+ * Header component with search functionality and user menu
+ * @param {Object} props - Component props
+ * @param {Function} [props.onSearch] - Callback function for search
+ * @returns {JSX.Element}
+ */
+const Header = ({ onSearch }) => {
   const { user, logout } = useAuth();
   const [searchQuery, setSearchQuery] = useState('');
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
-  const handleSearch = (e: React.FormEvent) => {
+  /**
+   * Handle search form submission
+   * @param {React.FormEvent} e - Form event
+   */
+  const handleSearch = (e) => {
     e.preventDefault();
     if (onSearch && searchQuery.trim()) {
       onSearch(searchQuery.trim());
     }
   };
 
+  /**
+   * Handle user logout
+   */
   const handleLogout = () => {
     logout();
     setIsMenuOpen(false);
@@ -93,6 +104,10 @@ const Header: React.FC<HeaderProps> = ({ onSearch }) => {
       </div>
     </header>
   );
+};
+
+Header.propTypes = {
+  onSearch: PropTypes.func
 };
 
 export default Header;

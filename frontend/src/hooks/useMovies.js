@@ -1,10 +1,16 @@
+// @ts-check
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '@/services/api';
-import { MovieRequest, PatchMovie } from '@/types/movie';
 import { queryKeys } from './useQueryClient';
 
-// Get all movies with pagination
-export const useMovies = (page: number = 0, size: number = 10, sort?: string) => {
+/**
+ * Hook to get all movies with pagination
+ * @param {number} [page=0] - Page number
+ * @param {number} [size=10] - Page size
+ * @param {string} [sort] - Sort parameter
+ * @returns {Object} Movies query result
+ */
+export const useMovies = (page = 0, size = 10, sort) => {
   return useQuery({
     queryKey: queryKeys.movies.list(page, size, sort),
     queryFn: async () => {
@@ -21,8 +27,12 @@ export const useMovies = (page: number = 0, size: number = 10, sort?: string) =>
   });
 };
 
-// Get movie by ID
-export const useMovie = (id: number) => {
+/**
+ * Hook to get movie by ID
+ * @param {number} id - Movie ID
+ * @returns {Object} Movie query result
+ */
+export const useMovie = (id) => {
   return useQuery({
     queryKey: queryKeys.movies.detail(id),
     queryFn: async () => {
@@ -33,8 +43,12 @@ export const useMovie = (id: number) => {
   });
 };
 
-// Search movies
-export const useSearchMovies = (query: string) => {
+/**
+ * Hook to search movies
+ * @param {string} query - Search query
+ * @returns {Object} Search results query
+ */
+export const useSearchMovies = (query) => {
   return useQuery({
     queryKey: queryKeys.movies.search(query),
     queryFn: async () => {
@@ -46,12 +60,15 @@ export const useSearchMovies = (query: string) => {
   });
 };
 
-// Add new movie (Admin only)
+/**
+ * Hook to add new movie (Admin only)
+ * @returns {Object} Add movie mutation
+ */
 export const useAddMovie = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: MovieRequest) => {
+    mutationFn: (data) => {
       return apiClient.post('/v1/movies', data);
     },
     onSuccess: () => {
@@ -64,12 +81,15 @@ export const useAddMovie = () => {
   });
 };
 
-// Update movie (Admin only)
+/**
+ * Hook to update movie (Admin only)
+ * @returns {Object} Update movie mutation
+ */
 export const useUpdateMovie = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: PatchMovie }) => {
+    mutationFn: ({ id, data }) => {
       return apiClient.patch(`/v1/movies/${id}`, data);
     },
     onSuccess: (_, { id }) => {
@@ -83,12 +103,15 @@ export const useUpdateMovie = () => {
   });
 };
 
-// Delete movie (Admin only)
+/**
+ * Hook to delete movie (Admin only)
+ * @returns {Object} Delete movie mutation
+ */
 export const useDeleteMovie = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: number) => {
+    mutationFn: (id) => {
       return apiClient.delete(`/v1/movies/${id}`);
     },
     onSuccess: () => {
