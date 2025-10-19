@@ -16,14 +16,14 @@ export default function RegisterPage() {
   const { mutate: register, isPending: isRegistering } = registerMutation
   const navigate = useNavigate()
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (e) => {
     setFormData(prev => ({
       ...prev,
       [e.target.name]: e.target.value
     }))
   }
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     
     if (!formData.username || !formData.email || !formData.password || !formData.phoneNumber || !formData.address) {
@@ -49,7 +49,7 @@ export default function RegisterPage() {
           toast.success('Đăng ký thành công! Vui lòng đăng nhập')
           navigate('/login')
         },
-        onError: (error: any) => {
+        onError: (error) => {
           toast.error(error?.response?.data?.message || 'Đăng ký thất bại')
         },
       }

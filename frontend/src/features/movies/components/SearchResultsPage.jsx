@@ -1,11 +1,10 @@
 import React from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { useSearchMovies } from '@/hooks/useMovies';
-import { Movie } from '@/types/movie';
 import Header from '@/components/common/Header';
 import MovieCard from '@/components/common/MovieCard';
 
-const SearchResultsPage: React.FC = () => {
+const SearchResultsPage = () => {
   const [searchParams] = useSearchParams();
   const query = searchParams.get('q') || '';
   
@@ -43,7 +42,7 @@ const SearchResultsPage: React.FC = () => {
         
         {movies && movies.length > 0 ? (
           <div className="movies-grid">
-            {movies.map((movie: Movie) => (
+            {movies.map((movie) => (
               <MovieCard key={movie.id} movie={movie} />
             ))}
           </div>

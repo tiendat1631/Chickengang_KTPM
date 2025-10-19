@@ -1,21 +1,8 @@
 import React from 'react';
-import { Movie } from '@/types/movie';
 import MovieCard from '@/components/common/MovieCard';
 import '@/styles/MovieList.css';
 
-interface MovieListProps {
-  movies: Movie[];
-  title: string;
-  subtitle?: string;
-  variant?: 'default' | 'featured' | 'compact';
-  loading?: boolean;
-  error?: string;
-  onMovieClick?: (movie: Movie) => void;
-  onLoadMore?: () => void;
-  hasMore?: boolean;
-}
-
-const MovieList: React.FC<MovieListProps> = ({
+const MovieList = ({
   movies,
   title,
   subtitle,

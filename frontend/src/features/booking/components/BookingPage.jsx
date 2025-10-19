@@ -5,46 +5,17 @@ import Breadcrumb from '@/components/ui/Breadcrumb'
 import { formatVND } from '@/utils/formatCurrency'
 import './BookingPage.css'
 
-interface Seat {
-  id: number
-  rowLabel: string
-  number: number
-  seatType: 'NORMAL' | 'SWEETBOX'
-  price: number
-}
-
-interface Screening {
-  id: number
-  startTime: string
-  endTime: string
-  format: '2D' | '3D'
-  auditorium: {
-    id: number
-    name: string
-  }
-  movie: {
-    id: number
-    title: string
-  }
-}
-
-interface BookingData {
-  screening: Screening
-  selectedSeats: Seat[]
-  totalPrice: number
-}
-
 export default function BookingPage() {
-  const { movieId } = useParams<{ movieId: string }>()
+  const { movieId } = useParams()
   const navigate = useNavigate()
   const location = useLocation()
-  const [bookingData, setBookingData] = useState<BookingData | null>(null)
+  const [bookingData, setBookingData] = useState(null)
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState(null)
 
   useEffect(() => {
     // Get booking data from location state or localStorage
-    const stateData = location.state as BookingData
+    const stateData = location.state
     const storedData = localStorage.getItem('bookingData')
     
     try {
@@ -63,7 +34,7 @@ export default function BookingPage() {
     }
   }, [location.state])
 
-  const formatTime = (dateString: string) => {
+  const formatTime = (dateString) => {
     const date = new Date(dateString)
     return date.toLocaleTimeString('vi-VN', { 
       hour: '2-digit', 
@@ -71,7 +42,7 @@ export default function BookingPage() {
     })
   }
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString) => {
     const date = new Date(dateString)
     return date.toLocaleDateString('vi-VN', {
       weekday: 'long',
@@ -205,4 +176,3 @@ export default function BookingPage() {
     </div>
   )
 }
-

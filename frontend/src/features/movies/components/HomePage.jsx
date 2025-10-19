@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useMovies } from '@/hooks/useMovies'
-import { Movie } from '@/types/movie'
 import Header from '@/components/common/Header'
 import HeroSection from './HeroSection'
 import MovieList from './MovieList'
@@ -10,8 +9,8 @@ import './HomePage.css'
 export default function HomePage() {
   const navigate = useNavigate()
   const [currentPage, setCurrentPage] = useState(0)
-  const [featuredMovies, setFeaturedMovies] = useState<Movie[]>([])
-  const [recentMovies, setRecentMovies] = useState<Movie[]>([])
+  const [featuredMovies, setFeaturedMovies] = useState([])
+  const [recentMovies, setRecentMovies] = useState([])
 
   const {
     data: moviesData,
@@ -41,14 +40,14 @@ export default function HomePage() {
     }
   }, [featuredData])
 
-  const handleSearch = (query: string) => {
+  const handleSearch = (query) => {
     if (query.trim()) {
       // Navigate to search results page (will implement later)
       navigate(`/movies/search?q=${encodeURIComponent(query)}`)
     }
   }
 
-  const handleMovieClick = (movie: Movie) => {
+  const handleMovieClick = (movie) => {
     if (movie.id && movie.id > 0) {
       navigate(`/movies/${movie.id}`)
     } else {
@@ -137,4 +136,3 @@ export default function HomePage() {
     </div>
   )
 }
-

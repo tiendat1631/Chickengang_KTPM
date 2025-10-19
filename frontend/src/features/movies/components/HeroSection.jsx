@@ -1,11 +1,7 @@
 import React from 'react';
 import '@/styles/HeroSection.css';
 
-interface HeroSectionProps {
-  onGetStarted?: () => void;
-}
-
-const HeroSection: React.FC<HeroSectionProps> = ({ onGetStarted }) => {
+const HeroSection = ({ onGetStarted }) => {
   return (
     <section className="hero-section">
       <div className="hero-background">
