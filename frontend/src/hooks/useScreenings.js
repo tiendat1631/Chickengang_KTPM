@@ -1,6 +1,6 @@
 // JavaScript file - no TypeScript checking
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import apiClient from '@/services/api';
+import apiClient from '@/services/api.js';
 import { queryKeys } from './useQueryClient.js';
 
 /**
@@ -62,12 +62,12 @@ export const useReserveSeats = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ screeningId, seatIds }) => {
-      return apiClient.post(`/v1/screenings/${screeningId}/reserve`, { seatIds });
+    mutationFn: (data) => {
+      return apiClient.post(`/v1/screenings/${data.screeningId}/reserve`, { seatIds: data.seatIds });
     },
-    onSuccess: (_, { screeningId }) => {
+    onSuccess: (_, variables) => {
       // Invalidate seats to refetch updated status
-      queryClient.invalidateQueries({ queryKey: queryKeys.seats.list(screeningId) });
+      queryClient.invalidateQueries({ queryKey: queryKeys.seats.list(variables.screeningId) });
     },
     onError: (error) => {
       console.error('Failed to reserve seats:', error);

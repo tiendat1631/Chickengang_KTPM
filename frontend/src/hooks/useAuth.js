@@ -1,8 +1,8 @@
 // JavaScript file - no TypeScript checking
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
-import { AuthService } from '@/services/authService';
-import { storeTokens, removeToken, getToken, getUserData } from '@/lib/auth';
+import { AuthService } from '@/services/authService.js';
+import { storeTokens, removeToken, getToken, getUserData } from '@/lib/auth.js';
 import { queryKeys } from './useQueryClient.js';
 
 /**

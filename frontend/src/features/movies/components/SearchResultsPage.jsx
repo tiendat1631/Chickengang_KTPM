@@ -1,8 +1,8 @@
 import React from 'react';
 import { useSearchParams } from 'react-router-dom';
-import { useSearchMovies } from '@/hooks/useMovies';
-import Header from '@/components/common/Header';
-import MovieCard from '@/components/common/MovieCard';
+import { useSearchMovies } from '@/hooks/useMovies.js';
+import Header from '@/components/common/Header.jsx';
+import MovieCard from '@/components/common/MovieCard.jsx';
 
 const SearchResultsPage = () => {
   const [searchParams] = useSearchParams();

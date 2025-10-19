@@ -1,6 +1,6 @@
 // JavaScript file - no TypeScript checking
 import axios from 'axios';
-import { getToken, removeToken } from '@/lib/auth';
+import { getToken, removeToken } from '@/lib/auth.js';
 
 // API Configuration - Always use proxy in development
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';

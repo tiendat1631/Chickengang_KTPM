@@ -1,6 +1,6 @@
 // JavaScript file - no TypeScript checking
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import apiClient from '@/services/api';
+import apiClient from '@/services/api.js';
 import { queryKeys } from './useQueryClient.js';
 
 /**

@@ -5,19 +5,19 @@ import { Toaster } from 'react-hot-toast';
 import PropTypes from 'prop-types';
 
 // Layout
-import Layout from '@/components/Layout';
+import Layout from '@/components/Layout.jsx';
 
 // Pages
-import HomePage from '@/features/movies/components/HomePage';
-import MovieDetailPage from '@/features/movies/components/MovieDetailPage';
-import SearchResultsPage from '@/features/movies/components/SearchResultsPage';
-import ScreeningListPage from '@/features/screenings/components/ScreeningListPage';
-import SeatSelectionPage from '@/features/booking/components/SeatSelectionPage';
-import LoginPage from '@/features/auth/components/LoginPage';
-import RegisterPage from '@/features/auth/components/RegisterPage';
-import BookingPage from '@/features/booking/components/BookingPage';
-import CheckoutPage from '@/features/booking/components/CheckoutPage';
-import MovieDetailDemo from '@/components/MovieDetailDemo';
+import HomePage from '@/features/movies/components/HomePage.jsx';
+import MovieDetailPage from '@/features/movies/components/MovieDetailPage.jsx';
+import SearchResultsPage from '@/features/movies/components/SearchResultsPage.jsx';
+import ScreeningListPage from '@/features/screenings/components/ScreeningListPage.jsx';
+import SeatSelectionPage from '@/features/booking/components/SeatSelectionPage.jsx';
+import LoginPage from '@/features/auth/components/LoginPage.jsx';
+import RegisterPage from '@/features/auth/components/RegisterPage.jsx';
+import BookingPage from '@/features/booking/components/BookingPage.jsx';
+import CheckoutPage from '@/features/booking/components/CheckoutPage.jsx';
+import MovieDetailDemo from '@/components/MovieDetailDemo.jsx';
 
 // 404 Page Component
 const NotFoundPage = () => (
@@ -52,7 +52,7 @@ const NotFoundPage = () => (
 );
 
 // Hooks
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth } from '@/hooks/useAuth.js';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -120,7 +120,7 @@ PublicRoute.propTypes = {
 
 /**
  * Main App Router component
- * @returns {JSX.Element}
+ * @returns {React.ReactElement}
  */
 const AppRouter = () => {
   return (

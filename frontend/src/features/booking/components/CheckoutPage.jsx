@@ -1,5 +1,5 @@
 // JavaScript file - no TypeScript checking
-import Breadcrumb from '@/components/ui/Breadcrumb';
+import Breadcrumb from '@/components/ui/Breadcrumb.jsx';
 
 /**
  * CheckoutPage component demonstrating the new Breadcrumb component
