@@ -58,14 +58,20 @@ const MovieList = ({
       </div>
 
       <div className="movie-list-grid">
-        {movies.map((movie) => (
+        {movies && movies.length > 0 ? movies.map((movie) => (
           <MovieCard
             key={movie.id}
             movie={movie}
             variant={variant}
             onClick={onMovieClick}
           />
-        ))}
+        )) : (
+          <div className="movie-list-empty">
+            <div className="empty-icon">🎬</div>
+            <h3>Chưa có phim nào</h3>
+            <p>Hãy quay lại sau để xem những bộ phim mới nhất!</p>
+          </div>
+        )}
       </div>
 
       {loading && movies.length > 0 && (

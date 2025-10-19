@@ -1,3 +1,4 @@
+// @ts-nocheck
 // JavaScript file - no TypeScript checking
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '@/services/api.js';
@@ -56,6 +57,9 @@ export const useSeats = (screeningId) => {
 
 /**
  * Hook to reserve seats
+ * @param {Object} data - Reservation data
+ * @param {number} data.screeningId - Screening ID
+ * @param {number[]} data.seatIds - Array of seat IDs to reserve
  * @returns {Object} Reserve seats mutation
  */
 export const useReserveSeats = () => {
@@ -63,11 +67,17 @@ export const useReserveSeats = () => {
 
   return useMutation({
     mutationFn: (data) => {
+      // Add null safety check
+      if (!data || !data.screeningId || !data.seatIds) {
+        throw new Error('Invalid reservation data');
+      }
       return apiClient.post(`/v1/screenings/${data.screeningId}/reserve`, { seatIds: data.seatIds });
     },
     onSuccess: (_, variables) => {
-      // Invalidate seats to refetch updated status
-      queryClient.invalidateQueries({ queryKey: queryKeys.seats.list(variables.screeningId) });
+      // Add null safety check
+      if (variables && variables.screeningId) {
+        queryClient.invalidateQueries({ queryKey: queryKeys.seats.list(variables.screeningId) });
+      }
     },
     onError: (error) => {
       console.error('Failed to reserve seats:', error);

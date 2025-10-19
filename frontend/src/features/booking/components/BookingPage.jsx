@@ -129,13 +129,15 @@ export default function BookingPage() {
           <div className="seats-info-section">
             <h2>Ghế đã chọn</h2>
             <div className="selected-seats">
-              {bookingData.selectedSeats.map((seat) => (
+              {bookingData.selectedSeats && bookingData.selectedSeats.length > 0 ? bookingData.selectedSeats.map((seat) => (
                 <div key={seat.id} className="seat-item">
                   <span className="seat-label">{seat.rowLabel}{seat.number}</span>
                   <span className="seat-type">{seat.seatType === 'SWEETBOX' ? 'Sweetbox' : 'Thường'}</span>
                   <span className="seat-price"><span className="whitespace-nowrap">{formatVND(seat.price)}</span></span>
                 </div>
-              ))}
+              )) : (
+                <p>Chưa chọn ghế nào</p>
+              )}
             </div>
           </div>
 
