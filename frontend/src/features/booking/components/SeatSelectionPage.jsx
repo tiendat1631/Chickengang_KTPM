@@ -6,44 +6,21 @@ import Breadcrumb from '@/components/ui/Breadcrumb'
 import './SeatSelectionPage.css'
 
 // Utility function for currency formatting
-const formatVND = (amount: number): string => {
+const formatVND = (amount) => {
   return new Intl.NumberFormat('vi-VN', {
     style: 'currency',
     currency: 'VND',
   }).format(amount)
 }
 
-interface Seat {
-  id: number
-  rowLabel: string
-  number: number
-  seatType: 'NORMAL' | 'SWEETBOX'
-  status: 'AVAILABLE' | 'SOLD' | 'RESERVED'
-}
-
-interface Screening {
-  id: number
-  startTime: string
-  endTime: string
-  format: '2D' | '3D'
-  auditorium: {
-    id: number
-    name: string
-  }
-  movie: {
-    id: number
-    title: string
-  }
-}
-
 export default function SeatSelectionPage() {
-  const { movieId, screeningId } = useParams<{ movieId: string; screeningId: string }>()
+  const { movieId, screeningId } = useParams()
   const navigate = useNavigate()
-  const [screening, setScreening] = useState<Screening | null>(null)
-  const [seats, setSeats] = useState<Seat[]>([])
-  const [selectedSeats, setSelectedSeats] = useState<Seat[]>([])
+  const [screening, setScreening] = useState(null)
+  const [seats, setSeats] = useState([])
+  const [selectedSeats, setSelectedSeats] = useState([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState(null)
 
   // const movieIdNum = movieId ? parseInt(movieId) : 0 // Not used currently
   const screeningIdNum = screeningId ? parseInt(screeningId) : 0
@@ -63,7 +40,7 @@ export default function SeatSelectionPage() {
   useEffect(() => {
     if (screeningData) {
       // Transform API data to match our interface
-      const transformedScreening: Screening = {
+      const transformedScreening = {
         id: screeningData.id,
         startTime: screeningData.startTime,
         endTime: screeningData.endTime,
@@ -85,7 +62,7 @@ export default function SeatSelectionPage() {
     if (seatsData && seatsData.length > 0) {
       console.log('Raw seats data from API:', seatsData);
       // Transform API data to match our interface
-      const transformedSeats: Seat[] = seatsData.map((seat: any) => ({
+      const transformedSeats = seatsData.map((seat) => ({
         id: seat.id,
         rowLabel: seat.rowLabel,
         number: seat.number,
@@ -97,7 +74,7 @@ export default function SeatSelectionPage() {
     } else {
       console.log('No seats data received');
       // Fallback: generate a default 8x10 layout for UI demo
-      const generated: Seat[] = []
+      const generated = []
       const rows = 8
       const cols = 10
       for (let r = 0; r < rows; r++) {
@@ -122,7 +99,7 @@ export default function SeatSelectionPage() {
     setError(screeningError?.message || seatsError?.message || null)
   }, [screeningLoading, seatsLoading, screeningError, seatsError])
 
-  const formatTime = (dateString: string) => {
+  const formatTime = (dateString) => {
     const date = new Date(dateString)
     return date.toLocaleTimeString('vi-VN', { 
       hour: '2-digit', 
@@ -130,7 +107,7 @@ export default function SeatSelectionPage() {
     })
   }
 
-  const handleSeatClick = (seat: Seat) => {
+  const handleSeatClick = (seat) => {
     if (seat.status !== 'AVAILABLE') return
 
     setSelectedSeats(prev => {
@@ -143,7 +120,7 @@ export default function SeatSelectionPage() {
     })
   }
 
-  const getSeatPrice = (seat: Seat) => {
+  const getSeatPrice = (seat) => {
     return seat.seatType === 'SWEETBOX' ? 150000 : 120000
   }
 
@@ -203,18 +180,33 @@ export default function SeatSelectionPage() {
   return (
     <div className="seat-selection-page">
       <Header onSearch={() => {}} />
-      <div className="container">
-        {/* Breadcrumb */}
-        <Breadcrumb 
-          items={[
-            { label: "Trang chủ", to: "/" },
-            { label: screening.movie.title, to: `/movies/${movieId}` },
-            { label: "Chọn suất", to: `/movies/${movieId}/screenings` },
-            { label: "Chọn ghế" }
-          ]}
-          className="mb-6"
-        />
+      
+      {/* Synced Header Section */}
+      <header className="bg-gradient-to-r from-purple-800 to-gray-800">
+        <div className="container">
+          {/* Breadcrumb */}
+          <Breadcrumb 
+            items={[
+              { label: "Trang chủ", href: "/" },
+              { label: screening.movie.title, href: `/movies/${movieId}` },
+              { label: "Chọn suất", href: `/movies/${movieId}/screenings` },
+              { label: "Chọn ghế" }
+            ]}
+          />
+          
+          {/* Page Title */}
+          <div className="py-6">
+            <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 tracking-tight">
+              Chọn ghế - {screening.movie.title}
+            </h1>
+            <p className="text-white/90 text-base md:text-lg font-medium">
+              Chọn ghế phù hợp cho suất chiếu của bạn
+            </p>
+          </div>
+        </div>
+      </header>
 
+      <div className="container">
         <div className="screening-info">
           <h1>{screening.movie.title}</h1>
           <div className="screening-details">

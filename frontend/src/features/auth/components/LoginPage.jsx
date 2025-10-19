@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useLogin } from '../../../hooks/useAuth'
 import toast from 'react-hot-toast'
 
@@ -9,8 +9,12 @@ export default function LoginPage() {
   const loginMutation = useLogin()
   const { mutate: login, isPending: isLoggingIn } = loginMutation
   const navigate = useNavigate()
+  const location = useLocation()
+  
+  // Get return URL from location state or localStorage
+  const returnTo = location.state?.returnTo || localStorage.getItem('intendedBookingUrl') || '/'
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
     
     if (!username || !password) {
@@ -23,9 +27,12 @@ export default function LoginPage() {
       {
         onSuccess: () => {
           toast.success('Đăng nhập thành công')
-          navigate('/')
+          // Clear the intended booking URL from localStorage
+          localStorage.removeItem('intendedBookingUrl')
+          // Navigate to the intended destination
+          navigate(returnTo, { replace: true })
         },
-        onError: (error: any) => {
+        onError: (error) => {
           toast.error(error?.response?.data?.message || 'Đăng nhập thất bại')
         },
       }
@@ -39,6 +46,11 @@ export default function LoginPage() {
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
             Đăng nhập vào tài khoản
           </h2>
+          {location.state?.message && (
+            <p className="mt-2 text-center text-sm text-blue-600">
+              {location.state.message}
+            </p>
+          )}
         </div>
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">

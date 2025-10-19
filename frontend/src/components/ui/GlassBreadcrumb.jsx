@@ -1,63 +1,60 @@
-// @ts-check
 import PropTypes from 'prop-types';
 import { Link } from 'react-router-dom';
-import styles from './Breadcrumb.module.css';
+import styles from './GlassBreadcrumb.module.css';
 
 /**
  * @typedef {{ label: string, href?: string }} CrumbItem
  */
 
 /**
- * Breadcrumb component for navigation with A11y support and responsive design
+ * Glassmorphism Breadcrumb Component
  * @param {Object} props - Component props
- * @param {CrumbItem[]} props.items - Array of breadcrumb items in order, last item is current page (no href)
+ * @param {CrumbItem[]} props.items - Array of breadcrumb items
  * @param {string} [props.className] - Additional CSS class
  * @returns {JSX.Element}
  */
-const Breadcrumb = ({ items, className = '' }) => {
-  // Get full breadcrumb path for tooltip
-  const getFullPath = () => {
-    return items.map(item => item.label).join(' / ');
-  };
-
+const GlassBreadcrumb = ({ items, className = '' }) => {
   return (
-    <div className={`${styles.breadcrumbContainer} ${className}`}>
-      <nav 
-        className={styles.breadcrumbNav}
-        aria-label="Breadcrumb"
-        title={getFullPath()}
-      >
-        <ol className={`${styles.breadcrumbNav} ol`}>
+    <nav 
+      className={`${styles.glassBreadcrumb} ${className}`}
+      aria-label="Breadcrumb navigation"
+    >
+      <div className={styles.breadcrumbContainer}>
+        <ol className={styles.breadcrumbList}>
           {items.map((item, index) => {
             const isLast = index === items.length - 1;
             
             return (
-              <li key={index}>
+              <li key={index} className={styles.breadcrumbItem}>
                 {isLast ? (
                   <span 
+                    className={styles.currentPage}
                     aria-current="page"
                   >
-                    {item.label}
+                    {item.label === 'Trang chủ' ? '🏠' : item.label}
                   </span>
                 ) : (
                   <>
                     {item.href ? (
                       <Link
                         to={item.href}
+                        className={styles.breadcrumbLink}
                         title={item.label}
-                        className={item.label === 'Trang chủ' ? 'home-icon' : ''}
                       >
                         {item.label === 'Trang chủ' ? '🏠' : item.label}
                       </Link>
                     ) : (
                       <span 
+                        className={styles.breadcrumbText}
                         title={item.label}
                       >
                         {item.label}
                       </span>
                     )}
                     {!isLast && (
-                      <span className={styles.separator}>›</span>
+                      <span className={styles.separator} aria-hidden="true">
+                        ›
+                      </span>
                     )}
                   </>
                 )}
@@ -65,12 +62,12 @@ const Breadcrumb = ({ items, className = '' }) => {
             );
           })}
         </ol>
-      </nav>
-    </div>
+      </div>
+    </nav>
   );
 };
 
-Breadcrumb.propTypes = {
+GlassBreadcrumb.propTypes = {
   items: PropTypes.arrayOf(
     PropTypes.shape({
       label: PropTypes.string.isRequired,
@@ -80,4 +77,4 @@ Breadcrumb.propTypes = {
   className: PropTypes.string
 };
 
-export default Breadcrumb;
+export default GlassBreadcrumb;

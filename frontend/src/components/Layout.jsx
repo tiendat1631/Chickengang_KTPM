@@ -18,7 +18,7 @@ export default function Layout() {
   const handleLogout = () => {
     logout()
     toast.success('Đăng xuất thành công')
-    navigate('/login')
+    navigate('/')
   }
 
   // Không hiển thị header khi ở trang chủ hoặc trang có header riêng

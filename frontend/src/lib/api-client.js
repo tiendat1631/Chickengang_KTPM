@@ -58,11 +58,11 @@ class ApiClient {
               return this.client(originalRequest);
             }
           } catch (refreshError) {
-            // Refresh failed, redirect to login
+            // Refresh failed, redirect to home
             localStorage.removeItem(STORAGE_KEYS.ACCESS_TOKEN);
             localStorage.removeItem(STORAGE_KEYS.REFRESH_TOKEN);
             localStorage.removeItem(STORAGE_KEYS.USER_DATA);
-            window.location.href = '/login';
+            window.location.href = '/';
           }
         }
 

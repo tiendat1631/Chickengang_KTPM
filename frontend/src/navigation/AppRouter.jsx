@@ -16,6 +16,9 @@ import SeatSelectionPage from '@/features/booking/components/SeatSelectionPage';
 import LoginPage from '@/features/auth/components/LoginPage';
 import RegisterPage from '@/features/auth/components/RegisterPage';
 import BookingPage from '@/features/booking/components/BookingPage';
+import CheckoutPage from '@/features/booking/components/CheckoutPage';
+import BreadcrumbDemo from '@/components/BreadcrumbDemo';
+import MovieDetailDemo from '@/components/MovieDetailDemo';
 
 // 404 Page Component
 const NotFoundPage = () => (
@@ -78,7 +81,14 @@ const ProtectedRoute = ({ children }) => {
     );
   }
   
-  return isAuthenticated ? <>{children}</> : <Navigate to="/login" replace />;
+  if (!isAuthenticated) {
+    // Store current location for redirect after login
+    const currentPath = window.location.pathname + window.location.search;
+    localStorage.setItem('intendedBookingUrl', currentPath);
+    return <Navigate to="/login" replace />;
+  }
+  
+  return <>{children}</>;
 };
 
 ProtectedRoute.propTypes = {
@@ -161,6 +171,18 @@ const AppRouter = () => {
                 </ProtectedRoute>
               } 
             />
+            <Route 
+              path="checkout" 
+              element={
+                <ProtectedRoute>
+                  <CheckoutPage />
+                </ProtectedRoute>
+              } 
+            />
+            
+            {/* Demo Routes */}
+            <Route path="breadcrumb-demo" element={<BreadcrumbDemo />} />
+            <Route path="movie-hero-demo" element={<MovieDetailDemo />} />
           </Route>
           
           {/* 404 Route */}

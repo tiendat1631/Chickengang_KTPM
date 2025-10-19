@@ -1,0 +1,64 @@
+/* Tag Chips Styles */
+.tagChips {
+  margin: 1.5rem 0;
+}
+
+.chipsContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.chipsContainer::-webkit-scrollbar {
+  display: none;
+}
+
+.chip {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.9);
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  white-space: nowrap;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  user-select: none;
+}
+
+.chip:hover {
+  background: rgba(255, 255, 255, 0.2);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+}
+
+.chip:focus {
+  outline: 2px solid rgba(255, 255, 255, 0.6);
+  outline-offset: 2px;
+  background: rgba(255, 255, 255, 0.2);
+}
+
+.chip:active {
+  transform: translateY(0);
+}
+
+/* Responsive */
+@media (max-width: 640px) {
+  .chipsContainer {
+    flex-wrap: nowrap;
+    gap: 0.5rem;
+    padding-bottom: 0.25rem;
+  }
+  
+  .chip {
+    padding: 0.375rem 0.75rem;
+    font-size: 0.8rem;
+    flex-shrink: 0;
+  }
+}

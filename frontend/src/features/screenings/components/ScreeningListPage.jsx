@@ -2,32 +2,20 @@ import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
 import { useMovies } from '@/hooks/useMovies'
 import { useScreenings } from '@/hooks/useScreenings'
-import { Movie } from '@/types/movie'
+import { useAuth } from '@/hooks/useAuth'
 import Header from '@/components/common/Header'
 import Breadcrumb from '@/components/ui/Breadcrumb'
 import { formatVND } from '@/utils/formatCurrency'
 import './ScreeningListPage.css'
 
-interface Screening {
-  id: number
-  startTime: string
-  endTime: string
-  format: '2D' | '3D' | 'IMAX'
-  status: 'ACTIVE' | 'INACTIVE'
-  auditorium: {
-    id: number
-    name: string
-  }
-  price: number
-}
-
 export default function ScreeningListPage() {
-  const { movieId } = useParams<{ movieId: string }>()
+  const { movieId } = useParams()
   const navigate = useNavigate()
-  const [movie, setMovie] = useState<Movie | null>(null)
-  const [screenings, setScreenings] = useState<Screening[]>([])
+  const { isAuthenticated } = useAuth()
+  const [movie, setMovie] = useState(null)
+  const [screenings, setScreenings] = useState([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState(null)
 
   const movieIdNum = movieId ? parseInt(movieId) : 0
 
@@ -46,7 +34,7 @@ export default function ScreeningListPage() {
   useEffect(() => {
     if (movieData && movieIdNum) {
       // Find the specific movie by ID
-      const foundMovie = movieData.find((m: Movie) => m.id === movieIdNum)
+      const foundMovie = movieData.find((m) => m.id === movieIdNum)
       if (foundMovie) {
         setMovie(foundMovie)
       }
@@ -56,7 +44,7 @@ export default function ScreeningListPage() {
   useEffect(() => {
     if (screeningsData) {
       // Transform API data to match our interface
-      const transformedScreenings: Screening[] = screeningsData.map((screening: any) => ({
+      const transformedScreenings = screeningsData.map((screening) => ({
         id: screening.id,
         startTime: screening.startTime,
         endTime: screening.endTime,
@@ -77,7 +65,7 @@ export default function ScreeningListPage() {
     setError(movieError?.message || screeningsError?.message || null)
   }, [movieLoading, screeningsLoading, movieError, screeningsError])
 
-  const formatTime = (dateString: string) => {
+  const formatTime = (dateString) => {
     const date = new Date(dateString)
     return date.toLocaleTimeString('vi-VN', { 
       hour: '2-digit', 
@@ -85,7 +73,7 @@ export default function ScreeningListPage() {
     })
   }
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString) => {
     const date = new Date(dateString)
     return date.toLocaleDateString('vi-VN', {
       weekday: 'long',
@@ -95,8 +83,23 @@ export default function ScreeningListPage() {
     })
   }
 
-  const handleScreeningClick = (screening: Screening) => {
-    // Navigate to seat selection page using React Router
+  const handleScreeningClick = (screening) => {
+    if (!isAuthenticated) {
+      // Store the intended booking URL in localStorage for after login
+      const bookingUrl = `/booking/${movieId}/screening/${screening.id}`
+      localStorage.setItem('intendedBookingUrl', bookingUrl)
+      
+      // Navigate to login page
+      navigate('/login', { 
+        state: { 
+          message: 'Vui lòng đăng nhập để tiếp tục đặt vé',
+          returnTo: bookingUrl
+        } 
+      })
+      return
+    }
+    
+    // If authenticated, navigate directly to seat selection
     navigate(`/booking/${movieId}/screening/${screening.id}`)
   }
 
@@ -125,17 +128,32 @@ export default function ScreeningListPage() {
   return (
     <div className="screening-list-page">
       <Header onSearch={() => {}} />
-      <div className="container">
-        {/* Breadcrumb */}
-        <Breadcrumb 
-          items={[
-            { label: "Trang chủ", to: "/" },
-            { label: movie.title, to: `/movies/${movieId}` },
-            { label: "Chọn suất" }
-          ]}
-          className="mb-6"
-        />
+      
+      {/* Synced Header Section */}
+      <header className="bg-gradient-to-r from-purple-800 to-gray-800">
+        <div className="container">
+          {/* Breadcrumb */}
+          <Breadcrumb 
+            items={[
+              { label: "Trang chủ", href: "/" },
+              { label: movie.title, href: `/movies/${movieId}` },
+              { label: "Chọn suất" }
+            ]}
+          />
+          
+          {/* Page Title */}
+          <div className="py-6">
+            <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 tracking-tight">
+              Chọn suất chiếu - {movie.title}
+            </h1>
+            <p className="text-white/90 text-base md:text-lg font-medium">
+              Chọn suất chiếu phù hợp với lịch trình của bạn
+            </p>
+          </div>
+        </div>
+      </header>
 
+      <div className="container">
         <div className="movie-info">
           <div className="movie-poster">
             <div className="movie-poster-placeholder">🎬</div>

@@ -4,30 +4,16 @@ import Header from '@/components/common/Header'
 import Breadcrumb from '@/components/ui/Breadcrumb'
 import apiClient from '@/services/api'
 import { useScreenings } from '@/hooks/useScreenings'
-import { Movie } from '@/types/movie'
 import { formatVND } from '@/utils/formatCurrency'
 import './MovieDetailPage.css'
 
-interface Screening {
-  id: number
-  startTime: string
-  endTime: string
-  format: '2D' | '3D'
-  status: 'ACTIVE' | 'INACTIVE'
-  auditorium: {
-    id: number
-    name: string
-  }
-  price: number
-}
-
 export default function MovieDetailPage() {
-  const { id } = useParams<{ id: string }>()
+  const { id } = useParams()
   const navigate = useNavigate()
-  const [movie, setMovie] = useState<Movie | null>(null)
-  const [screenings, setScreenings] = useState<Screening[]>([])
+  const [movie, setMovie] = useState(null)
+  const [screenings, setScreenings] = useState([])
   const [loading, setLoading] = useState(true)
-  const [error, setError] = useState<string | null>(null)
+  const [error, setError] = useState(null)
 
   const movieId = id ? parseInt(id) : 0
 
@@ -40,7 +26,7 @@ export default function MovieDetailPage() {
   useEffect(() => {
     if (screeningsData) {
       // Transform API data to match our interface
-      const transformedScreenings: Screening[] = screeningsData.map((screening: any) => ({
+      const transformedScreenings = screeningsData.map((screening) => ({
         id: screening.id,
         startTime: screening.startTime,
         endTime: screening.endTime,
@@ -84,7 +70,7 @@ export default function MovieDetailPage() {
           if (response.data && response.data.data) {
             const movieData = response.data.data
             // Convert releaseDate from LocalDate to string if needed
-            const formattedMovie: Movie = {
+            const formattedMovie = {
               ...movieData,
               releaseDate: typeof movieData.releaseDate === 'string' 
                 ? movieData.releaseDate 
@@ -112,7 +98,7 @@ export default function MovieDetailPage() {
     fetchData()
   }, [movieId])
 
-  const formatTime = (dateString: string) => {
+  const formatTime = (dateString) => {
     const date = new Date(dateString)
     return date.toLocaleTimeString('vi-VN', { 
       hour: '2-digit', 
@@ -120,7 +106,7 @@ export default function MovieDetailPage() {
     })
   }
 
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString) => {
     const date = new Date(dateString)
     return date.toLocaleDateString('vi-VN', {
       year: 'numeric',
@@ -129,7 +115,7 @@ export default function MovieDetailPage() {
     })
   }
 
-  const handleScreeningClick = (screening: Screening) => {
+  const handleScreeningClick = (screening) => {
     // Navigate to seat selection page using React Router
     navigate(`/booking/${movieId}/screening/${screening.id}`)
   }
@@ -174,16 +160,31 @@ export default function MovieDetailPage() {
   return (
     <div className="movie-detail-page">
       <Header onSearch={() => {}} />
+      
+      {/* Synced Header Section */}
+      <header className="bg-gradient-to-r from-purple-800 to-gray-800">
         <div className="container">
-        {/* Breadcrumb */}
-        <Breadcrumb 
-          items={[
-            { label: "Trang chủ", to: "/" },
-            { label: movie.title }
-          ]}
-          className="mb-6"
-        />
+          {/* Breadcrumb */}
+          <Breadcrumb 
+            items={[
+              { label: "Trang chủ", href: "/" },
+              { label: movie.title }
+            ]}
+          />
+          
+          {/* Page Title */}
+          <div className="py-6">
+            <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 tracking-tight">
+              {movie.title}
+            </h1>
+            <p className="text-white/90 text-base md:text-lg font-medium">
+              {movie.description}
+            </p>
+          </div>
+        </div>
+      </header>
 
+      <div className="container">
         {/* Hero Section - CGV Style */}
         <div className="movie-hero-section">
           <div className="hero-background">
@@ -228,7 +229,7 @@ export default function MovieDetailPage() {
 
                 {/* Genre Tags */}
                 <div className="genre-tags">
-                  {movie.genres.split(',').map((genre: string, index: number) => (
+                  {movie.genres.split(',').map((genre, index) => (
                     <span key={`${movie.id}-genre-${index}`} className="genre-tag">{genre.trim()}</span>
                   ))}
                 </div>
@@ -356,4 +357,3 @@ export default function MovieDetailPage() {
     </div>
   )
 }
-

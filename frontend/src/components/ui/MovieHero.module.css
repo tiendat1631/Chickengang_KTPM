@@ -1,0 +1,187 @@
+/* Movie Hero Section Styles */
+.movieHero {
+  position: relative;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+}
+
+.heroBackground {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1;
+}
+
+.gradientOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(135deg, #5B2BDA 0%, #4421A3 50%, #072A49 100%);
+}
+
+.noiseOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-image: 
+    radial-gradient(circle at 20% 80%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 40% 40%, rgba(255, 255, 255, 0.05) 0%, transparent 50%);
+  opacity: 0.3;
+}
+
+.vignetteOverlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: radial-gradient(ellipse at center, transparent 0%, rgba(0, 0, 0, 0.1) 70%);
+}
+
+.heroContent {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  padding: 2rem 0;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+.heroLayout {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 3rem;
+  align-items: start;
+}
+
+.posterSection {
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.infoSection {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+.movieTitle {
+  font-size: 3.5rem;
+  font-weight: 800;
+  line-height: 1.1;
+  color: white;
+  margin: 0 0 1.5rem 0;
+  letter-spacing: -0.025em;
+  text-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+.movieOverview {
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.9);
+  margin: 0 0 2rem 0;
+  max-width: 60ch;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+  .heroLayout {
+    gap: 2rem;
+  }
+  
+  .movieTitle {
+    font-size: 3rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 0 1rem;
+  }
+  
+  .heroLayout {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+    text-align: center;
+  }
+  
+  .posterSection {
+    order: 1;
+  }
+  
+  .infoSection {
+    order: 2;
+  }
+  
+  .movieTitle {
+    font-size: 2.5rem;
+  }
+  
+  .movieOverview {
+    font-size: 1rem;
+    max-width: none;
+  }
+}
+
+@media (max-width: 640px) {
+  .movieHero {
+    min-height: auto;
+    padding: 2rem 0;
+  }
+  
+  .heroContent {
+    padding: 1rem 0;
+  }
+  
+  .container {
+    padding: 0 0.75rem;
+  }
+  
+  .heroLayout {
+    gap: 1.5rem;
+  }
+  
+  .movieTitle {
+    font-size: 2.25rem;
+    margin-bottom: 1rem;
+  }
+  
+  .movieOverview {
+    font-size: 0.95rem;
+    margin-bottom: 1.5rem;
+  }
+}
+
+/* High contrast mode support */
+@media (prefers-contrast: high) {
+  .movieTitle {
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+  }
+  
+  .movieOverview {
+    color: rgba(255, 255, 255, 1);
+  }
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .movieHero * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
