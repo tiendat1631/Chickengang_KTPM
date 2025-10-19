@@ -1,7 +1,7 @@
 // @ts-check
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '@/services/api';
-import { queryKeys } from './useQueryClient';
+import { queryKeys } from './useQueryClient.js';
 
 /**
  * Hook to get screenings for a movie

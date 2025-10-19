@@ -1,5 +1,5 @@
 // @ts-check
-import apiClient from './api';
+import apiClient from './api.js';
 
 export class AuthService {
   /**

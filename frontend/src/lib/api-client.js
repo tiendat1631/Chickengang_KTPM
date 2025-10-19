@@ -1,6 +1,6 @@
 // @ts-check
 import axios from 'axios';
-import { API_CONFIG, STORAGE_KEYS } from './constants';
+import { API_CONFIG, STORAGE_KEYS } from './constants.js';
 
 class ApiClient {
   constructor() {

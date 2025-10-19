@@ -2,8 +2,8 @@ import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useMovies } from '@/hooks/useMovies'
 import Header from '@/components/common/Header'
-import HeroSection from './HeroSection'
-import MovieList from './MovieList'
+import HeroSection from './HeroSection.jsx'
+import MovieList from './MovieList.jsx'
 import './HomePage.css'
 
 export default function HomePage() {

@@ -1,5 +1,5 @@
 import PropTypes from 'prop-types';
-import MovieHero from './ui/MovieHero';
+import MovieHero from './ui/MovieHero.jsx';
 
 /**
  * Movie Detail Demo Page showcasing the polished MovieHero component

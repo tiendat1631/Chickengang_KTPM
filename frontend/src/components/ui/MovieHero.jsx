@@ -1,9 +1,9 @@
 import PropTypes from 'prop-types';
-import GlassBreadcrumb from './GlassBreadcrumb';
-import PosterCard from './PosterCard';
-import MetaList from './MetaList';
-import TagChips from './TagChips';
-import HeroCTA from './HeroCTA';
+import GlassBreadcrumb from './GlassBreadcrumb.jsx';
+import PosterCard from './PosterCard.jsx';
+import MetaList from './MetaList.jsx';
+import TagChips from './TagChips.jsx';
+import HeroCTA from './HeroCTA.jsx';
 import styles from './MovieHero.module.css';
 
 /**

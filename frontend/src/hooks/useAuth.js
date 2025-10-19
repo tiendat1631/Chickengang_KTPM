@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
 import { AuthService } from '@/services/authService';
 import { storeTokens, removeToken, getToken, getUserData } from '@/lib/auth';
-import { queryKeys } from './useQueryClient';
+import { queryKeys } from './useQueryClient.js';
 
 /**
  * Hook for handling login mutation
