@@ -67,7 +67,7 @@
 }
 
 /* Link styling with dark theme - compact */
-.breadcrumbNav a {
+.breadcrumbLink {
   color: rgba(255, 255, 255, 0.8);
   text-decoration: none !important;
   transition: all 0.2s ease;
@@ -79,30 +79,61 @@
   flex-shrink: 0;
 }
 
-.breadcrumbNav a:hover {
+.breadcrumbLink:hover {
   color: rgba(255, 255, 255, 1);
   background-color: rgba(255, 255, 255, 0.1);
 }
 
-.breadcrumbNav a:focus {
+.breadcrumbLink:focus {
   outline: 1px solid rgba(255, 255, 255, 0.6);
   outline-offset: 1px;
   background-color: rgba(255, 255, 255, 0.15);
 }
 
-/* Home icon special styling */
-.breadcrumbNav .home-icon {
-  color: #ffd700;
-  font-size: 1em;
-  padding: 0.125rem 0.25rem;
+/* Home button special styling - like image 2 */
+.homeButton {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background-color: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  text-decoration: none !important;
+  padding: 0.5rem 0.75rem;
+  border-radius: 8px;
+  font-weight: 600;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.breadcrumbNav .home-icon:hover {
-  color: #ffed4e;
-  background-color: rgba(255, 215, 0, 0.2);
+.homeButton:hover {
+  background-color: rgba(255, 255, 255, 0.25);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.homeButton:focus {
+  outline: 2px solid rgba(255, 255, 255, 0.6);
+  outline-offset: 2px;
+}
+
+.homeIcon {
+  font-size: 1.1em;
+  color: #ffd700;
 }
 
 /* Current page styling - compact */
+.currentPage {
+  color: #ff6b6b;
+  font-weight: 600;
+  background-color: rgba(255, 107, 107, 0.2);
+  padding: 0.125rem 0.25rem;
+  border-radius: 3px;
+  border-left: 2px solid #ff6b6b;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
 .breadcrumbNav [aria-current="page"] {
   color: #ff6b6b;
   font-weight: 600;
@@ -129,12 +160,20 @@
     font-size: 0.8rem;
   }
   
-  .breadcrumbNav a {
+  .breadcrumbLink {
+    padding: 0.25rem 0.5rem;
+  }
+  
+  .currentPage {
     padding: 0.25rem 0.5rem;
   }
   
   .breadcrumbNav [aria-current="page"] {
     padding: 0.25rem 0.5rem;
+  }
+  
+  .homeButton {
+    padding: 0.6rem 1rem;
   }
 }
 
@@ -154,13 +193,23 @@
     font-size: 0.7rem;
   }
   
-  .breadcrumbNav a {
+  .breadcrumbLink {
+    padding: 0.1rem 0.2rem;
+    font-size: 0.7rem;
+  }
+  
+  .currentPage {
     padding: 0.1rem 0.2rem;
     font-size: 0.7rem;
   }
   
   .breadcrumbNav [aria-current="page"] {
     padding: 0.1rem 0.2rem;
+    font-size: 0.7rem;
+  }
+  
+  .homeButton {
+    padding: 0.3rem 0.5rem;
     font-size: 0.7rem;
   }
 }
@@ -178,12 +227,23 @@
 
 /* High contrast mode support */
 @media (prefers-contrast: high) {
-  .breadcrumbNav a {
+  .breadcrumbLink {
     color: #000;
   }
   
-  .breadcrumbNav a:hover {
+  .breadcrumbLink:hover {
     text-decoration: underline;
+  }
+  
+  .homeButton {
+    background-color: #000;
+    color: #fff;
+    border-color: #fff;
+  }
+  
+  .currentPage {
+    color: #000;
+    font-weight: 600;
   }
   
   .breadcrumbNav [aria-current="page"] {
@@ -194,7 +254,11 @@
 
 /* Reduced motion support */
 @media (prefers-reduced-motion: reduce) {
-  .breadcrumbNav a {
+  .breadcrumbLink {
+    transition: none;
+  }
+  
+  .homeButton {
     transition: none;
   }
 }

@@ -45,13 +45,21 @@ const Breadcrumb = ({ items, className = '' }) => {
                       <Link
                         to={item.href}
                         title={item.label}
-                        className={item.label === 'Trang chủ' ? 'home-icon' : ''}
+                        className={item.label === 'Trang chủ' ? styles.homeButton : styles.breadcrumbLink}
                       >
-                        {item.label === 'Trang chủ' ? '🏠' : item.label}
+                        {item.label === 'Trang chủ' ? (
+                          <>
+                            <span className={styles.homeIcon}>🏠</span>
+                            <span>{item.label}</span>
+                          </>
+                        ) : (
+                          item.label
+                        )}
                       </Link>
                     ) : (
                       <span 
                         title={item.label}
+                        className={styles.currentPage}
                       >
                         {item.label}
                       </span>
