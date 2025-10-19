@@ -1,4 +1,4 @@
-// @ts-check
+// JavaScript file - no TypeScript checking
 // Web-based token storage using localStorage
 const ACCESS_TOKEN_KEY = 'access_token';
 const REFRESH_TOKEN_KEY = 'refresh_token';

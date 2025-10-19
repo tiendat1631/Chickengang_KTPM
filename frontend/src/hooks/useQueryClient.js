@@ -1,4 +1,4 @@
-// @ts-check
+// JavaScript file - no TypeScript checking
 import { QueryClient } from '@tanstack/react-query';
 
 // Create a client

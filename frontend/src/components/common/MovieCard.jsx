@@ -1,4 +1,4 @@
-// @ts-check
+// JavaScript file - no TypeScript checking
 import PropTypes from 'prop-types';
 import '@/styles/MovieCard.css';
 

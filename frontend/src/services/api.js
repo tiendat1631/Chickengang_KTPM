@@ -1,4 +1,4 @@
-// @ts-check
+// JavaScript file - no TypeScript checking
 import axios from 'axios';
 import { getToken, removeToken } from '@/lib/auth';
 

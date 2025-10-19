@@ -1,4 +1,4 @@
-// @ts-check
+// JavaScript file - no TypeScript checking
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';

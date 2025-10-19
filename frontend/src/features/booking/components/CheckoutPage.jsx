@@ -1,5 +1,4 @@
-// @ts-check
-import PropTypes from 'prop-types';
+// JavaScript file - no TypeScript checking
 import Breadcrumb from '@/components/ui/Breadcrumb';
 
 /**

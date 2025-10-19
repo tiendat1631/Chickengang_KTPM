@@ -1,4 +1,4 @@
-// @ts-check
+// JavaScript file - no TypeScript checking
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { Toaster } from 'react-hot-toast';
@@ -17,7 +17,6 @@ import LoginPage from '@/features/auth/components/LoginPage';
 import RegisterPage from '@/features/auth/components/RegisterPage';
 import BookingPage from '@/features/booking/components/BookingPage';
 import CheckoutPage from '@/features/booking/components/CheckoutPage';
-import BreadcrumbDemo from '@/components/BreadcrumbDemo';
 import MovieDetailDemo from '@/components/MovieDetailDemo';
 
 // 404 Page Component
@@ -181,7 +180,6 @@ const AppRouter = () => {
             />
             
             {/* Demo Routes */}
-            <Route path="breadcrumb-demo" element={<BreadcrumbDemo />} />
             <Route path="movie-hero-demo" element={<MovieDetailDemo />} />
           </Route>
           

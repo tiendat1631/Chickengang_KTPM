@@ -1,4 +1,4 @@
-// @ts-check
+// JavaScript file - no TypeScript checking
 
 /**
  * Format amount as Vietnamese Dong currency

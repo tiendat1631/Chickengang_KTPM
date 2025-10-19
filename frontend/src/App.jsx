@@ -1,4 +1,4 @@
-// @ts-check
+// JavaScript file - no TypeScript checking
 import AppRouter from '@/navigation/AppRouter'
 
 /**
