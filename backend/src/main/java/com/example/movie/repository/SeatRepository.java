@@ -16,6 +16,11 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
     List<Seat> findByAuditoriumIdOrderByRowLabelAscNumberAsc(Long auditoriumId);
     
     /**
+     * Find all seats by auditorium ID (simplified method)
+     */
+    List<Seat> findByAuditoriumId(Long auditoriumId);
+    
+    /**
      * Find a specific seat by auditorium ID, row label, and seat number
      */
     Optional<Seat> findByAuditoriumIdAndRowLabelAndNumber(Long auditoriumId, String rowLabel, Integer number);

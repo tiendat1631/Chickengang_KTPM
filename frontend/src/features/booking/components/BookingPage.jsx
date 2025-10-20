@@ -52,8 +52,10 @@ export default function BookingPage() {
   }
 
   const handlePayment = () => {
-    // TODO: Implement payment integration
-    alert('Chức năng thanh toán sẽ được triển khai sớm!')
+    // Navigate to payment page with booking data
+    navigate(`/booking/${movieId}/payment`, { 
+      state: bookingData 
+    })
   }
 
   const handleBackToSeatSelection = () => {

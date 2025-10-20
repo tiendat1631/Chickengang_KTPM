@@ -54,12 +54,19 @@ public class BookingController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<BookingResponse>> getBookings(@RequestParam Long id){
-        BookingResponse booking = bookingService.getBooking(id);
-        ApiResponse<BookingResponse> result = new ApiResponse<>(
+    public ResponseEntity<ApiResponse<List<BookingResponse>>> getBookings(@RequestParam(required = false) Long userId) {
+        List<BookingResponse> bookings;
+        if (userId != null) {
+            bookings = bookingService.getBookingsByUserId(userId);
+        } else {
+            // Return single booking by ID (existing logic)
+            BookingResponse booking = bookingService.getBooking(userId);
+            bookings = List.of(booking);
+        }
+        ApiResponse<List<BookingResponse>> result = new ApiResponse<>(
                 HttpStatus.OK,
-                booking,
-                "get booking success",
+                bookings,
+                "get bookings success",
                 null
         );
         return ResponseEntity.status(HttpStatus.OK).body(result);

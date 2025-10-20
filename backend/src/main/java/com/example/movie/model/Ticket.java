@@ -34,7 +34,7 @@ public class Ticket {
     public enum Status{
         AVAILABLE,
         SOLD,
-        RESERVED
-
+        RESERVED,
+        ACTIVE
     }
 }

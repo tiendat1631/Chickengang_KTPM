@@ -16,6 +16,9 @@ import SeatSelectionPage from '@/features/booking/components/SeatSelectionPage.j
 import LoginPage from '@/features/auth/components/LoginPage.jsx';
 import RegisterPage from '@/features/auth/components/RegisterPage.jsx';
 import BookingPage from '@/features/booking/components/BookingPage.jsx';
+import PaymentPage from '@/features/booking/components/PaymentPage.jsx';
+import BookingSuccessPage from '@/features/booking/components/BookingSuccessPage.jsx';
+import MyTicketsPage from '@/features/booking/components/MyTicketsPage.jsx';
 import CheckoutPage from '@/features/booking/components/CheckoutPage.jsx';
 import MovieDetailDemo from '@/components/MovieDetailDemo.jsx';
 
@@ -167,6 +170,30 @@ const AppRouter = () => {
               element={
                 <ProtectedRoute>
                   <BookingPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="booking/:movieId/payment" 
+              element={
+                <ProtectedRoute>
+                  <PaymentPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="booking/success/:bookingId" 
+              element={
+                <ProtectedRoute>
+                  <BookingSuccessPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="my-tickets" 
+              element={
+                <ProtectedRoute>
+                  <MyTicketsPage />
                 </ProtectedRoute>
               } 
             />

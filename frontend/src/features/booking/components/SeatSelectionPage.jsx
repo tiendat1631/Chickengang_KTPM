@@ -22,7 +22,6 @@ export default function SeatSelectionPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  // const movieIdNum = movieId ? parseInt(movieId) : 0 // Not used currently
   const screeningIdNum = screeningId ? parseInt(screeningId) : 0
 
   const {
