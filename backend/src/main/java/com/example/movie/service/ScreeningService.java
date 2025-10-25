@@ -12,4 +12,5 @@ public interface ScreeningService {
     void  deleteScreening(Long id);
     ScreeningResponse getScreening(Long id);
     List<ScreeningResponse> getScreeningsByMovieId(Long movieId);
+    List<ScreeningResponse> getAllScreenings(int page, int size);
 }

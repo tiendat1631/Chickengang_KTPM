@@ -11,6 +11,8 @@ import com.example.movie.repository.MovieRepository;
 import com.example.movie.repository.ScreeningRepository;
 import com.example.movie.service.ScreeningService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -109,6 +111,15 @@ public class ScreeningServiceImpl implements ScreeningService {
     @Override
     public List<ScreeningResponse> getScreeningsByMovieId(Long movieId) {
         List<Screening> screenings = screeningRepository.findByMovieIdAndStatusActive(movieId);
+        return screenings.stream()
+                .map(screeningMapper::toResponse)
+                .toList();
+    }
+
+    @Override
+    public List<ScreeningResponse> getAllScreenings(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        List<Screening> screenings = screeningRepository.findAll(pageable).getContent();
         return screenings.stream()
                 .map(screeningMapper::toResponse)
                 .toList();

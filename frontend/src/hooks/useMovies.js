@@ -44,15 +44,52 @@ export const useMovie = (id) => {
 };
 
 /**
- * Hook to search movies
+ * Hook to search movies with advanced filters
  * @param {string} query - Search query
+ * @param {Object} filters - Filter options
+ * @param {string} [filters.genre] - Genre filter
+ * @param {string} [filters.yearFrom] - Year from filter
+ * @param {string} [filters.yearTo] - Year to filter
+ * @param {string} [filters.minRating] - Minimum rating filter
+ * @param {string} [filters.language] - Language filter
+ * @param {string} [filters.sortBy] - Sort option
  * @returns {Object} Search results query
  */
-export const useSearchMovies = (query) => {
+export const useSearchMovies = (query, filters = {}) => {
   return useQuery({
-    queryKey: queryKeys.movies.search(query),
+    queryKey: queryKeys.movies.search(query, filters),
     queryFn: async () => {
-      const response = await apiClient.get(`/v1/movies/search?q=${encodeURIComponent(query)}`);
+      const params = new URLSearchParams();
+      
+      if (query) {
+        params.append('q', query);
+      }
+      
+      if (filters.genre) {
+        params.append('genre', filters.genre);
+      }
+      
+      if (filters.yearFrom) {
+        params.append('yearFrom', filters.yearFrom);
+      }
+      
+      if (filters.yearTo) {
+        params.append('yearTo', filters.yearTo);
+      }
+      
+      if (filters.minRating) {
+        params.append('minRating', filters.minRating);
+      }
+      
+      if (filters.language) {
+        params.append('language', filters.language);
+      }
+      
+      if (filters.sortBy && filters.sortBy !== 'popularity') {
+        params.append('sortBy', filters.sortBy);
+      }
+      
+      const response = await apiClient.get(`/v1/movies/search?${params}`);
       return response.data.data;
     },
     enabled: !!query && query.length > 2,

@@ -12,6 +12,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/auditoriums")
 @RestController
@@ -40,6 +42,20 @@ public class AuditoriumController {
                 HttpStatus.OK,
                 updated,
                 "update success",
+                null
+        );
+        return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
+
+    @GetMapping
+    public ResponseEntity<ApiResponse<List<AuditoriumResponse>>> getAllAuditoriums(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        List<AuditoriumResponse> auditoriums = auditoriumService.getAllAuditoriums(page, size);
+        ApiResponse<List<AuditoriumResponse>> result = new ApiResponse<>(
+                HttpStatus.OK,
+                auditoriums,
+                "getAllAuditoriums success",
                 null
         );
         return ResponseEntity.status(HttpStatus.OK).body(result);
