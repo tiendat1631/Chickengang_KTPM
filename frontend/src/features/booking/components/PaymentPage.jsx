@@ -6,11 +6,13 @@ import Breadcrumb from '@/components/ui/Breadcrumb'
 import { formatVND } from '@/utils/formatCurrency'
 import apiClient from '@/services/api'
 import toast from 'react-hot-toast'
+import { useAuth } from '@/hooks/useAuth'
 
 export default function PaymentPage() {
   const { movieId } = useParams()
   const navigate = useNavigate()
   const location = useLocation()
+  const { user, isAuthenticated } = useAuth()
   const [bookingData, setBookingData] = useState(null)
   const [paymentMethod, setPaymentMethod] = useState('CASH')
   const [note, setNote] = useState('')
@@ -19,16 +21,29 @@ export default function PaymentPage() {
 
   // Create booking mutation
   const createBookingMutation = useMutation({
-    mutationFn: async (bookingData) => {
+    mutationFn: async (/** @type {any} */ bookingData) => {
+      console.log('Creating booking with data:', {
+        screeningId: bookingData.screening.id,
+        seatIds: bookingData.selectedSeats.map(seat => seat.id),
+        totalPrice: bookingData.totalPrice
+      })
       const response = await apiClient.post('/v1/bookings', {
-        userId: bookingData.userId,
         screeningId: bookingData.screening.id,
         seatIds: bookingData.selectedSeats.map(seat => seat.id),
         totalPrice: bookingData.totalPrice
       })
       return response.data.data
     },
-    onSuccess: (booking) => {
+    onSuccess: (/** @type {any} */ booking) => {
+      console.log('Booking created successfully:', booking)
+      
+      // Validate booking response has id
+      if (!booking || !booking.id) {
+        console.error('Booking response missing id:', booking)
+        toast.error('Lỗi tạo đơn đặt vé. Vui lòng thử lại.')
+        return
+      }
+      
       // After creating booking, confirm payment
       confirmPaymentMutation.mutate({
         bookingId: booking.id,
@@ -36,26 +51,79 @@ export default function PaymentPage() {
         note
       })
     },
-    onError: (error) => {
-      toast.error(error?.response?.data?.message || 'Tạo đơn đặt vé thất bại')
+    onError: (/** @type {any} */ error) => {
+      console.error('Booking creation error:', error)
+      
+      // Handle 401 specifically - only redirect if token refresh also failed
+      if (error?.response?.status === 401) {
+        const refreshFailed = error.config?._refreshFailed === true
+        
+        if (refreshFailed) {
+          toast.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.')
+          navigate('/login', {
+            state: { 
+              message: 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.',
+              returnTo: `/booking/${movieId}/payment`
+            }
+          })
+          return
+        } else {
+          toast.error('Lỗi xác thực. Vui lòng thử lại.')
+          return
+        }
+      }
+      
+      const errorMessage = error?.response?.data?.message || 'Tạo đơn đặt vé thất bại'
+      toast.error(errorMessage)
     }
   })
 
   // Confirm payment mutation
   const confirmPaymentMutation = useMutation({
-    mutationFn: async (paymentData) => {
+    mutationFn: async (/** @type {any} */ paymentData) => {
+      console.log('Confirming payment with data:', paymentData)
       const response = await apiClient.post('/v1/payments/confirm', paymentData)
       return response.data.data
     },
-    onSuccess: (payment) => {
+    onSuccess: (/** @type {any} */ payment) => {
+      console.log('Payment confirmed successfully:', payment)
       toast.success('Đặt vé thành công!')
       // Navigate to success page
       navigate(`/booking/success/${payment.bookingId}`, {
         state: { payment, bookingData }
       })
     },
-    onError: (error) => {
-      toast.error(error?.response?.data?.message || 'Xác nhận thanh toán thất bại')
+    onError: (/** @type {any} */ error) => {
+      console.error('Payment confirmation error:', error)
+      
+      // Handle 401 specifically - only redirect if token refresh also failed
+      if (error?.response?.status === 401) {
+        const refreshFailed = error.config?._refreshFailed === true
+        
+        if (refreshFailed) {
+          toast.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.')
+          navigate('/login', {
+            state: { 
+              message: 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.',
+              returnTo: `/booking/${movieId}/payment`
+            }
+          })
+          return
+        } else {
+          // Don't show generic auth error, let the retry mechanism handle it
+          console.warn('Payment confirmation failed with 401, token refresh will be attempted')
+          return
+        }
+      }
+      
+      // Handle 400 Bad Request (likely invalid bookingId)
+      if (error?.response?.status === 400) {
+        toast.error('Dữ liệu đặt vé không hợp lệ. Vui lòng thử lại.')
+        return
+      }
+      
+      const errorMessage = error?.response?.data?.message || 'Xác nhận thanh toán thất bại'
+      toast.error(errorMessage)
     }
   })
 
@@ -101,6 +169,21 @@ export default function PaymentPage() {
   const handleSubmitPayment = () => {
     if (!bookingData) {
       toast.error('Không tìm thấy thông tin đặt vé')
+      return
+    }
+
+    // Debug logging
+    console.log('User authentication status:', { isAuthenticated, userId: user?.id })
+    console.log('Booking data:', bookingData)
+
+    if (!isAuthenticated || !user?.id) {
+      toast.error('Vui lòng đăng nhập để đặt vé')
+      navigate('/login', {
+        state: { 
+          message: 'Vui lòng đăng nhập để đặt vé',
+          returnTo: `/booking/${movieId}/payment`
+        }
+      })
       return
     }
 
@@ -341,8 +424,10 @@ export default function PaymentPage() {
                   onClick={handleSubmitPayment}
                   disabled={createBookingMutation.isPending || confirmPaymentMutation.isPending}
                 >
-                  {(createBookingMutation.isPending || confirmPaymentMutation.isPending) 
-                    ? 'Đang xử lý...' 
+                  {createBookingMutation.isPending 
+                    ? 'Đang tạo đơn đặt vé...' 
+                    : confirmPaymentMutation.isPending
+                    ? 'Đang xác nhận thanh toán...'
                     : '💳 Xác nhận thanh toán'
                   }
                 </button>

@@ -6,6 +6,10 @@ import com.example.movie.dto.response.ApiResponse;
 import com.example.movie.service.PaymentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -19,6 +23,7 @@ public class PaymentController {
     private final PaymentService paymentService;
 
     @PostMapping("/confirm")
+    @PreAuthorize("hasRole('CUSTOMER') or hasRole('ADMIN')")
     public ResponseEntity<ApiResponse<PaymentResponse>> confirmPayment(@Valid @RequestBody PaymentConfirmRequest request) {
         PaymentResponse response = paymentService.confirmPayment(request);
         ApiResponse<PaymentResponse> result = new ApiResponse<>(
@@ -30,7 +35,7 @@ public class PaymentController {
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
-    @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')")
+    @PreAuthorize("hasRole('ADMIN')")
     @PatchMapping("/{paymentId}/complete")
     public ResponseEntity<ApiResponse<PaymentResponse>> completePayment(
             @PathVariable Long paymentId,
@@ -52,6 +57,29 @@ public class PaymentController {
                 HttpStatus.OK,
                 response,
                 "Get payment by booking success",
+                null
+        );
+        return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping
+    public ResponseEntity<ApiResponse<Page<PaymentResponse>>> getAllPayments(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "id,DESC") String sort) {
+        
+        String[] sortParams = sort.split(",");
+        Sort.Direction direction = sortParams.length > 1 && sortParams[1].equalsIgnoreCase("ASC") 
+                ? Sort.Direction.ASC 
+                : Sort.Direction.DESC;
+        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParams[0]));
+        
+        Page<PaymentResponse> payments = paymentService.getAllPayments(pageable);
+        ApiResponse<Page<PaymentResponse>> result = new ApiResponse<>(
+                HttpStatus.OK,
+                payments,
+                "Get all payments success",
                 null
         );
         return ResponseEntity.status(HttpStatus.OK).body(result);
