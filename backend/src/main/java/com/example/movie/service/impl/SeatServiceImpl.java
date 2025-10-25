@@ -39,7 +39,7 @@ public class SeatServiceImpl implements SeatService {
                 .findFirst()
                 .orElse(null);
             
-            if (ticket != null) {
+            if (ticket != null && ticket.getStatus() != Ticket.Status.AVAILABLE) {
                 response.setStatus(ticket.getStatus().toString());
             } else {
                 response.setStatus("AVAILABLE");

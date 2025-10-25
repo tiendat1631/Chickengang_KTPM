@@ -25,7 +25,7 @@ public class Booking {
     private LocalDateTime createdOn;
 
     @Column(nullable = false)
-    @Enumerated(EnumType.STRING)
+    @Enumerated(EnumType.ORDINAL)
     private BookingStatus bookingStatus;
 
     @Column(nullable = false)
@@ -47,10 +47,9 @@ public class Booking {
     private List<Ticket> tickets;
 
     public enum BookingStatus {
-        PENDING,    // Đang chờ thanh toán
-        CONFIRMED,  // Đã thanh toán / xác nhận
-        CANCELLED,  // Đã hủy
-
+        PENDING,    // 0 - Đang chờ thanh toán
+        PAID,       // 1 - Đã thanh toán  
+        CANCELLED   // 2 - Đã hủy
     }
 
 }

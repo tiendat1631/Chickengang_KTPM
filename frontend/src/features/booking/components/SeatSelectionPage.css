@@ -112,34 +112,70 @@
   transform: translateY(-1px);
 }
 
+/* AVAILABLE - Xanh lá (có thể chọn) */
 .seat-selection-container .seat.available {
   border-color: #22c55e;
   background: #ffffff;
   color: #065f46;
 }
 
-.seat-selection-container .seat.sold {
-  border-color: #ef4444;
-  background: #ffffff;
-  color: #991b1b;
+.seat-selection-container .seat.available:hover:not(:disabled) {
+  background: #f0fdf4;
+  border-color: #16a34a;
+  transform: translateY(-2px);
+}
+
+/* BOOKED - Cam đậm (đang giữ chỗ) */
+.seat-selection-container .seat.booked {
+  border-color: #d97706;
+  background: #fbbf24;
+  color: #78350f;
   cursor: not-allowed;
 }
 
+/* SOLD - Đỏ (đã bán - ISSUED/USED/CANCELLED) */
+.seat-selection-container .seat.sold {
+  border-color: #dc2626;
+  background: #fef2f2;
+  color: #991b1b;
+  cursor: not-allowed;
+  font-weight: bold;
+}
+
+/* SELECTED - Xanh dương (đang chọn) */
 .seat-selection-container .seat.selected {
   border-color: #2563eb;
   background: #2563eb;
   color: #ffffff;
 }
 
+/* Sweetbox styling */
 .seat-selection-container .seat.sweetbox {
   border-color: #f59e0b;
-  background: #fde68a;
+}
+
+.seat-selection-container .seat.sweetbox.available {
+  background: #fef3c7;
   color: #92400e;
 }
 
-.seat.sweetbox.selected {
-  background: #f59e0b;
-  color: white;
+.seat-selection-container .seat.sweetbox.booked {
+  border-color: #d97706;
+  background: #fbbf24;
+  color: #78350f;
+  cursor: not-allowed;
+}
+
+.seat-selection-container .seat.sweetbox.sold {
+  border-color: #dc2626;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.seat-selection-container .seat.sweetbox.selected {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #ffffff;
 }
 
 .seat-legend {
@@ -163,18 +199,23 @@
 }
 
 .seat-icon.available {
-  background: #ecfdf5;
-  border-color: #10b981;
+  background: #ffffff;
+  border-color: #22c55e;
+}
+
+.seat-icon.booked {
+  background: #fbbf24;
+  border-color: #d97706;
 }
 
 .seat-icon.sold {
   background: #fef2f2;
-  border-color: #ef4444;
+  border-color: #dc2626;
 }
 
 .seat-icon.selected {
-  background: #3b82f6;
-  border-color: #3b82f6;
+  background: #2563eb;
+  border-color: #2563eb;
 }
 
 .seat-icon.sweetbox {

@@ -35,7 +35,7 @@ public interface SeatRepository extends JpaRepository<Seat, Long> {
      */
     @Query("SELECT s FROM Seat s WHERE s.auditorium.id = :auditoriumId " +
            "AND s.id NOT IN (SELECT t.seat.id FROM Ticket t WHERE t.screening.id = :screeningId " +
-           "AND t.status IN (com.example.movie.model.Ticket.Status.SOLD, com.example.movie.model.Ticket.Status.RESERVED)) " +
+           "AND t.status IN (com.example.movie.model.Ticket$Status.BOOKED, com.example.movie.model.Ticket$Status.ISSUED)) " +
            "ORDER BY s.rowLabel ASC, s.number ASC")
     List<Seat> findAvailableSeatsForScreening(@Param("auditoriumId") Long auditoriumId, 
                                              @Param("screeningId") Long screeningId);

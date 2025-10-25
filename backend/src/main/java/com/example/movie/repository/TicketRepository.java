@@ -17,7 +17,8 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
     /**
      * Find tickets by booking ID
      */
-    List<Ticket> findByBookingId(Long bookingId);
+    @Query("SELECT t FROM Ticket t WHERE t.booking.id = :bookingId")
+    List<Ticket> findByBookingId(@Param("bookingId") Long bookingId);
     
     /**
      * Find tickets by seat ID
@@ -35,6 +36,15 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
      */
     @Query("SELECT t FROM Ticket t WHERE t.screening.id = :screeningId AND t.seat.id = :seatId")
     Ticket findByScreeningIdAndSeatId(@Param("screeningId") Long screeningId, @Param("seatId") Long seatId);
+    
+    /**
+     * Find ticket by movie, auditorium, screening and seat (using new unique constraint)
+     */
+    @Query("SELECT t FROM Ticket t WHERE t.movie.id = :movieId AND t.auditorium.id = :auditoriumId AND t.screening.id = :screeningId AND t.seat.id = :seatId")
+    Ticket findByMovieIdAndAuditoriumIdAndScreeningIdAndSeatId(@Param("movieId") Long movieId, 
+                                                               @Param("auditoriumId") Long auditoriumId,
+                                                               @Param("screeningId") Long screeningId, 
+                                                               @Param("seatId") Long seatId);
     
     /**
      * Count tickets by status for a screening
