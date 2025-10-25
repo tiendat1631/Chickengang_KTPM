@@ -1,108 +1,91 @@
-// JavaScript file - no TypeScript checking
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
 import { useAuth } from '@/hooks/useAuth.js';
+import SearchBar from './SearchBar';
+import UserMenu from './UserMenu';
+import MobileNav from './MobileNav';
 import '@/styles/Header.css';
 
 /**
- * Header component with search functionality and user menu
+ * Main Header component - orchestrates all sub-components
  * @param {Object} props - Component props
  * @param {Function} [props.onSearch] - Callback function for search
- * @returns {JSX.Element}
+ * @returns {React.ReactElement}
  */
 const Header = ({ onSearch }) => {
   const { user, logout } = useAuth();
-  const [searchQuery, setSearchQuery] = useState('');
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  /**
-   * Handle search form submission
-   * @param {React.FormEvent} e - Form event
-   */
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (onSearch && searchQuery.trim()) {
-      onSearch(searchQuery.trim());
+  const handleLogout = () => {
+    logout();
+  };
+
+  const handleSearch = (query, filters) => {
+    if (onSearch) {
+      onSearch(query, filters);
     }
   };
 
-  /**
-   * Handle user logout
-   */
-  const handleLogout = () => {
-    logout();
-    setIsMenuOpen(false);
-  };
-
   return (
-    <header className="header">
-      <div className="header-container">
-        {/* Logo */}
-        <Link to="/" aria-label="Trang chủ" className="header-logo-link">
-          <div className="header-logo">
-            <span className="logo-icon">🎬</span>
-            <span className="logo-text">MovieBooking</span>
+    <>
+      <header className="header">
+        <div className="header__container">
+          {/* Logo */}
+          <Link to="/" className="header__logo" aria-label="Trang chủ">
+            <span className="header__logo-icon">🎬</span>
+            <span className="header__logo-text">MovieBooking</span>
+          </Link>
+
+          {/* Desktop Search */}
+          <div className="header__search-desktop">
+            <SearchBar onSearch={handleSearch} isMobile={false} />
           </div>
-        </Link>
 
-        {/* Search Bar */}
-        <form className="header-search" onSubmit={handleSearch}>
-          <input
-            type="text"
-            placeholder="Tìm kiếm phim..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="search-input"
-          />
-          <button type="submit" className="search-button">
-            🔍
+          {/* Desktop User Menu / Auth Buttons */}
+          <div className="header__actions-desktop">
+            {user ? (
+              <UserMenu user={user} onLogout={handleLogout} />
+            ) : (
+              <div className="header__auth">
+                <Link to="/login" className="header__auth-btn header__auth-btn--outline">
+                  Đăng nhập
+                </Link>
+                <Link to="/register" className="header__auth-btn header__auth-btn--primary">
+                  Đăng ký
+                </Link>
+              </div>
+            )}
+          </div>
+
+          {/* Mobile Menu Button */}
+          <button
+            className="header__mobile-toggle"
+            onClick={() => setIsMobileMenuOpen(true)}
+            aria-label="Mở menu"
+            aria-expanded={isMobileMenuOpen}
+          >
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
           </button>
-        </form>
-
-        {/* User Menu */}
-        <div className="header-user">
-          {user ? (
-            <div className="user-menu">
-              <button
-                className="user-button"
-                onClick={() => setIsMenuOpen(!isMenuOpen)}
-              >
-                👤 {user.username}
-              </button>
-              {isMenuOpen && (
-                <div className="user-dropdown">
-                  <div className="user-info">
-                    <p className="user-name">{user.username}</p>
-                    <p className="user-email">{user.email}</p>
-                  </div>
-                  <div className="user-actions">
-                    <button className="dropdown-item">Hồ sơ</button>
-                    <button className="dropdown-item">Đặt vé của tôi</button>
-                    <button className="dropdown-item" onClick={handleLogout}>
-                      Đăng xuất
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-          ) : (
-            <div className="auth-buttons">
-              <Link to="/login" className="btn btn-outline">Đăng nhập</Link>
-              <Link to="/register" className="btn btn-primary">Đăng ký</Link>
-            </div>
-          )}
         </div>
 
-        {/* Mobile Menu Button */}
-        <button
-          className="mobile-menu-button"
-          onClick={() => setIsMenuOpen(!isMenuOpen)}
-        >
-          ☰
-        </button>
-      </div>
-    </header>
+        {/* Mobile Search - Below header on mobile */}
+        <div className="header__search-mobile">
+          <SearchBar onSearch={handleSearch} isMobile={true} />
+        </div>
+      </header>
+
+      {/* Mobile Navigation Overlay */}
+      <MobileNav
+        isOpen={isMobileMenuOpen}
+        onClose={() => setIsMobileMenuOpen(false)}
+        user={user}
+        onLogout={handleLogout}
+        onSearch={handleSearch}
+      />
+    </>
   );
 };
 
