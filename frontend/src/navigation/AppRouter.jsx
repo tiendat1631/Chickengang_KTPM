@@ -6,6 +6,7 @@ import PropTypes from 'prop-types';
 
 // Layout
 import Layout from '@/components/Layout.jsx';
+import ErrorBoundary from '@/components/ErrorBoundary.jsx';
 
 // Pages
 import HomePage from '@/features/movies/components/HomePage.jsx';
@@ -15,9 +16,23 @@ import ScreeningListPage from '@/features/screenings/components/ScreeningListPag
 import SeatSelectionPage from '@/features/booking/components/SeatSelectionPage.jsx';
 import LoginPage from '@/features/auth/components/LoginPage.jsx';
 import RegisterPage from '@/features/auth/components/RegisterPage.jsx';
+import UserProfile from '@/features/auth/components/UserProfile.jsx';
 import BookingPage from '@/features/booking/components/BookingPage.jsx';
+import PaymentPage from '@/features/booking/components/PaymentPage.jsx';
+import BookingSuccessPage from '@/features/booking/components/BookingSuccessPage.jsx';
+import MyTicketsPage from '@/features/booking/components/MyTicketsPage.jsx';
 import CheckoutPage from '@/features/booking/components/CheckoutPage.jsx';
 import MovieDetailDemo from '@/components/MovieDetailDemo.jsx';
+
+// Admin Pages
+import AdminDashboard from '@/features/admin/components/AdminDashboard.jsx';
+import AdminMovieManagement from '@/features/admin/components/AdminMovieManagement.jsx';
+import AdminUserManagement from '@/features/admin/components/AdminUserManagement.jsx';
+import AdminAuditoriumManagement from '@/features/admin/components/AdminAuditoriumManagement.jsx';
+import AdminScreeningManagement from '@/features/admin/components/AdminScreeningManagement.jsx';
+import AdminBookingManagement from '@/features/admin/components/AdminBookingManagement.jsx';
+import AdminPaymentManagement from '@/features/admin/components/AdminPaymentManagement.jsx';
+import AdminReports from '@/features/admin/components/AdminReports.jsx';
 
 // 404 Page Component
 const NotFoundPage = () => (
@@ -53,6 +68,7 @@ const NotFoundPage = () => (
 
 // Hooks
 import { useAuth } from '@/hooks/useAuth.js';
+import AdminRoute from './AdminRoute.jsx';
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -171,6 +187,38 @@ const AppRouter = () => {
               } 
             />
             <Route 
+              path="booking/:movieId/payment" 
+              element={
+                <ProtectedRoute>
+                  <PaymentPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="booking/success/:bookingId" 
+              element={
+                <ProtectedRoute>
+                  <BookingSuccessPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="my-tickets" 
+              element={
+                <ProtectedRoute>
+                  <MyTicketsPage />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="profile" 
+              element={
+                <ProtectedRoute>
+                  <UserProfile />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
               path="checkout" 
               element={
                 <ProtectedRoute>
@@ -181,6 +229,88 @@ const AppRouter = () => {
             
             {/* Demo Routes */}
             <Route path="movie-hero-demo" element={<MovieDetailDemo />} />
+            
+            {/* Admin Routes */}
+            <Route 
+              path="admin" 
+              element={
+                <AdminRoute>
+                  <ErrorBoundary>
+                    <AdminDashboard />
+                  </ErrorBoundary>
+                </AdminRoute>
+              } 
+            />
+            <Route 
+              path="admin/movies" 
+              element={
+                <AdminRoute>
+                  <ErrorBoundary>
+                    <AdminMovieManagement />
+                  </ErrorBoundary>
+                </AdminRoute>
+              } 
+            />
+            <Route 
+              path="admin/users" 
+              element={
+                <AdminRoute>
+                  <ErrorBoundary>
+                    <AdminUserManagement />
+                  </ErrorBoundary>
+                </AdminRoute>
+              } 
+            />
+            <Route 
+              path="admin/auditoriums" 
+              element={
+                <AdminRoute>
+                  <ErrorBoundary>
+                    <AdminAuditoriumManagement />
+                  </ErrorBoundary>
+                </AdminRoute>
+              } 
+            />
+            <Route 
+              path="admin/screenings" 
+              element={
+                <AdminRoute>
+                  <ErrorBoundary>
+                    <AdminScreeningManagement />
+                  </ErrorBoundary>
+                </AdminRoute>
+              } 
+            />
+            <Route 
+              path="admin/bookings" 
+              element={
+                <AdminRoute>
+                  <ErrorBoundary>
+                    <AdminBookingManagement />
+                  </ErrorBoundary>
+                </AdminRoute>
+              } 
+            />
+            <Route 
+              path="admin/payments" 
+              element={
+                <AdminRoute>
+                  <ErrorBoundary>
+                    <AdminPaymentManagement />
+                  </ErrorBoundary>
+                </AdminRoute>
+              } 
+            />
+            <Route 
+              path="admin/reports" 
+              element={
+                <AdminRoute>
+                  <ErrorBoundary>
+                    <AdminReports />
+                  </ErrorBoundary>
+                </AdminRoute>
+              } 
+            />
           </Route>
           
           {/* 404 Route */}

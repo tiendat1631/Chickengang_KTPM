@@ -2,8 +2,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
 import { AuthService } from '@/services/authService.js';
-import { storeTokens, removeToken, getToken, getUserData } from '@/lib/auth.js';
+import { storeTokens, removeToken, getToken, getUserData, isTokenExpired } from '@/lib/auth.js';
 import { queryKeys } from './useQueryClient.js';
+import { tokenRefreshService } from '@/services/tokenRefreshService.js';
 
 /**
  * Hook for handling login mutation
@@ -94,13 +95,19 @@ export const useAuth = () => {
     const checkAuth = async () => {
       try {
         const token = await getToken();
-        if (token) {
+        if (token && token.trim() !== '') {
           // Get user data from localStorage
           const userData = await getUserData();
           if (userData) {
             setUser(userData);
+            
+            // Start proactive token refresh if token is valid
+            if (!isTokenExpired(token)) {
+              tokenRefreshService.startProactiveRefresh();
+            }
           } else {
             // If no user data found, remove invalid token
+            console.warn('No user data found, removing tokens');
             await removeToken();
           }
         }
@@ -113,7 +120,29 @@ export const useAuth = () => {
       }
     };
 
+    // Listen for token refresh events
+    const handleTokenRefresh = async () => {
+      console.log('Token refreshed, updating auth state');
+      // Re-check auth state with new token
+      const token = await getToken();
+      if (token && !isTokenExpired(token)) {
+        const userData = await getUserData();
+        if (userData) {
+          setUser(userData);
+        }
+      }
+    };
+
     checkAuth();
+    
+    // Add event listener for token refresh
+    window.addEventListener('tokenRefreshed', handleTokenRefresh);
+    
+    // Cleanup event listener and stop proactive refresh
+    return () => {
+      window.removeEventListener('tokenRefreshed', handleTokenRefresh);
+      tokenRefreshService.stopProactiveRefresh();
+    };
   }, []);
 
   const isAuthenticated = !!user;
@@ -140,6 +169,10 @@ export const useAuth = () => {
           updatedAt: new Date().toISOString(),
         };
         setUser(userData);
+        
+        // Start proactive token refresh after successful login
+        tokenRefreshService.startProactiveRefresh();
+        
         options?.onSuccess?.(response);
       },
     });
@@ -154,6 +187,10 @@ export const useAuth = () => {
       ...options,
       onSuccess: () => {
         setUser(null);
+        
+        // Stop proactive token refresh on logout
+        tokenRefreshService.stopProactiveRefresh();
+        
         options?.onSuccess?.();
       },
     });

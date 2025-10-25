@@ -11,6 +11,8 @@ import com.example.movie.repository.AuditoriumRepository;
 import com.example.movie.repository.SeatRepository;
 import com.example.movie.service.AuditoriumService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -66,5 +68,14 @@ public class AuditoriumServiceImpl implements AuditoriumService {
         Auditorium auditorium = auditoriumRepository.findById(id)
                 .orElseThrow(()-> new InvalidId(id));
         return auditoriumMapper.toResponse(auditorium);
+    }
+
+    @Override
+    public List<AuditoriumResponse> getAllAuditoriums(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        List<Auditorium> auditoriums = auditoriumRepository.findAll(pageable).getContent();
+        return auditoriums.stream()
+                .map(auditoriumMapper::toResponse)
+                .toList();
     }
 }

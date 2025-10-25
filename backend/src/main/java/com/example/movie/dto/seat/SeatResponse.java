@@ -1,20 +1,18 @@
 package com.example.movie.dto.seat;
 
-import com.example.movie.model.Seat;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@Builder
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 public class SeatResponse {
     private Long id;
     private String rowLabel;
-    private Integer number;
-    private Seat.SeatType seatType;
+    private int number;
+    private String seatType;
+    private String status;
     private Long auditoriumId;
     private String auditoriumName;
 }

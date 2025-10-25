@@ -9,6 +9,9 @@ import lombok.NoArgsConstructor;
 @Entity
 @AllArgsConstructor
 @NoArgsConstructor
+@Table(uniqueConstraints = {
+    @UniqueConstraint(columnNames = {"movie_id", "auditorium_id", "screening_id", "seat_id"}, name = "uk_movie_auditorium_screening_seat")
+})
 public class Ticket {
 
     @Id
@@ -18,23 +21,39 @@ public class Ticket {
     @Column(nullable = false)
     private Status status;
 
-    @OneToOne
-    @JoinColumn(name = "seat_id", nullable = false, unique = true)
-    private Seat seat;
+    @Column(unique = true, length = 14)
+    private String ticketCode; // Mã vé duy nhất
 
-    @ManyToOne
+    // Quan hệ trực tiếp với Movie
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "movie_id", nullable = false)
+    private Movie movie;
+
+    // Quan hệ trực tiếp với Auditorium
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "auditorium_id", nullable = false)
+    private Auditorium auditorium;
+
+    // Quan hệ với Screening
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "screening_id", nullable = false)
     private Screening screening;
+
+    // Quan hệ với Seat
+    @OneToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "seat_id", nullable = false)
+    private Seat seat;
 
     // Một vé có thể nằm trong một booking (sau khi đặt)
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "booking_id")
-    private Booking booking; // thêm dòng này để biết vé nào thuộc booking nào
+    private Booking booking;
 
     public enum Status{
-        AVAILABLE,
-        SOLD,
-        RESERVED
-
+        AVAILABLE,  // Ghế trống
+        BOOKED,     // Đã đặt (chưa thanh toán)
+        ISSUED,     // Đã phát hành vé (đã thanh toán)
+        USED,       // Đã sử dụng
+        CANCELLED   // Đã hủy
     }
 }

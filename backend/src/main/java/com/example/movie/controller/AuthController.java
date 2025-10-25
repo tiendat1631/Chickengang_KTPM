@@ -3,6 +3,7 @@ package com.example.movie.controller;
 import com.example.movie.dto.auth.AuthResponse;
 import com.example.movie.dto.auth.LoginRequest;
 import com.example.movie.dto.auth.RegisterRequest;
+import com.example.movie.dto.auth.RefreshTokenRequest;
 import com.example.movie.dto.response.ApiResponse;
 import com.example.movie.dto.user.UserResponse;
 import com.example.movie.service.AuthService;
@@ -41,6 +42,18 @@ public class AuthController {
                 HttpStatus.OK,
                 created,
                 "login successfully",
+                null
+        );
+        return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
+
+    @PostMapping("/refresh")
+    public ResponseEntity<ApiResponse<AuthResponse>> refreshToken(@RequestBody RefreshTokenRequest refreshTokenRequest) {
+        AuthResponse response = authService.refreshToken(refreshTokenRequest.getRefreshToken());
+        ApiResponse<AuthResponse> result = new ApiResponse<>(
+                HttpStatus.OK,
+                response,
+                "Token refreshed successfully",
                 null
         );
         return ResponseEntity.status(HttpStatus.OK).body(result);

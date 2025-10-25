@@ -45,6 +45,20 @@ public class ScreeningController {
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
+    @GetMapping("/all")
+    public ResponseEntity<ApiResponse<List<ScreeningResponse>>> getAllScreenings(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        List<ScreeningResponse> screenings = screeningService.getAllScreenings(page, size);
+        ApiResponse<List<ScreeningResponse>> result = new ApiResponse<>(
+                HttpStatus.OK,
+                screenings,
+                "getAllScreenings success",
+                null
+        );
+        return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
+
     @GetMapping("/movie/{movieId}")
     public ResponseEntity<ApiResponse<List<ScreeningResponse>>> getScreeningsByMovieId(@PathVariable Long movieId) {
         List<ScreeningResponse> screenings = screeningService.getScreeningsByMovieId(movieId);

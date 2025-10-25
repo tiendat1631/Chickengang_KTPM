@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useLogin } from '../../../hooks/useAuth'
+import { getUserRole } from '../../../lib/auth.js'
 import toast from 'react-hot-toast'
 
 export default function LoginPage() {
@@ -25,12 +26,26 @@ export default function LoginPage() {
     login(
       { username, password },
       {
-        onSuccess: () => {
+        onSuccess: async () => {
           toast.success('Đăng nhập thành công')
-          // Clear the intended booking URL from localStorage
-          localStorage.removeItem('intendedBookingUrl')
-          // Navigate to the intended destination
-          navigate(returnTo, { replace: true })
+          
+          // Check user role to determine redirect destination
+          const role = await getUserRole()
+          
+          if (role === 'ADMIN') {
+            // Admin user - redirect to admin panel or intended admin URL
+            const intendedAdminUrl = localStorage.getItem('intendedAdminUrl')
+            if (intendedAdminUrl) {
+              localStorage.removeItem('intendedAdminUrl')
+              navigate(intendedAdminUrl, { replace: true })
+            } else {
+              navigate('/admin', { replace: true })
+            }
+          } else {
+            // Regular user - redirect to intended destination or home
+            localStorage.removeItem('intendedBookingUrl')
+            navigate(returnTo, { replace: true })
+          }
         },
         onError: (error) => {
           toast.error(error?.response?.data?.message || 'Đăng nhập thất bại')

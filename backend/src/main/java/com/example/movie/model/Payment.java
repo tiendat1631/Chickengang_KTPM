@@ -19,6 +19,8 @@ public class Payment {
     private String transactionId;
     private LocalDateTime paymentDate;
     private float amount;
+    private String paymentMethod; // CASH, BANK_TRANSFER
+    private String note;
 
     @Enumerated(EnumType.STRING)
     private PaymentStatus status;

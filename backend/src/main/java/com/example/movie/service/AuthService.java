@@ -8,4 +8,5 @@ import com.example.movie.dto.user.UserResponse;
 public interface AuthService {
     UserResponse register(RegisterRequest authRequest);
     AuthResponse login(LoginRequest loginRequest);
+    AuthResponse refreshToken(String refreshToken);
 }

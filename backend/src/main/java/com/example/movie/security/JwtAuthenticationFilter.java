@@ -31,8 +31,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         if (path.startsWith("/api/v1/auth/") || 
             path.startsWith("/api/v1/screenings/") ||
             (path.startsWith("/api/v1/movies") && "GET".equals(request.getMethod())) ||
-            path.startsWith("/api/v1/users/") ||
-            path.startsWith("/api/v1/bookings/")) {
+            (path.startsWith("/api/v1/users") && "POST".equals(request.getMethod()))) {
+            System.out.println("Skipping JWT validation for path: " + path);
             filterChain.doFilter(request, response);
             return;
         }

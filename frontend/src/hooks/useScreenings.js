@@ -46,9 +46,8 @@ export const useSeats = (screeningId) => {
   return useQuery({
     queryKey: queryKeys.seats.list(screeningId),
     queryFn: async () => {
-      // Seats are embedded in screening detail; there is no separate endpoint
-      const response = await apiClient.get(`/v1/screenings`, { params: { id: screeningId } });
-      return response.data.data?.seats ?? [];
+      const response = await apiClient.get(`/v1/seats/screening/${screeningId}`);
+      return response.data.data;
     },
     enabled: !!screeningId,
     staleTime: 30 * 1000, // 30 seconds (seats change frequently)

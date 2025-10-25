@@ -13,6 +13,14 @@ const formatVND = (amount) => {
   }).format(amount)
 }
 
+// Map backend status to display status
+const getDisplayStatus = (backendStatus) => {
+  if (backendStatus === 'AVAILABLE') return 'available';
+  if (backendStatus === 'BOOKED') return 'booked';
+  // ISSUED, USED, CANCELLED all show as SOLD
+  return 'sold';
+}
+
 export default function SeatSelectionPage() {
   const { movieId, screeningId } = useParams()
   const navigate = useNavigate()
@@ -22,7 +30,6 @@ export default function SeatSelectionPage() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
-  // const movieIdNum = movieId ? parseInt(movieId) : 0 // Not used currently
   const screeningIdNum = screeningId ? parseInt(screeningId) : 0
 
   const {
@@ -233,7 +240,7 @@ export default function SeatSelectionPage() {
                     {rowSeats.map((seat) => (
                       <button
                         key={seat.id}
-                        className={`seat ${seat.status.toLowerCase()} ${seat.seatType.toLowerCase()} ${
+                        className={`seat ${getDisplayStatus(seat.status)} ${seat.seatType.toLowerCase()} ${
                           selectedSeats.some(s => s.id === seat.id) ? 'selected' : ''
                         }`}
                         onClick={() => handleSeatClick(seat)}
@@ -255,12 +262,16 @@ export default function SeatSelectionPage() {
               <span>Có thể chọn</span>
             </div>
             <div className="legend-item">
+              <div className="seat-icon booked"></div>
+              <span>Đang giữ chỗ</span>
+            </div>
+            <div className="legend-item">
               <div className="seat-icon sold"></div>
               <span>Đã bán</span>
             </div>
             <div className="legend-item">
               <div className="seat-icon selected"></div>
-              <span>Đã chọn</span>
+              <span>Đang chọn</span>
             </div>
             <div className="legend-item">
               <div className="seat-icon sweetbox"></div>

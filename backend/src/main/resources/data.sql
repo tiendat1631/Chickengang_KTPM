@@ -50,10 +50,10 @@ ALTER TABLE booking AUTO_INCREMENT = 1;
 ALTER TABLE payment AUTO_INCREMENT = 1;
 
 -- Insert auditoriums
-INSERT INTO auditorium (name) VALUES
-('Phòng 1'),
-('Phòng 2'),
-('Phòng 3');
+INSERT INTO auditorium (name, capacity, description) VALUES
+('Phòng 1', 80, 'Phòng chiếu tiêu chuẩn với 8 hàng ghế'),
+('Phòng 2', 80, 'Phòng chiếu tiêu chuẩn với 8 hàng ghế'),
+('Phòng 3', 80, 'Phòng chiếu tiêu chuẩn với 8 hàng ghế');
 
 -- Insert seats for each auditorium (8 rows A-H, 10 seats per row)
 -- Auditorium 1

@@ -75,4 +75,64 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.CONFLICT);
     }
 
+    @ExceptionHandler(SeatNotAvailableException.class)
+    private ResponseEntity<ApiResponse<Void>> handleSeatNotAvailableException (SeatNotAvailableException ex) {
+        ApiResponse<Void> response = new ApiResponse<>(
+                HttpStatus.CONFLICT,
+                null,
+                ex.getMessage(),
+                "SEAT_NOT_AVAILABLE"
+        );
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
+
+    @ExceptionHandler(AuthenticationRequiredException.class)
+    private ResponseEntity<ApiResponse<Void>> handleAuthenticationRequiredException (AuthenticationRequiredException ex) {
+        ApiResponse<Void> response = new ApiResponse<>(
+                HttpStatus.UNAUTHORIZED,
+                null,
+                ex.getMessage(),
+                "AUTHENTICATION_REQUIRED"
+        );
+        return new ResponseEntity<>(response, HttpStatus.UNAUTHORIZED);
+    }
+
+    @ExceptionHandler(SeatNotFoundException.class)
+    private ResponseEntity<ApiResponse<Void>> handleSeatNotFoundException (SeatNotFoundException ex) {
+        ApiResponse<Void> response = new ApiResponse<>(
+                HttpStatus.NOT_FOUND,
+                null,
+                ex.getMessage(),
+                "SEAT_NOT_FOUND"
+        );
+        return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
+    }
+
+    @ExceptionHandler(RuntimeException.class)
+    private ResponseEntity<ApiResponse<Void>> handleRuntimeException (RuntimeException ex) {
+        ApiResponse<Void> response = new ApiResponse<>(
+                HttpStatus.INTERNAL_SERVER_ERROR,
+                null,
+                ex.getMessage(),
+                "INTERNAL_SERVER_ERROR"
+        );
+        return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+
+    @ExceptionHandler(org.springframework.dao.DataIntegrityViolationException.class)
+    private ResponseEntity<ApiResponse<Void>> handleDataIntegrityViolationException (org.springframework.dao.DataIntegrityViolationException ex) {
+        String message = "Dữ liệu không hợp lệ. Vui lòng kiểm tra lại thông tin.";
+        if (ex.getMessage().contains("Duplicate entry")) {
+            message = "Ghế đã được đặt. Vui lòng chọn ghế khác.";
+        }
+        
+        ApiResponse<Void> response = new ApiResponse<>(
+                HttpStatus.CONFLICT,
+                null,
+                message,
+                "DATA_INTEGRITY_VIOLATION"
+        );
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
+
 }
