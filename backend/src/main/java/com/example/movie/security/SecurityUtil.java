@@ -19,6 +19,9 @@ public class SecurityUtil {
     @Value("${app.jwt.access.expiration-in-seconds}")
     private long jwtAccessExpiration;
 
+    @Value("${app.jwt.access.admin-expiration-in-seconds}")
+    private long jwtAdminAccessExpiration;
+
     @Value("${app.jwt.refresh.expiration-in-seconds}")
     private long jwtRefreshExpiration;
 
@@ -31,11 +34,16 @@ public class SecurityUtil {
     // Hash Algorithm
     public static final MacAlgorithm JWT_ALGORITHM = MacAlgorithm.HS512;
 
-    // sinh token
+    // sinh token with role-based expiration
     public String createAccessToken (User user){
         Instant now = Instant.now();
 
-        Instant validity = now.plus(jwtAccessExpiration, ChronoUnit.SECONDS);
+        // Use longer expiration for admin users (8 hours), shorter for regular users (1 hour)
+        long expirationSeconds = user.getRole().name().equals("ADMIN") 
+            ? jwtAdminAccessExpiration 
+            : jwtAccessExpiration;
+        
+        Instant validity = now.plus(expirationSeconds, ChronoUnit.SECONDS);
 
         // xây dựng payload
         JwtClaimsSet claims = JwtClaimsSet.builder()
@@ -61,5 +69,9 @@ public class SecurityUtil {
 
         JwsHeader jwsHeader = JwsHeader.with(JWT_ALGORITHM).build();
         return jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, claims)).getTokenValue();
+    }
+
+    public JwtDecoder getJwtDecoder() {
+        return jwtDecoder;
     }
 }

@@ -95,7 +95,21 @@ export const isAuthenticated = async () => {
  */
 export const parseJWT = (token) => {
   try {
-    const base64Url = token.split('.')[1];
+    // Validate token format
+    if (!token || typeof token !== 'string') {
+      return null;
+    }
+    
+    const parts = token.split('.');
+    if (parts.length !== 3) {
+      return null;
+    }
+    
+    const base64Url = parts[1];
+    if (!base64Url) {
+      return null;
+    }
+    
     const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
     const jsonPayload = decodeURIComponent(
       atob(base64)
@@ -116,9 +130,64 @@ export const parseJWT = (token) => {
  * @returns {boolean} True if expired
  */
 export const isTokenExpired = (token) => {
+  // If no token provided, consider it expired
+  if (!token) return true;
+  
   const payload = parseJWT(token);
   if (!payload || !payload.exp) return true;
   
   const currentTime = Date.now() / 1000;
   return payload.exp < currentTime;
+};
+
+/**
+ * Get time until token expiry in seconds
+ * @param {string} token - JWT token
+ * @returns {number} Seconds until expiry (negative if already expired)
+ */
+export const getTokenTimeToExpiry = (token) => {
+  if (!token) return -1;
+  
+  const payload = parseJWT(token);
+  if (!payload || !payload.exp) return -1;
+  
+  const currentTime = Date.now() / 1000;
+  return payload.exp - currentTime;
+};
+
+/**
+ * Check if token is expiring soon
+ * @param {string} token - JWT token
+ * @param {number} thresholdSeconds - Threshold in seconds (default: 300 = 5 minutes)
+ * @returns {boolean} True if token expires within threshold
+ */
+export const isTokenExpiringSoon = (token, thresholdSeconds = 300) => {
+  const timeToExpiry = getTokenTimeToExpiry(token);
+  return timeToExpiry > 0 && timeToExpiry < thresholdSeconds;
+};
+
+/**
+ * Get user role from JWT token
+ * @returns {Promise<string|null>} User role or null
+ */
+export const getUserRole = async () => {
+  try {
+    const token = await getToken();
+    if (!token) return null;
+    
+    const payload = parseJWT(token);
+    return payload?.role || null;
+  } catch (error) {
+    console.error('Failed to get user role:', error);
+    return null;
+  }
+};
+
+/**
+ * Check if current user is admin
+ * @returns {Promise<boolean>} True if user is admin
+ */
+export const isAdmin = async () => {
+  const role = await getUserRole();
+  return role === 'ADMIN';
 };

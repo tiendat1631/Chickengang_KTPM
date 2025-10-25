@@ -44,9 +44,13 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/movies/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/movies/**").hasRole("ADMIN")
 
-                        //CREATE USER
-                        //.requestMatchers(HttpMethod.POST,"/api/v1/users/**").hasRole("ADMIN")
-                        .requestMatchers("api/v1/users/**").permitAll()
+                        // USER MANAGEMENT
+                        // Allow user registration (POST) without authentication
+                        .requestMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
+                        // Admin-only operations for user management
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/users/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/users/**").hasRole("ADMIN")
 
                         // AUDITORIUM
                         .requestMatchers(HttpMethod.POST,"/api/v1/auditoriums/**").hasRole("ADMIN")
@@ -57,8 +61,12 @@ public class SecurityConfig {
                         // SCREENING
                         .requestMatchers("/api/v1/screenings/**").permitAll()
 
-                        // BOOKING
-                        .requestMatchers("api/v1/bookings/**").permitAll()
+                        // BOOKING - Require authentication
+                        .requestMatchers("/api/v1/bookings/**").authenticated()
+                        
+                        // PAYMENT - Require authentication
+                        .requestMatchers("/api/v1/payments/**").authenticated()
+                        
                         .anyRequest().authenticated()
                 )
                 .exceptionHandling(ex->ex

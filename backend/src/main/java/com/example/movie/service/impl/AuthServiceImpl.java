@@ -16,6 +16,7 @@ import jakarta.transaction.Transactional;
 import lombok.*;
 
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -79,5 +80,35 @@ public class AuthServiceImpl implements AuthService {
                 .refreshToken(refreshToken)
                 .build();
 
+    }
+
+    @Override
+    public AuthResponse refreshToken(String refreshToken) {
+        try {
+            // Decode refresh token to get username
+            Jwt jwt = securityUtil.getJwtDecoder().decode(refreshToken);
+            String username = jwt.getSubject();
+            
+            // Find user by username
+            User user = userRepository.findByUsername(username)
+                    .orElseThrow(() -> new RuntimeException("User not found"));
+            
+            // Generate new access token
+            String newAccessToken = securityUtil.createAccessToken(user);
+            
+            return AuthResponse.builder()
+                    .id(user.getId())
+                    .username(user.getUsername())
+                    .email(user.getEmail())
+                    .phoneNumber(user.getPhoneNumber())
+                    .address(user.getAddress())
+                    .role(user.getRole().name())
+                    .accessToken(newAccessToken)
+                    .refreshToken(refreshToken) // Keep the same refresh token
+                    .build();
+                    
+        } catch (Exception e) {
+            throw new RuntimeException("Invalid refresh token");
+        }
     }
 }
