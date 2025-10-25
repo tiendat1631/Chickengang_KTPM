@@ -42,16 +42,17 @@ export default function MyTicketsPage() {
     enabled: !!selectedBooking?.id
   })
 
-  useEffect(() => {
-    if (!isAuthenticated) {
-      navigate('/login', {
-        state: { 
-          message: 'Vui lòng đăng nhập để xem vé của bạn',
-          returnTo: '/my-tickets'
-        }
-      })
-    }
-  }, [isAuthenticated, navigate])
+  // No need for redirect here - ProtectedRoute already handles it
+  // useEffect(() => {
+  //   if (!isAuthenticated) {
+  //     navigate('/login', {
+  //       state: { 
+  //         message: 'Vui lòng đăng nhập để xem vé của bạn',
+  //         returnTo: '/my-tickets'
+  //       }
+  //     })
+  //   }
+  // }, [isAuthenticated, navigate])
 
   const formatTime = (dateString) => {
     const date = new Date(dateString)
@@ -75,10 +76,7 @@ export default function MyTicketsPage() {
     if (booking.bookingStatus === 'PENDING') {
       return <span className="px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Chờ thanh toán</span>
     }
-    if (booking.bookingStatus === 'CONFIRMED' && payment?.status === 'PENDING') {
-      return <span className="px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">Chờ xác nhận</span>
-    }
-    if (booking.bookingStatus === 'CONFIRMED' && payment?.status === 'SUCCESS') {
+    if (booking.bookingStatus === 'PAID') {
       return <span className="px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">Đã thanh toán</span>
     }
     if (booking.bookingStatus === 'CANCELLED') {
@@ -95,10 +93,8 @@ export default function MyTicketsPage() {
     navigate('/')
   }
 
-  if (!isAuthenticated) {
-    return null // Will redirect to login
-  }
-
+  // ProtectedRoute already handles authentication check
+  
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800">
@@ -194,6 +190,12 @@ export default function MyTicketsPage() {
                             <div><span className="font-medium">Tổng tiền:</span> {formatVND(booking.totalPrice)}</div>
                           </div>
                           
+                          {booking.seats && booking.seats.length > 0 && (
+                            <div className="text-xs text-gray-600 mt-1">
+                              <span className="font-medium">Ghế:</span> {booking.seats.map(seat => `${seat.rowLabel}${seat.number}`).join(', ')}
+                            </div>
+                          )}
+                          
                           <div className="text-xs text-gray-500">
                             Đặt lúc: {booking.createdOn ? formatDate(booking.createdOn) : 'N/A'}
                           </div>
@@ -238,6 +240,9 @@ export default function MyTicketsPage() {
                           <div><span className="font-medium">Ngày:</span> {selectedBooking.screening?.startTime ? formatDate(selectedBooking.screening.startTime) : 'N/A'}</div>
                           <div><span className="font-medium">Phòng:</span> {selectedBooking.screening?.auditorium?.name || 'N/A'}</div>
                           <div><span className="font-medium">Định dạng:</span> {selectedBooking.screening?.format || 'N/A'}</div>
+                          {selectedBooking.seats && selectedBooking.seats.length > 0 && (
+                            <div><span className="font-medium">Ghế ngồi:</span> {selectedBooking.seats.map(seat => `${seat.rowLabel}${seat.number}`).join(', ')}</div>
+                          )}
                         </div>
                       </div>
                     </div>

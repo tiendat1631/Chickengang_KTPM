@@ -2,14 +2,20 @@ package com.example.movie.service.impl;
 
 import com.example.movie.dto.booking.BookingRequest;
 import com.example.movie.dto.booking.BookingResponse;
+import com.example.movie.dto.booking.CreateBookingRequest;
 import com.example.movie.dto.booking.PatchBooking;
 import com.example.movie.exception.InvalidId;
+import com.example.movie.exception.AuthenticationRequiredException;
+import com.example.movie.exception.SeatNotFoundException;
+import com.example.movie.exception.SeatNotAvailableException;
 import com.example.movie.mapper.BookingMapper;
 import com.example.movie.mapper.ScreeningMapper;
 import com.example.movie.model.*;
 import com.example.movie.repository.*;
 import com.example.movie.service.BookingService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -29,26 +35,41 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     @Transactional
-    public BookingResponse createBooking(BookingRequest bookingRequest) {
-        // Validate user exists
-        User user = userRepository.findById(bookingRequest.getUserId())
-                .orElseThrow(() -> new InvalidId(bookingRequest.getUserId()));
-
+    public BookingResponse createBooking(CreateBookingRequest createBookingRequest) {
+        // Get current user from SecurityContext
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new AuthenticationRequiredException("User not authenticated");
+        }
+        
+        // Get username from authentication
+        String username = authentication.getName();
+        System.out.println("Creating booking for authenticated user: " + username);
+        
+        // Find user by username
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found: " + username));
+        
+        // Log the request for debugging
+        System.out.println("Creating booking for userId: " + user.getId());
+        System.out.println("ScreeningId: " + createBookingRequest.getScreeningId());
+        System.out.println("SeatIds: " + createBookingRequest.getSeatIds());
+        
         // Validate screening exists
-        Screening screening = screeningRepository.findById(bookingRequest.getScreeningId())
-                .orElseThrow(() -> new InvalidId(bookingRequest.getScreeningId()));
+        Screening screening = screeningRepository.findById(createBookingRequest.getScreeningId())
+                .orElseThrow(() -> new InvalidId(createBookingRequest.getScreeningId()));
 
         // Validate seats exist and are available
-        List<Seat> seats = seatRepository.findAllById(bookingRequest.getSeatIds());
-        if (seats.size() != bookingRequest.getSeatIds().size()) {
-            throw new RuntimeException("Some seats not found");
+        List<Seat> seats = seatRepository.findAllById(createBookingRequest.getSeatIds());
+        if (seats.size() != createBookingRequest.getSeatIds().size()) {
+            throw new SeatNotFoundException("Some seats not found");
         }
 
         // Check if seats are available for this screening
         for (Seat seat : seats) {
             Ticket existingTicket = ticketRepository.findByScreeningIdAndSeatId(screening.getId(), seat.getId());
             if (existingTicket != null && existingTicket.getStatus() != Ticket.Status.AVAILABLE) {
-                throw new RuntimeException("Seat " + seat.getRowLabel() + seat.getNumber() + " is not available");
+                throw new SeatNotAvailableException("Seat " + seat.getRowLabel() + seat.getNumber() + " is not available");
             }
         }
 
@@ -57,20 +78,40 @@ public class BookingServiceImpl implements BookingService {
         booking.setBookingCode(generateBookingCode());
         booking.setCreatedOn(LocalDateTime.now());
         booking.setBookingStatus(Booking.BookingStatus.PENDING);
-        booking.setTotalPrice(bookingRequest.getTotalPrice());
+        booking.setTotalPrice(createBookingRequest.getTotalPrice());
         booking.setUser(user);
         booking.setScreening(screening);
 
         Booking savedBooking = bookingRepository.save(booking);
 
-        // Create tickets for each seat
+        // Create or update tickets for each seat
         for (Seat seat : seats) {
-            Ticket ticket = new Ticket();
-            ticket.setStatus(Ticket.Status.AVAILABLE);
-            ticket.setSeat(seat);
-            ticket.setScreening(screening);
-            ticket.setBooking(savedBooking);
-            ticketRepository.save(ticket);
+            // Check if ticket already exists for this screening + seat
+            Ticket existingTicket = ticketRepository.findByScreeningIdAndSeatId(screening.getId(), seat.getId());
+            
+            if (existingTicket != null) {
+                // Ticket already exists - update it
+                if (existingTicket.getStatus() != Ticket.Status.AVAILABLE) {
+                    throw new SeatNotAvailableException("Seat " + seat.getRowLabel() + seat.getNumber() + " is not available");
+                }
+                
+                // Update existing ticket
+                existingTicket.setStatus(Ticket.Status.BOOKED);
+                existingTicket.setBooking(savedBooking);
+                existingTicket.setMovie(screening.getMovie());
+                existingTicket.setAuditorium(screening.getAuditorium());
+                ticketRepository.save(existingTicket);
+            } else {
+                // Create new ticket
+                Ticket newTicket = new Ticket();
+                newTicket.setStatus(Ticket.Status.BOOKED);
+                newTicket.setMovie(screening.getMovie());
+                newTicket.setAuditorium(screening.getAuditorium());
+                newTicket.setScreening(screening);
+                newTicket.setSeat(seat);
+                newTicket.setBooking(savedBooking);
+                ticketRepository.save(newTicket);
+            }
         }
 
         return bookingMapper.toResponse(savedBooking);
@@ -83,7 +124,7 @@ public class BookingServiceImpl implements BookingService {
     }
 
     @Override
-    public BookingResponse updateBooking(Long id,PatchBooking patchBooking){
+    public BookingResponse updateBooking(Long id, PatchBooking patchBooking) {
         Booking booking =  bookingRepository.findById(id).orElseThrow(()->new InvalidId(id));
 
         if (patchBooking.getBookingCode()!=null){
@@ -132,7 +173,15 @@ public class BookingServiceImpl implements BookingService {
 
     @Override
     public List<BookingResponse> getBookingsByUserId(Long userId) {
-        List<Booking> bookings = bookingRepository.findByUserIdOrderByCreatedOnDesc(userId);
+        List<Booking> bookings = bookingRepository.findByUserIdWithDetails(userId);
+        return bookings.stream()
+                .map(bookingMapper::toResponse)
+                .collect(java.util.stream.Collectors.toList());
+    }
+
+    @Override
+    public List<BookingResponse> getAllBookings() {
+        List<Booking> bookings = bookingRepository.findAllWithDetails();
         return bookings.stream()
                 .map(bookingMapper::toResponse)
                 .collect(java.util.stream.Collectors.toList());
