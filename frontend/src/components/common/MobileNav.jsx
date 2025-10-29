@@ -123,6 +123,11 @@ const MobileNav = ({ isOpen, onClose, user, onLogout, onSearch }) => {
               <span>Trang chủ</span>
             </Link>
 
+            <Link to="/movies" className="mobile-nav__link">
+              <span className="mobile-nav__link-icon">🎬</span>
+              <span>Danh sách phim</span>
+            </Link>
+
             {user && (
               <>
                 <Link to="/profile" className="mobile-nav__link">

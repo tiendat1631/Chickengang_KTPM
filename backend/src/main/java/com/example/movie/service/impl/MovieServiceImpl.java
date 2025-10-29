@@ -3,16 +3,19 @@ package com.example.movie.service.impl;
 import com.example.movie.mapper.MovieMapper;
 import com.example.movie.dto.movie.MovieRequest;
 import com.example.movie.dto.movie.MovieResponse;
+import com.example.movie.dto.movie.MovieSearchRequest;
 import com.example.movie.dto.movie.PatchMovie;
+import com.example.movie.dto.response.PageResponse;
 import com.example.movie.exception.InvalidId;
 import com.example.movie.model.Movie;
 import com.example.movie.repository.MovieRepository;
 import com.example.movie.service.MovieService;
+import com.example.movie.specification.MovieSpecification;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -60,6 +63,9 @@ public class MovieServiceImpl implements MovieService {
         if(moviePatch.getDescription() != null) {
             existingMovie.setDescription(moviePatch.getDescription());
         }
+        if(moviePatch.getStatus() != null) {
+            existingMovie.setStatus(moviePatch.getStatus());
+        }
         Movie saved = movieRepository.save(existingMovie);
         return movieMapper.toResponse(saved);
 
@@ -81,22 +87,44 @@ public class MovieServiceImpl implements MovieService {
     }
 
     @Override
-    public List<MovieResponse> getMovies(int page, int size, String sort) {
-        Pageable pageable;
-        if (sort != null && !sort.isBlank()) {
-            // expect format field,ASC|DESC
-            String[] parts = sort.split(",");
-            String field = parts[0];
-            Sort.Direction direction = (parts.length > 1 && parts[1].equalsIgnoreCase("DESC"))
-                    ? Sort.Direction.DESC : Sort.Direction.ASC;
-            pageable = PageRequest.of(page, size, Sort.by(direction, field));
-        } else {
-            pageable = PageRequest.of(page, size);
+    public PageResponse<MovieResponse> searchAndFilterMovies(MovieSearchRequest searchRequest, Pageable pageable) {
+        // Build specifications
+        Specification<Movie> spec = Specification.where(null);
+        
+        if (searchRequest.getSearchQuery() != null && !searchRequest.getSearchQuery().trim().isEmpty()) {
+            spec = spec.and(MovieSpecification.searchByKeyword(searchRequest.getSearchQuery()));
         }
-        return movieRepository.findAll(pageable)
+        
+        if (searchRequest.getGenre() != null && !searchRequest.getGenre().trim().isEmpty()) {
+            spec = spec.and(MovieSpecification.filterByGenre(searchRequest.getGenre()));
+        }
+        
+        if (searchRequest.getYearFrom() != null || searchRequest.getYearTo() != null) {
+            spec = spec.and(MovieSpecification.filterByYearRange(searchRequest.getYearFrom(), searchRequest.getYearTo()));
+        }
+        
+        if (searchRequest.getStatus() != null && !searchRequest.getStatus().trim().isEmpty()) {
+            spec = spec.and(MovieSpecification.filterByStatus(searchRequest.getStatus()));
+        }
+        
+        // Execute query with pagination
+        Page<Movie> moviePage = movieRepository.findAll(spec, pageable);
+        
+        // Convert to PageResponse
+        List<MovieResponse> content = moviePage.getContent()
                 .stream()
                 .map(movieMapper::toResponse)
                 .collect(Collectors.toList());
+        
+        return PageResponse.<MovieResponse>builder()
+                .content(content)
+                .totalElements(moviePage.getTotalElements())
+                .totalPages(moviePage.getTotalPages())
+                .currentPage(moviePage.getNumber())
+                .pageSize(moviePage.getSize())
+                .hasNext(moviePage.hasNext())
+                .hasPrevious(moviePage.hasPrevious())
+                .build();
     }
 
 

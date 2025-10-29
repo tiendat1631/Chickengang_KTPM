@@ -1,6 +1,7 @@
 package com.example.movie.dto.movie;
 
 
+import com.example.movie.model.MovieStatus;
 import jakarta.validation.constraints.NotBlank;
 import lombok.Data;
 
@@ -33,4 +34,6 @@ public class MovieRequest {
 
     @NotBlank
     private String description;
+
+    private MovieStatus status;
 }

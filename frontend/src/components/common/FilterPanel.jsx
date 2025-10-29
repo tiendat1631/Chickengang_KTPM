@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
+import './FilterPanel.css';
 
 /**
  * FilterPanel component for advanced movie search filters
@@ -15,41 +16,37 @@ const FilterPanel = ({ filters, onFilterChange, onClose, isMobile = false }) => 
     genre: '',
     yearFrom: '',
     yearTo: '',
-    minRating: '',
-    language: '',
-    sortBy: 'popularity'
+    status: '',
+    sort: 'releaseDate,DESC'
   });
 
   const genres = [
-    { value: '', label: 'Tất cả thể loại' },
-    { value: 'action', label: 'Hành động' },
-    { value: 'comedy', label: 'Hài' },
-    { value: 'drama', label: 'Chính kịch' },
-    { value: 'horror', label: 'Kinh dị' },
-    { value: 'sci-fi', label: 'Khoa học viễn tưởng' },
-    { value: 'romance', label: 'Lãng mạn' },
-    { value: 'thriller', label: 'Ly kỳ' },
-    { value: 'animation', label: 'Hoạt hình' }
-  ];
-
-  const languages = [
-    { value: '', label: 'Tất cả ngôn ngữ' },
-    { value: 'vi', label: 'Tiếng Việt' },
-    { value: 'en', label: 'Tiếng Anh' },
-    { value: 'ko', label: 'Tiếng Hàn' },
-    { value: 'ja', label: 'Tiếng Nhật' },
-    { value: 'zh', label: 'Tiếng Trung' }
+    'Action',
+    'Adventure',
+    'Animation',
+    'Biography',
+    'Comedy',
+    'Crime',
+    'Drama',
+    'Family',
+    'Fantasy',
+    'History',
+    'Horror',
+    'Romance',
+    'Sci-Fi',
+    'Thriller'
   ];
 
   const sortOptions = [
-    { value: 'popularity', label: 'Phổ biến' },
-    { value: 'rating', label: 'Đánh giá' },
-    { value: 'releaseDate', label: 'Ngày phát hành' },
-    { value: 'title', label: 'Tên phim' }
+    { value: '', label: 'Mặc định' },
+    { value: 'title,ASC', label: 'Tên (A-Z)' },
+    { value: 'title,DESC', label: 'Tên (Z-A)' },
+    { value: 'releaseDate,DESC', label: 'Mới nhất' },
+    { value: 'releaseDate,ASC', label: 'Cũ nhất' }
   ];
 
   const currentYear = new Date().getFullYear();
-  const years = Array.from({ length: 36 }, (_, i) => currentYear - i);
+  const years = Array.from({ length: 60 }, (_, i) => currentYear - i);
 
   const handleChange = (key, value) => {
     setLocalFilters(prev => ({ ...prev, [key]: value }));
@@ -67,9 +64,8 @@ const FilterPanel = ({ filters, onFilterChange, onClose, isMobile = false }) => 
       genre: '',
       yearFrom: '',
       yearTo: '',
-      minRating: '',
-      language: '',
-      sortBy: 'popularity'
+      status: '',
+      sort: 'releaseDate,DESC'
     };
     setLocalFilters(clearedFilters);
     onFilterChange(clearedFilters);
@@ -94,7 +90,7 @@ const FilterPanel = ({ filters, onFilterChange, onClose, isMobile = false }) => 
         {/* Genre Filter */}
         <div className="filter-group">
           <label htmlFor="genre-filter" className="filter-group__label">
-            Thể loại
+            🎭 Thể loại
           </label>
           <select
             id="genre-filter"
@@ -102,9 +98,10 @@ const FilterPanel = ({ filters, onFilterChange, onClose, isMobile = false }) => 
             value={localFilters.genre}
             onChange={(e) => handleChange('genre', e.target.value)}
           >
+            <option value="">Tất cả thể loại</option>
             {genres.map(genre => (
-              <option key={genre.value} value={genre.value}>
-                {genre.label}
+              <option key={genre} value={genre}>
+                {genre}
               </option>
             ))}
           </select>
@@ -112,7 +109,7 @@ const FilterPanel = ({ filters, onFilterChange, onClose, isMobile = false }) => 
 
         {/* Year Range Filter */}
         <div className="filter-group">
-          <label className="filter-group__label">Năm phát hành</label>
+          <label className="filter-group__label">📅 Năm phát hành</label>
           <div className="filter-group__row">
             <select
               className="filter-group__select filter-group__select--half"
@@ -137,55 +134,33 @@ const FilterPanel = ({ filters, onFilterChange, onClose, isMobile = false }) => 
           </div>
         </div>
 
-        {/* Rating Filter */}
+        {/* Status Filter */}
         <div className="filter-group">
-          <label htmlFor="rating-filter" className="filter-group__label">
-            Đánh giá tối thiểu
+          <label htmlFor="status-filter" className="filter-group__label">
+            🎬 Trạng thái
           </label>
           <select
-            id="rating-filter"
+            id="status-filter"
             className="filter-group__select"
-            value={localFilters.minRating}
-            onChange={(e) => handleChange('minRating', e.target.value)}
+            value={localFilters.status}
+            onChange={(e) => handleChange('status', e.target.value)}
           >
             <option value="">Tất cả</option>
-            {[9, 8, 7, 6, 5, 4, 3, 2, 1].map(rating => (
-              <option key={rating} value={rating}>
-                {rating}+ ⭐
-              </option>
-            ))}
-          </select>
-        </div>
-
-        {/* Language Filter */}
-        <div className="filter-group">
-          <label htmlFor="language-filter" className="filter-group__label">
-            Ngôn ngữ
-          </label>
-          <select
-            id="language-filter"
-            className="filter-group__select"
-            value={localFilters.language}
-            onChange={(e) => handleChange('language', e.target.value)}
-          >
-            {languages.map(lang => (
-              <option key={lang.value} value={lang.value}>
-                {lang.label}
-              </option>
-            ))}
+            <option value="NOW_SHOWING">🔥 Đang chiếu</option>
+            <option value="COMING_SOON">⭐ Sắp chiếu</option>
           </select>
         </div>
 
         {/* Sort By */}
         <div className="filter-group">
           <label htmlFor="sort-filter" className="filter-group__label">
-            Sắp xếp theo
+            ⚡ Sắp xếp theo
           </label>
           <select
             id="sort-filter"
             className="filter-group__select"
-            value={localFilters.sortBy}
-            onChange={(e) => handleChange('sortBy', e.target.value)}
+            value={localFilters.sort}
+            onChange={(e) => handleChange('sort', e.target.value)}
           >
             {sortOptions.map(option => (
               <option key={option.value} value={option.value}>

@@ -42,4 +42,8 @@ public class Movie {
 
     @Column(nullable = false)
     private String description;
+
+    @Enumerated(EnumType.STRING)
+    @Column
+    private MovieStatus status;
 }

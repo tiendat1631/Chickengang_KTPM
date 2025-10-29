@@ -3,17 +3,20 @@ package com.example.movie.controller;
 
 import com.example.movie.dto.movie.MovieRequest;
 import com.example.movie.dto.movie.MovieResponse;
+import com.example.movie.dto.movie.MovieSearchRequest;
 import com.example.movie.dto.movie.PatchMovie;
 import com.example.movie.dto.response.ApiResponse;
-import com.example.movie.model.Movie;
+import com.example.movie.dto.response.PageResponse;
 import com.example.movie.service.MovieService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
-import java.util.List;
 
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/movies")
@@ -73,13 +76,40 @@ public class MovieController {
     }
 
     @GetMapping
-    public ResponseEntity<ApiResponse<List<MovieResponse>>> getMovies(
+    public ResponseEntity<ApiResponse<PageResponse<MovieResponse>>> getMovies(
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size,
-            @RequestParam(required = false) String sort
+            @RequestParam(required = false) String sort,
+            @RequestParam(required = false) String search,
+            @RequestParam(required = false) String genre,
+            @RequestParam(required = false) Integer yearFrom,
+            @RequestParam(required = false) Integer yearTo,
+            @RequestParam(required = false) String status
     ) {
-        List<MovieResponse> movies = movieService.getMovies(page, size, sort);
-        ApiResponse<List<MovieResponse>> result = new ApiResponse<>(
+        // Build search request
+        MovieSearchRequest searchRequest = MovieSearchRequest.builder()
+                .searchQuery(search)
+                .genre(genre)
+                .yearFrom(yearFrom)
+                .yearTo(yearTo)
+                .status(status)
+                .build();
+        
+        // Build pageable with sorting
+        Pageable pageable;
+        if (sort != null && !sort.isBlank()) {
+            // expect format field,ASC|DESC
+            String[] parts = sort.split(",");
+            String field = parts[0];
+            Sort.Direction direction = (parts.length > 1 && parts[1].equalsIgnoreCase("DESC"))
+                    ? Sort.Direction.DESC : Sort.Direction.ASC;
+            pageable = PageRequest.of(page, size, Sort.by(direction, field));
+        } else {
+            pageable = PageRequest.of(page, size);
+        }
+        
+        PageResponse<MovieResponse> movies = movieService.searchAndFilterMovies(searchRequest, pageable);
+        ApiResponse<PageResponse<MovieResponse>> result = new ApiResponse<>(
                 HttpStatus.OK,
                 movies,
                 "get list success",

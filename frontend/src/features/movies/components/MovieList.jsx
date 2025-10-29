@@ -1,8 +1,10 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import MovieCard from '@/components/common/MovieCard.jsx';
+import SkeletonCard from '@/components/common/SkeletonCard.jsx';
 import '@/styles/MovieList.css';
 
-const MovieList = ({
+const MovieList = React.memo(({
   movies,
   title,
   subtitle,
@@ -11,7 +13,8 @@ const MovieList = ({
   error,
   onMovieClick,
   onLoadMore,
-  hasMore = false
+  hasMore = false,
+  skeletonCount = 8
 }) => {
   if (error) {
     return (
@@ -32,8 +35,11 @@ const MovieList = ({
   if (loading && movies.length === 0) {
     return (
       <div className="movie-list-loading">
-        <div className="loading-spinner"></div>
-        <p>Đang tải danh sách phim...</p>
+        <div className="movie-list-grid movie-list-grid--skeleton">
+          {Array.from({ length: skeletonCount }).map((_, index) => (
+            <SkeletonCard key={`skeleton-${index}`} variant={variant} />
+          ))}
+        </div>
       </div>
     );
   }
@@ -93,6 +99,21 @@ const MovieList = ({
       )}
     </section>
   );
+});
+
+MovieList.displayName = 'MovieList';
+
+MovieList.propTypes = {
+  movies: PropTypes.arrayOf(PropTypes.object).isRequired,
+  title: PropTypes.string,
+  subtitle: PropTypes.string,
+  variant: PropTypes.oneOf(['default', 'featured', 'compact', 'grid', 'list']),
+  loading: PropTypes.bool,
+  error: PropTypes.string,
+  onMovieClick: PropTypes.func,
+  onLoadMore: PropTypes.func,
+  hasMore: PropTypes.bool,
+  skeletonCount: PropTypes.number
 };
 
 export default MovieList;

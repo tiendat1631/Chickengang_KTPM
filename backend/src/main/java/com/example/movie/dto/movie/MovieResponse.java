@@ -1,5 +1,6 @@
 package com.example.movie.dto.movie;
 
+import com.example.movie.model.MovieStatus;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,4 +22,5 @@ public class MovieResponse {
     private String language;
     private String rated;
     private String description;
+    private MovieStatus status;
 }

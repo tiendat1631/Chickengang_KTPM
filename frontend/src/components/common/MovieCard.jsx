@@ -1,4 +1,5 @@
 // JavaScript file - no TypeScript checking
+import React from 'react';
 import PropTypes from 'prop-types';
 import '@/styles/MovieCard.css';
 
@@ -7,11 +8,11 @@ import '@/styles/MovieCard.css';
  * @param {Object} props - Component props
  * @param {Object} props.movie - Movie object
  * @param {Function} [props.onClick] - Click handler for movie card
- * @param {'default' | 'featured' | 'compact'} [props.variant='default'] - Card variant
+ * @param {'default' | 'featured' | 'compact' | 'grid'} [props.variant='default'] - Card variant
  * @param {string} [props.rankTag] - Ranking tag (e.g., "No.1", "Hot")
  * @returns {JSX.Element}
  */
-const MovieCard = ({ 
+const MovieCard = React.memo(({ 
   movie, 
   onClick, 
   variant = 'default',
@@ -121,7 +122,9 @@ const MovieCard = ({
       </div>
     </div>
   );
-};
+});
+
+MovieCard.displayName = 'MovieCard';
 
 MovieCard.propTypes = {
   movie: PropTypes.shape({
@@ -138,7 +141,7 @@ MovieCard.propTypes = {
     posterUrl: PropTypes.string
   }).isRequired,
   onClick: PropTypes.func,
-  variant: PropTypes.oneOf(['default', 'featured', 'compact']),
+  variant: PropTypes.oneOf(['default', 'featured', 'compact', 'grid']),
   rankTag: PropTypes.string
 };
 

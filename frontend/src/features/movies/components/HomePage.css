@@ -21,6 +21,55 @@
   padding: 0 2rem;
 }
 
+/* Section Divider */
+.section-divider {
+  height: 3rem;
+  margin: 2rem 0;
+}
+
+/* View All Section */
+.view-all-section {
+  margin-top: 4rem;
+  padding: 3rem 0;
+  text-align: center;
+  background: linear-gradient(135deg, #f5f7fa 0%, #e8ecf4 100%);
+  border-radius: 20px;
+}
+
+.btn-view-all {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 1rem 2.5rem;
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: white;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+}
+
+.btn-view-all:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+}
+
+.btn-view-all:active {
+  transform: translateY(0);
+}
+
+.btn-view-all .arrow {
+  font-size: 1.5rem;
+  transition: transform 0.3s ease;
+}
+
+.btn-view-all:hover .arrow {
+  transform: translateX(5px);
+}
+
 /* Footer - Refactored */
 :root {
   --footer-bg-primary: #667eea;

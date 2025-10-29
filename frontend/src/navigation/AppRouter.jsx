@@ -10,6 +10,7 @@ import ErrorBoundary from '@/components/ErrorBoundary.jsx';
 
 // Pages
 import HomePage from '@/features/movies/components/HomePage.jsx';
+import MoviesPage from '@/features/movies/components/MoviesPage.jsx';
 import MovieDetailPage from '@/features/movies/components/MovieDetailPage.jsx';
 import SearchResultsPage from '@/features/movies/components/SearchResultsPage.jsx';
 import ScreeningListPage from '@/features/screenings/components/ScreeningListPage.jsx';
@@ -147,6 +148,7 @@ const AppRouter = () => {
           <Route path="/" element={<Layout />}>
             {/* Public Routes */}
             <Route index element={<HomePage />} />
+            <Route path="movies" element={<MoviesPage />} />
             <Route path="movies/search" element={<SearchResultsPage />} />
             <Route path="movies/:id" element={<MovieDetailPage />} />
             <Route path="movies/:movieId/screenings" element={<ScreeningListPage />} />

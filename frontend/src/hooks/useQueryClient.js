@@ -28,10 +28,10 @@ export const queryKeys = {
   // Movie queries
   movies: {
     all: ['movies'],
-    list: (page, size, sort) => 
-      ['movies', 'list', { page, size, sort }],
+    list: (page, size, sort, filters) => 
+      ['movies', 'list', { page, size, sort, ...filters }],
     detail: (id) => ['movies', 'detail', id],
-    search: (query) => ['movies', 'search', query],
+    search: (query, filters) => ['movies', 'search', { query, ...filters }],
   },
   
   // User queries

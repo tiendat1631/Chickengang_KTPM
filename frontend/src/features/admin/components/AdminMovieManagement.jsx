@@ -2,8 +2,10 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '@/hooks/useAuth.js';
+import { useMovies } from '@/hooks/useMovies.js';
 import apiClient from '@/services/api.js';
 import toast from 'react-hot-toast';
+import Pagination from '@/components/common/Pagination.jsx';
 import './AdminMovieManagement.css';
 
 /**
@@ -12,10 +14,18 @@ import './AdminMovieManagement.css';
  */
 const AdminMovieManagement = () => {
   const { user } = useAuth();
-  const [movies, setMovies] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingMovie, setEditingMovie] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [currentPage, setCurrentPage] = useState(0);
+  const [pageSize, setPageSize] = useState(20);
+  const [filters, setFilters] = useState({
+    genre: undefined,
+    yearFrom: undefined,
+    yearTo: undefined,
+    status: undefined,
+    sort: 'releaseDate,DESC',
+  });
   const [formData, setFormData] = useState({
     title: '',
     director: '',
@@ -25,34 +35,50 @@ const AdminMovieManagement = () => {
     duration: '',
     language: '',
     rated: '',
-    description: ''
+    description: '',
+    status: ''
   });
 
-  useEffect(() => {
-    fetchMovies();
-  }, []);
+  // Use the useMovies hook with search and filters
+  const searchFilters = searchQuery ? { ...filters, search: searchQuery } : filters;
+  const { data: moviesData, isLoading, error, refetch } = useMovies(
+    currentPage, 
+    pageSize, 
+    filters.sort, 
+    searchFilters
+  );
 
-  const fetchMovies = async () => {
-    try {
-      setIsLoading(true);
-      const response = await apiClient.get('/v1/movies', { 
-        params: { page: 0, size: 100 } 
-      });
-      setMovies(response.data.data || []);
-    } catch (error) {
-      console.error('Error fetching movies:', error);
-      setMovies([]);
-      // Show user-friendly error message
-      if (error.response?.status === 401) {
-        toast.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.');
-      } else if (error.response?.status === 403) {
-        toast.error('Bạn không có quyền truy cập trang này.');
-      } else {
-        toast.error('Không thể tải danh sách phim. Vui lòng thử lại.');
-      }
-    } finally {
-      setIsLoading(false);
-    }
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setCurrentPage(0);
+    refetch();
+  };
+
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handlePageSizeChange = (newSize) => {
+    setPageSize(newSize);
+    setCurrentPage(0);
+  };
+
+  const handleFilterChange = (newFilters) => {
+    setFilters(newFilters);
+    setCurrentPage(0);
+  };
+
+  const handleClearFilters = () => {
+    setFilters({
+      genre: undefined,
+      yearFrom: undefined,
+      yearTo: undefined,
+      status: undefined,
+      sort: 'releaseDate,DESC',
+    });
+    setSearchQuery('');
+    setCurrentPage(0);
   };
 
   const handleInputChange = (e) => {
@@ -131,13 +157,14 @@ const AdminMovieManagement = () => {
         genres: '',
         releaseDate: '',
         duration: '',
-        language: '',
-        rated: '',
-        description: ''
-      });
-      setShowAddForm(false);
-      setEditingMovie(null);
-      fetchMovies();
+      language: '',
+      rated: '',
+      description: '',
+      status: ''
+    });
+    setShowAddForm(false);
+    setEditingMovie(null);
+    refetch();
     } catch (error) {
       console.error('Error saving movie:', error);
       
@@ -169,7 +196,8 @@ const AdminMovieManagement = () => {
       duration: movie.duration || '',
       language: movie.language || '',
       rated: movie.rated || '',
-      description: movie.description || ''
+      description: movie.description || '',
+      status: movie.status || ''
     });
     setShowAddForm(true);
   };
@@ -179,7 +207,7 @@ const AdminMovieManagement = () => {
       try {
         await apiClient.delete(`/v1/movies/${movieId}`);
         toast.success('Xóa phim thành công!');
-        fetchMovies();
+        refetch();
       } catch (error) {
         console.error('Error deleting movie:', error);
         
@@ -211,7 +239,8 @@ const AdminMovieManagement = () => {
       duration: '',
       language: '',
       rated: '',
-      description: ''
+      description: '',
+      status: ''
     });
   };
 
@@ -225,14 +254,7 @@ const AdminMovieManagement = () => {
     );
   }
 
-  if (isLoading) {
-    return (
-      <div className="admin-loading">
-        <div className="loading-spinner"></div>
-        <p>Đang tải dữ liệu...</p>
-      </div>
-    );
-  }
+  const movies = moviesData?.content || [];
 
   return (
     <div className="admin-movie-management">
@@ -244,6 +266,23 @@ const AdminMovieManagement = () => {
         >
           + Thêm phim mới
         </button>
+      </div>
+
+      {/* Search Bar */}
+      <div className="search-bar-admin">
+        <form onSubmit={handleSearch} className="admin-search-form">
+          <input
+            type="text"
+            placeholder="Tìm kiếm phim theo tên, thể loại, diễn viên..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="search-input"
+          />
+          <button type="submit" className="btn btn-search">
+            🔍 Tìm kiếm
+          </button>
+        </form>
+        <p className="search-hint">Sử dụng thanh tìm kiếm ở Header để lọc nâng cao</p>
       </div>
 
       {/* Add/Edit Form */}
@@ -362,6 +401,19 @@ const AdminMovieManagement = () => {
                 />
               </div>
 
+              <div className="form-group">
+                <label>Trạng thái</label>
+                <select
+                  name="status"
+                  value={formData.status}
+                  onChange={handleInputChange}
+                >
+                  <option value="">Chọn trạng thái</option>
+                  <option value="NOW_SHOWING">Đang chiếu</option>
+                  <option value="COMING_SOON">Sắp chiếu</option>
+                </select>
+              </div>
+
               <div className="form-actions">
                 <button type="button" className="btn btn-secondary" onClick={handleCancel}>
                   Hủy
@@ -377,43 +429,66 @@ const AdminMovieManagement = () => {
 
       {/* Movies List */}
       <div className="movies-list">
-        {movies.length > 0 ? (
-          <div className="movies-grid">
-            {movies.map((movie) => (
-              <div key={movie.id} className="movie-card">
-                <div className="movie-header">
-                  <h3>{movie.title}</h3>
-                  <div className="movie-actions">
-                    <button 
-                      className="btn btn-sm btn-outline"
-                      onClick={() => handleEdit(movie)}
-                    >
-                      Sửa
-                    </button>
-                    <button 
-                      className="btn btn-sm btn-danger"
-                      onClick={() => handleDelete(movie.id)}
-                    >
-                      Xóa
-                    </button>
+        {isLoading ? (
+          <div className="admin-loading">
+            <div className="loading-spinner"></div>
+            <p>Đang tải dữ liệu...</p>
+          </div>
+        ) : error ? (
+          <div className="admin-error">
+            <p>Có lỗi xảy ra khi tải danh sách phim.</p>
+          </div>
+        ) : movies.length > 0 ? (
+          <>
+            <div className="movies-grid">
+              {movies.map((movie) => (
+                <div key={movie.id} className="movie-card">
+                  <div className="movie-header">
+                    <h3>{movie.title}</h3>
+                    <div className="movie-actions">
+                      <button 
+                        className="btn btn-sm btn-outline"
+                        onClick={() => handleEdit(movie)}
+                      >
+                        Sửa
+                      </button>
+                      <button 
+                        className="btn btn-sm btn-danger"
+                        onClick={() => handleDelete(movie.id)}
+                      >
+                        Xóa
+                      </button>
+                    </div>
+                  </div>
+                  <div className="movie-details">
+                    <p><strong>Đạo diễn:</strong> {movie.director}</p>
+                    <p><strong>Diễn viên:</strong> {movie.actors}</p>
+                    <p><strong>Thể loại:</strong> {movie.genres}</p>
+                    <p><strong>Ngày phát hành:</strong> {movie.releaseDate}</p>
+                    <p><strong>Thời lượng:</strong> {movie.duration}</p>
+                    <p><strong>Ngôn ngữ:</strong> {movie.language}</p>
+                    <p><strong>Độ tuổi:</strong> {movie.rated}</p>
+                    {movie.status && <p><strong>Trạng thái:</strong> {movie.status === 'NOW_SHOWING' ? 'Đang chiếu' : 'Sắp chiếu'}</p>}
+                    <p><strong>Mô tả:</strong> {movie.description}</p>
                   </div>
                 </div>
-                <div className="movie-details">
-                  <p><strong>Đạo diễn:</strong> {movie.director}</p>
-                  <p><strong>Diễn viên:</strong> {movie.actors}</p>
-                  <p><strong>Thể loại:</strong> {movie.genres}</p>
-                  <p><strong>Ngày phát hành:</strong> {movie.releaseDate}</p>
-                  <p><strong>Thời lượng:</strong> {movie.duration}</p>
-                  <p><strong>Ngôn ngữ:</strong> {movie.language}</p>
-                  <p><strong>Độ tuổi:</strong> {movie.rated}</p>
-                  <p><strong>Mô tả:</strong> {movie.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+            
+            {moviesData && moviesData.totalPages > 1 && (
+              <Pagination
+                currentPage={moviesData.currentPage}
+                totalPages={moviesData.totalPages}
+                pageSize={moviesData.pageSize}
+                totalElements={moviesData.totalElements}
+                onPageChange={handlePageChange}
+                onPageSizeChange={handlePageSizeChange}
+              />
+            )}
+          </>
         ) : (
           <div className="no-movies">
-            <p>Chưa có phim nào. Hãy thêm phim đầu tiên!</p>
+            <p>Không tìm thấy phim nào phù hợp.</p>
           </div>
         )}
       </div>

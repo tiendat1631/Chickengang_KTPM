@@ -18,9 +18,8 @@ const SearchBar = ({ onSearch, isMobile = false }) => {
     genre: '',
     yearFrom: '',
     yearTo: '',
-    minRating: '',
-    language: '',
-    sortBy: 'popularity'
+    status: '',
+    sort: 'releaseDate,DESC'
   });
   const searchRef = useRef(null);
   const filterRef = useRef(null);
@@ -82,7 +81,7 @@ const SearchBar = ({ onSearch, isMobile = false }) => {
   }, []);
 
   const hasActiveFilters = Object.values(filters).some(v => 
-    v !== '' && v !== 'popularity'
+    v !== '' && v !== 'releaseDate,DESC'
   );
 
   return (
@@ -140,10 +139,6 @@ const SearchBar = ({ onSearch, isMobile = false }) => {
 SearchBar.propTypes = {
   onSearch: PropTypes.func,
   isMobile: PropTypes.bool
-};
-
-SearchBar.defaultProps = {
-  isMobile: false
 };
 
 export default SearchBar;

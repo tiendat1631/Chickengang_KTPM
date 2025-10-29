@@ -4,24 +4,30 @@ import apiClient from '@/services/api.js';
 import { queryKeys } from './useQueryClient.js';
 
 /**
- * Hook to get all movies with pagination
+ * Hook to get all movies with pagination and filters
  * @param {number} [page=0] - Page number
  * @param {number} [size=10] - Page size
  * @param {string} [sort] - Sort parameter
- * @returns {Object} Movies query result
+ * @param {Object} [filters={}] - Filter parameters
+ * @returns {Object} Movies query result with pagination metadata
  */
-export const useMovies = (page = 0, size = 10, sort) => {
+export const useMovies = (page = 0, size = 10, sort, filters = {}) => {
   return useQuery({
-    queryKey: queryKeys.movies.list(page, size, sort),
+    queryKey: queryKeys.movies.list(page, size, sort, filters),
     queryFn: async () => {
       const params = new URLSearchParams({
         page: page.toString(),
         size: size.toString(),
         ...(sort && { sort }),
+        ...(filters.search && { search: filters.search }),
+        ...(filters.genre && { genre: filters.genre }),
+        ...(filters.yearFrom && { yearFrom: filters.yearFrom.toString() }),
+        ...(filters.yearTo && { yearTo: filters.yearTo.toString() }),
+        ...(filters.status && { status: filters.status }),
       });
       
       const response = await apiClient.get(`/v1/movies?${params}`);
-      return response.data.data;
+      return response.data.data; // Returns PageResponse with content, totalElements, etc.
     },
     staleTime: 5 * 60 * 1000, // 5 minutes
   });
@@ -44,55 +50,32 @@ export const useMovie = (id) => {
 };
 
 /**
- * Hook to search movies with advanced filters
+ * Hook to search movies with advanced filters and pagination
  * @param {string} query - Search query
- * @param {Object} filters - Filter options
- * @param {string} [filters.genre] - Genre filter
- * @param {string} [filters.yearFrom] - Year from filter
- * @param {string} [filters.yearTo] - Year to filter
- * @param {string} [filters.minRating] - Minimum rating filter
- * @param {string} [filters.language] - Language filter
- * @param {string} [filters.sortBy] - Sort option
- * @returns {Object} Search results query
+ * @param {number} [page=0] - Page number
+ * @param {number} [size=10] - Page size
+ * @param {Object} [filters={}] - Filter options
+ * @returns {Object} Search results query with pagination
  */
-export const useSearchMovies = (query, filters = {}) => {
+export const useSearchMovies = (query, page = 0, size = 10, filters = {}) => {
   return useQuery({
-    queryKey: queryKeys.movies.search(query, filters),
+    queryKey: queryKeys.movies.search(query, { page, size, ...filters }),
     queryFn: async () => {
-      const params = new URLSearchParams();
+      const params = new URLSearchParams({
+        page: page.toString(),
+        size: size.toString(),
+        ...(query && { search: query }),
+        ...(filters.genre && { genre: filters.genre }),
+        ...(filters.yearFrom && { yearFrom: filters.yearFrom.toString() }),
+        ...(filters.yearTo && { yearTo: filters.yearTo.toString() }),
+        ...(filters.status && { status: filters.status }),
+        ...(filters.sort && { sort: filters.sort }),
+      });
       
-      if (query) {
-        params.append('q', query);
-      }
-      
-      if (filters.genre) {
-        params.append('genre', filters.genre);
-      }
-      
-      if (filters.yearFrom) {
-        params.append('yearFrom', filters.yearFrom);
-      }
-      
-      if (filters.yearTo) {
-        params.append('yearTo', filters.yearTo);
-      }
-      
-      if (filters.minRating) {
-        params.append('minRating', filters.minRating);
-      }
-      
-      if (filters.language) {
-        params.append('language', filters.language);
-      }
-      
-      if (filters.sortBy && filters.sortBy !== 'popularity') {
-        params.append('sortBy', filters.sortBy);
-      }
-      
-      const response = await apiClient.get(`/v1/movies/search?${params}`);
-      return response.data.data;
+      const response = await apiClient.get(`/v1/movies?${params}`);
+      return response.data.data; // Returns PageResponse
     },
-    enabled: !!query && query.length > 2,
+    enabled: !!query && query.length > 0,
     staleTime: 2 * 60 * 1000, // 2 minutes
   });
 };

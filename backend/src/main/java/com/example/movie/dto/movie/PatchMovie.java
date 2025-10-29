@@ -1,5 +1,6 @@
 package com.example.movie.dto.movie;
 
+import com.example.movie.model.MovieStatus;
 import lombok.Data;
 
 import java.time.LocalDate;
@@ -15,4 +16,5 @@ public class PatchMovie {
     private String language;
     private String rated;
     private String description;
+    private MovieStatus status;
 }

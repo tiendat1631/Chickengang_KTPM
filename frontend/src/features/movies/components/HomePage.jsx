@@ -1,4 +1,3 @@
-import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useMovies } from '@/hooks/useMovies'
 import Header from '@/components/common/Header'
@@ -8,37 +7,20 @@ import './HomePage.css'
 
 export default function HomePage() {
   const navigate = useNavigate()
-  const [currentPage, setCurrentPage] = useState(0)
-  const [featuredMovies, setFeaturedMovies] = useState([])
-  const [recentMovies, setRecentMovies] = useState([])
 
-  const {
-    data: moviesData,
-    isLoading: moviesLoading,
-    error: moviesError,
-  } = useMovies(currentPage, 12, 'releaseDate,DESC')
-
+  // Fetch featured movies (NOW_SHOWING)
   const {
     data: featuredData,
     isLoading: featuredLoading,
     error: featuredError,
-  } = useMovies(0, 4, 'releaseDate,DESC')
+  } = useMovies(0, 8, 'releaseDate,DESC', { status: 'NOW_SHOWING' })
 
-  useEffect(() => {
-    if (moviesData) {
-      if (currentPage === 0) {
-        setRecentMovies(moviesData)
-      } else {
-        setRecentMovies((prev) => [...prev, ...moviesData])
-      }
-    }
-  }, [moviesData, currentPage])
-
-  useEffect(() => {
-    if (featuredData) {
-      setFeaturedMovies(featuredData)
-    }
-  }, [featuredData])
+  // Fetch coming soon movies
+  const {
+    data: comingSoonData,
+    isLoading: comingSoonLoading,
+    error: comingSoonError,
+  } = useMovies(0, 8, 'releaseDate,ASC', { status: 'COMING_SOON' })
 
   const handleSearch = (query) => {
     if (query.trim()) {
@@ -55,15 +37,15 @@ export default function HomePage() {
     }
   }
 
-  const handleLoadMore = () => {
-    setCurrentPage((prev) => prev + 1)
-  }
-
   const handleGetStarted = () => {
     const moviesSection = document.getElementById('movies-section')
     if (moviesSection) {
       moviesSection.scrollIntoView({ behavior: 'smooth' })
     }
+  }
+
+  const handleViewAllMovies = () => {
+    navigate('/movies')
   }
 
   return (
@@ -73,26 +55,39 @@ export default function HomePage() {
         <HeroSection onGetStarted={handleGetStarted} />
         <div id="movies-section" className="movies-section">
           <div className="container">
+            {/* Featured Movies Section */}
             <MovieList
-              movies={featuredMovies}
+              movies={featuredData?.content || []}
               title="Phim Nổi Bật"
-              subtitle="Những bộ phim được yêu thích nhất hiện tại"
+              subtitle="Những bộ phim đang được yêu thích nhất"
               variant="featured"
               loading={featuredLoading}
               error={featuredError?.message}
               onMovieClick={handleMovieClick}
             />
+            
+            {/* Coming Soon Section */}
+            <div className="section-divider"></div>
             <MovieList
-              movies={recentMovies}
-              title="Phim Mới Nhất"
-              subtitle="Khám phá những bộ phim mới được cập nhật"
-              variant="default"
-              loading={moviesLoading}
-              error={moviesError?.message}
+              movies={comingSoonData?.content || []}
+              title="Phim Sắp Chiếu"
+              subtitle="Những bộ phim đáng mong đợi sắp ra mắt"
+              variant="featured"
+              loading={comingSoonLoading}
+              error={comingSoonError?.message}
               onMovieClick={handleMovieClick}
-              onLoadMore={handleLoadMore}
-              hasMore={!!moviesData && moviesData.length === 12}
             />
+            
+            {/* View All CTA */}
+            <div className="view-all-section">
+              <button 
+                className="btn-view-all"
+                onClick={handleViewAllMovies}
+              >
+                <span>Xem tất cả phim</span>
+                <span className="arrow">→</span>
+              </button>
+            </div>
           </div>
         </div>
       </main>
