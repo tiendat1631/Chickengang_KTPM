@@ -39,13 +39,19 @@ const AdminScreeningManagement = () => {
       const moviesResponse = await apiClient.get('/v1/movies', { 
         params: { page: 0, size: 100 } 
       });
-      setMovies(moviesResponse.data.data || []);
+      // API returns PageResponse with content array
+      const moviesPageData = moviesResponse.data?.data;
+      const moviesList = moviesPageData?.content || (Array.isArray(moviesPageData) ? moviesPageData : []);
+      setMovies(Array.isArray(moviesList) ? moviesList : []);
 
       // Fetch auditoriums for dropdown
       const auditoriumsResponse = await apiClient.get('/v1/auditoriums', {
         params: { page: 0, size: 100 }
       });
-      setAuditoriums(auditoriumsResponse.data.data || []);
+      // API returns PageResponse with content array or direct array
+      const auditoriumsPageData = auditoriumsResponse.data?.data;
+      const auditoriumsList = auditoriumsPageData?.content || (Array.isArray(auditoriumsPageData) ? auditoriumsPageData : []);
+      setAuditoriums(Array.isArray(auditoriumsList) ? auditoriumsList : []);
 
       // Fetch screenings from real API
       const screeningsResponse = await apiClient.get('/v1/screenings/all', {
@@ -117,11 +123,23 @@ const AdminScreeningManagement = () => {
     }
     
     try {
+      // Convert datetime-local format to ISO 8601 format for backend
+      const formatDateTimeForBackend = (dateTimeLocal) => {
+        if (!dateTimeLocal) return null;
+        // datetime-local format: "YYYY-MM-DDTHH:mm"
+        // Convert to ISO 8601: "YYYY-MM-DDTHH:mm:ss" or "YYYY-MM-DDTHH:mm:ss.SSS"
+        // Add seconds if not present
+        if (dateTimeLocal.length === 16) {
+          return dateTimeLocal + ':00'; // Add seconds
+        }
+        return dateTimeLocal;
+      };
+
       const screeningData = {
         movieId: parseInt(formData.movieId),
         auditoriumId: parseInt(formData.auditoriumId),
-        startTime: formData.startTime,
-        endTime: formData.endTime,
+        startTime: formatDateTimeForBackend(formData.startTime),
+        endTime: formatDateTimeForBackend(formData.endTime),
         format: formData.format,
         status: formData.status
       };

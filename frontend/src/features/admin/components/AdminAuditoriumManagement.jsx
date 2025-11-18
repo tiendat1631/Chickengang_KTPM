@@ -16,9 +16,14 @@ const AdminAuditoriumManagement = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [showAddForm, setShowAddForm] = useState(false);
   const [editingAuditorium, setEditingAuditorium] = useState(null);
+  const [showSeatsModal, setShowSeatsModal] = useState(false);
+  const [selectedAuditorium, setSelectedAuditorium] = useState(null);
+  const [seats, setSeats] = useState([]);
+  const [loadingSeats, setLoadingSeats] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
-    capacity: '',
+    rows: '',
+    columns: '',
     description: ''
   });
 
@@ -34,10 +39,14 @@ const AdminAuditoriumManagement = () => {
         params: { page: 0, size: 100 }
       });
       
+      console.log('Auditoriums API Response:', response.data);
+      
       // Parse ApiResponse structure
       if (response.data?.data) {
+        console.log('Auditoriums data:', response.data.data);
         setAuditoriums(response.data.data);
       } else {
+        console.warn('No data in response:', response.data);
         setAuditoriums([]);
       }
     } catch (error) {
@@ -76,26 +85,39 @@ const AdminAuditoriumManagement = () => {
       return;
     }
     
-    if (!formData.capacity || parseInt(formData.capacity) <= 0) {
-      toast.error('Sức chứa phải là số nguyên dương!');
+    if (!formData.rows || parseInt(formData.rows) <= 0) {
+      toast.error('Số dãy phải là số nguyên dương!');
+      return;
+    }
+    
+    if (!formData.columns || parseInt(formData.columns) <= 0) {
+      toast.error('Số ghế mỗi dãy phải là số nguyên dương!');
       return;
     }
     
     try {
+      // Convert rows and columns to integers for API request
+      const requestData = {
+        name: formData.name.trim(),
+        rows: parseInt(formData.rows, 10),
+        columns: parseInt(formData.columns, 10)
+      };
+      
       if (editingAuditorium) {
         // Update existing auditorium
-        await apiClient.patch(`/v1/auditoriums/${editingAuditorium.id}`, formData);
+        await apiClient.patch(`/v1/auditoriums/${editingAuditorium.id}`, requestData);
         toast.success('Cập nhật phòng chiếu thành công!');
       } else {
         // Create new auditorium
-        await apiClient.post('/v1/auditoriums', formData);
+        await apiClient.post('/v1/auditoriums', requestData);
         toast.success('Thêm phòng chiếu mới thành công!');
       }
       
       // Reset form and refresh data
       setFormData({
         name: '',
-        capacity: '',
+        rows: '',
+        columns: '',
         description: ''
       });
       setShowAddForm(false);
@@ -123,9 +145,19 @@ const AdminAuditoriumManagement = () => {
 
   const handleEdit = (auditorium) => {
     setEditingAuditorium(auditorium);
+    // Calculate rows and columns from seats if available
+    let rows = '';
+    let columns = '';
+    if (auditorium.seats && auditorium.seats.length > 0) {
+      const rowLabels = [...new Set(auditorium.seats.map(s => s.rowLabel))].sort();
+      rows = rowLabels.length.toString();
+      const firstRowSeats = auditorium.seats.filter(s => s.rowLabel === rowLabels[0]);
+      columns = firstRowSeats.length.toString();
+    }
     setFormData({
       name: auditorium.name || '',
-      capacity: auditorium.capacity || '',
+      rows: rows,
+      columns: columns,
       description: auditorium.description || ''
     });
     setShowAddForm(true);
@@ -147,6 +179,10 @@ const AdminAuditoriumManagement = () => {
           toast.error('Bạn không có quyền thực hiện thao tác này!');
         } else if (error.response?.status === 404) {
           toast.error('Không tìm thấy phòng chiếu!');
+        } else if (error.response?.status === 409) {
+          // Conflict - auditorium in use
+          const errorMessage = error.response?.data?.message || 'Phòng chiếu đang được sử dụng. Không thể xóa!';
+          toast.error(errorMessage);
         } else if (error.response?.status >= 500) {
           toast.error('Lỗi máy chủ! Vui lòng thử lại sau.');
         } else {
@@ -161,9 +197,41 @@ const AdminAuditoriumManagement = () => {
     setEditingAuditorium(null);
     setFormData({
       name: '',
-      capacity: '',
+      rows: '',
+      columns: '',
       description: ''
     });
+  };
+
+  const fetchSeats = async (auditoriumId) => {
+    try {
+      setLoadingSeats(true);
+      const response = await apiClient.get(`/v1/seats/auditorium/${auditoriumId}`);
+      
+      if (response.data?.data) {
+        setSeats(response.data.data);
+      } else {
+        setSeats([]);
+      }
+    } catch (error) {
+      console.error('Error fetching seats:', error);
+      toast.error('Không thể tải danh sách ghế. Vui lòng thử lại.');
+      setSeats([]);
+    } finally {
+      setLoadingSeats(false);
+    }
+  };
+
+  const handleViewSeats = async (auditorium) => {
+    setSelectedAuditorium(auditorium);
+    setShowSeatsModal(true);
+    await fetchSeats(auditorium.id);
+  };
+
+  const handleCloseSeatsModal = () => {
+    setShowSeatsModal(false);
+    setSelectedAuditorium(null);
+    setSeats([]);
   };
 
   if (!user || user.role !== 'ADMIN') {
@@ -215,15 +283,32 @@ const AdminAuditoriumManagement = () => {
               </div>
 
               <div className="form-group">
-                <label>Sức chứa *</label>
+                <label>Số dãy *</label>
                 <input
                   type="number"
-                  name="capacity"
-                  value={formData.capacity}
+                  name="rows"
+                  value={formData.rows}
                   onChange={handleInputChange}
                   min="1"
+                  max="26"
+                  placeholder="Ví dụ: 10"
                   required
                 />
+                <small className="form-hint">Số dãy ghế (A-Z, tối đa 26 dãy)</small>
+              </div>
+
+              <div className="form-group">
+                <label>Số ghế mỗi dãy *</label>
+                <input
+                  type="number"
+                  name="columns"
+                  value={formData.columns}
+                  onChange={handleInputChange}
+                  min="1"
+                  placeholder="Ví dụ: 15"
+                  required
+                />
+                <small className="form-hint">Số lượng ghế trong mỗi dãy</small>
               </div>
 
               <div className="form-group">
@@ -259,6 +344,12 @@ const AdminAuditoriumManagement = () => {
                   <h3>{auditorium.name}</h3>
                   <div className="auditorium-actions">
                     <button 
+                      className="btn btn-sm btn-info"
+                      onClick={() => handleViewSeats(auditorium)}
+                    >
+                      Xem ghế
+                    </button>
+                    <button 
                       className="btn btn-sm btn-outline"
                       onClick={() => handleEdit(auditorium)}
                     >
@@ -273,7 +364,19 @@ const AdminAuditoriumManagement = () => {
                   </div>
                 </div>
                 <div className="auditorium-details">
-                  <p><strong>Sức chứa:</strong> {auditorium.capacity} ghế</p>
+                  {auditorium.seats && auditorium.seats.length > 0 ? (
+                    <>
+                      {(() => {
+                        const rowLabels = [...new Set(auditorium.seats.map(s => s.rowLabel))].sort();
+                        const firstRowSeats = auditorium.seats.filter(s => s.rowLabel === rowLabels[0]);
+                        return (
+                          <p><strong>Cấu hình:</strong> {rowLabels.length} dãy × {firstRowSeats.length} ghế = {auditorium.seats.length} ghế</p>
+                        );
+                      })()}
+                    </>
+                  ) : (
+                    <p><strong>Cấu hình:</strong> Chưa có thông tin</p>
+                  )}
                   <p><strong>Mô tả:</strong> {auditorium.description || 'Chưa có mô tả'}</p>
                 </div>
               </div>
@@ -295,6 +398,57 @@ const AdminAuditoriumManagement = () => {
           </div>
         )}
       </div>
+
+      {/* Seats Modal */}
+      {showSeatsModal && (
+        <div className="seats-modal-overlay" onClick={handleCloseSeatsModal}>
+          <div className="seats-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="seats-modal-header">
+              <h2>Danh sách ghế - {selectedAuditorium?.name}</h2>
+              <button 
+                className="btn btn-sm btn-close"
+                onClick={handleCloseSeatsModal}
+              >
+                ×
+              </button>
+            </div>
+            
+            <div className="seats-modal-content">
+              {loadingSeats ? (
+                <div className="loading-seats">
+                  <div className="loading-spinner"></div>
+                  <p>Đang tải danh sách ghế...</p>
+                </div>
+              ) : seats.length > 0 ? (
+                <div className="seats-container">
+                  <div className="seats-grid">
+                    {seats.map((seat) => (
+                      <div 
+                        key={seat.id} 
+                        className={`seat-item seat-${seat.seatType?.toLowerCase() || 'normal'}`}
+                        title={`${seat.rowLabel}${seat.number} - ${seat.seatType || 'NORMAL'}`}
+                      >
+                        <span className="seat-label">{seat.rowLabel}{seat.number}</span>
+                        <span className="seat-type-badge">{seat.seatType || 'NORMAL'}</span>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <div className="seats-summary">
+                    <p><strong>Tổng số ghế:</strong> {seats.length}</p>
+                    <p><strong>Ghế thường:</strong> {seats.filter(s => s.seatType === 'NORMAL' || !s.seatType).length}</p>
+                    <p><strong>Ghế Sweetbox:</strong> {seats.filter(s => s.seatType === 'SWEETBOX').length}</p>
+                  </div>
+                </div>
+              ) : (
+                <div className="no-seats">
+                  <p>Chưa có ghế nào trong phòng chiếu này.</p>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

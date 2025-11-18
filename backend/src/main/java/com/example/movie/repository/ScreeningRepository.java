@@ -13,4 +13,9 @@ public interface ScreeningRepository extends JpaRepository<Screening,Long> {
     List<Screening> findByMovieIdAndStatusActive(@Param("movieId") Long movieId);
     
     List<Screening> findByMovieIdOrderByStartTime(Long movieId);
+    
+    /**
+     * Find all screenings by auditorium ID
+     */
+    List<Screening> findByAuditoriumId(Long auditoriumId);
 }

@@ -9,6 +9,7 @@ import com.example.movie.model.*;
 import com.example.movie.repository.AuditoriumRepository;
 import com.example.movie.repository.MovieRepository;
 import com.example.movie.repository.ScreeningRepository;
+import com.example.movie.repository.SeatRepository;
 import com.example.movie.service.ScreeningService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
@@ -25,6 +26,7 @@ public class ScreeningServiceImpl implements ScreeningService {
     private final ScreeningMapper screeningMapper;
     private final AuditoriumRepository auditoriumRepository;
     private final MovieRepository movieRepository;
+    private final SeatRepository seatRepository;
 
     @Override
     public ScreeningResponse createScreening (ScreeningRequest screeningRequest) {
@@ -42,17 +44,26 @@ public class ScreeningServiceImpl implements ScreeningService {
 
         screening.setMovie(movie);
         screening.setAuditorium(auditorium);
-        // tao danh sach ticket tuong ung trong voi cac ghe
+        
+        // Load seats from repository (avoid lazy loading issue)
+        List<Seat> seats = seatRepository.findByAuditoriumId(auditorium.getId());
+        
+        // Create tickets for all seats in the auditorium
         List<Ticket> tickets = new ArrayList<>();
-        for (Seat seat : auditorium.getSeats()) {
+        for (Seat seat : seats) {
             Ticket ticket = new Ticket();
             ticket.setSeat(seat);
             ticket.setScreening(screening);
+            ticket.setMovie(movie); // Set movie (required, nullable = false)
+            ticket.setAuditorium(auditorium); // Set auditorium (required, nullable = false)
             ticket.setStatus(Ticket.Status.AVAILABLE);
             tickets.add(ticket);
         }
+        
+        // Add tickets to screening's list (cascade will handle saving)
         screening.setTickets(tickets);
-
+        
+        // Save screening - cascade will automatically save all tickets
         Screening saved = screeningRepository.save(screening);
         return screeningMapper.toResponse(saved);
     }

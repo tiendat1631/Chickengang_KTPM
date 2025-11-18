@@ -37,8 +37,8 @@ public class Screening {
     @JoinColumn(name = "auditorium_id", nullable = false)
     private Auditorium auditorium;
 
-    //????
-    @OneToMany(mappedBy = "screening")
+    // Một suất chiếu có nhiều vé
+    @OneToMany(mappedBy = "screening", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Ticket> tickets = new ArrayList<>();
 
     //????
