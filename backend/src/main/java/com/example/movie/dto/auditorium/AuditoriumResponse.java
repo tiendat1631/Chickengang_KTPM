@@ -1,7 +1,7 @@
 package com.example.movie.dto.auditorium;
 
+import com.example.movie.dto.seat.SeatResponse;
 import com.example.movie.model.Screening;
-import com.example.movie.model.Seat;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -13,7 +13,8 @@ import java.util.List;
 @AllArgsConstructor
 @Data
 public class AuditoriumResponse {
+    private Long id;
     private String name;
-    private List<Seat> seats;
-    private  List<Screening> screenings;
+    private List<SeatResponse> seats;
+    private List<Screening> screenings;
 }

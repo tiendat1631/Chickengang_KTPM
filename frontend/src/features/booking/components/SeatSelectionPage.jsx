@@ -229,31 +229,47 @@ export default function SeatSelectionPage() {
           </div>
 
           <div className="seats-container">
-            {Array.from({ length: 8 }, (_, rowIndex) => {
-              const rowLabel = String.fromCharCode(65 + rowIndex) // A, B, C, D, E, F, G, H
-              const rowSeats = seats.filter(seat => seat.rowLabel === rowLabel)
-              
-              return (
-                <div key={rowLabel} className="seat-row">
-                  <div className="row-label">{rowLabel}</div>
-                  <div className="seat-row-grid">
-                    {rowSeats.map((seat) => (
-                      <button
-                        key={seat.id}
-                        className={`seat ${getDisplayStatus(seat.status)} ${seat.seatType.toLowerCase()} ${
-                          selectedSeats.some(s => s.id === seat.id) ? 'selected' : ''
-                        }`}
-                        onClick={() => handleSeatClick(seat)}
-                        disabled={seat.status !== 'AVAILABLE'}
-                        title={`${seat.rowLabel}${seat.number} - ${formatVND(getSeatPrice(seat))}`}
-                      >
-                        {seat.number}
-                      </button>
-                    ))}
-                  </div>
-                </div>
+            {(() => {
+              // Calculate max seats per row to determine grid columns
+              const maxSeatsPerRow = Math.max(
+                ...Array.from({ length: 26 }, (_, i) => {
+                  const rowLabel = String.fromCharCode(65 + i)
+                  return seats.filter(seat => seat.rowLabel === rowLabel).length
+                }),
+                10 // minimum 10 columns
               )
-            })}
+              
+              // Get unique row labels from seats data
+              const uniqueRowLabels = [...new Set(seats.map(seat => seat.rowLabel))].sort()
+              
+              return uniqueRowLabels.map((rowLabel) => {
+                const rowSeats = seats.filter(seat => seat.rowLabel === rowLabel)
+                
+                return (
+                  <div key={rowLabel} className="seat-row">
+                    <div className="row-label">{rowLabel}</div>
+                    <div 
+                      className="seat-row-grid"
+                      style={{ gridTemplateColumns: `repeat(${maxSeatsPerRow}, 1fr)` }}
+                    >
+                      {rowSeats.map((seat) => (
+                        <button
+                          key={seat.id}
+                          className={`seat ${getDisplayStatus(seat.status)} ${seat.seatType.toLowerCase()} ${
+                            selectedSeats.some(s => s.id === seat.id) ? 'selected' : ''
+                          }`}
+                          onClick={() => handleSeatClick(seat)}
+                          disabled={seat.status !== 'AVAILABLE'}
+                          title={`${seat.rowLabel}${seat.number} - ${formatVND(getSeatPrice(seat))}`}
+                        >
+                          {seat.number}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )
+              })
+            })()}
           </div>
 
           <div className="seat-legend">
