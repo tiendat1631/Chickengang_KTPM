@@ -23,7 +23,7 @@ public class AuditoriumController {
 
     @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
-    public ResponseEntity<ApiResponse<AuditoriumResponse>> createAuditorium (@RequestBody AuditoriumRequest auditoriumRequest) {
+    public ResponseEntity<ApiResponse<AuditoriumResponse>> createAuditorium (@Valid @RequestBody AuditoriumRequest auditoriumRequest) {
         AuditoriumResponse created = auditoriumService.createAuditorium(auditoriumRequest);
         ApiResponse<AuditoriumResponse> result = new ApiResponse<>(
                 HttpStatus.CREATED,

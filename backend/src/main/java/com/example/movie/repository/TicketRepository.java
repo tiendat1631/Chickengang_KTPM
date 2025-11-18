@@ -50,4 +50,14 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
      * Count tickets by status for a screening
      */
     long countByScreeningIdAndStatus(Long screeningId, Ticket.Status status);
+    
+    /**
+     * Find all tickets by auditorium ID
+     */
+    List<Ticket> findByAuditoriumId(Long auditoriumId);
+    
+    /**
+     * Count tickets by auditorium ID
+     */
+    long countByAuditoriumId(Long auditoriumId);
 }

@@ -53,6 +53,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/api/v1/users/**").hasRole("ADMIN")
 
                         // AUDITORIUM
+                        // Allow viewing auditoriums without authentication (GET)
+                        .requestMatchers(HttpMethod.GET, "/api/v1/auditoriums/**").permitAll()
+                        // Admin-only operations for auditorium management
                         .requestMatchers(HttpMethod.POST,"/api/v1/auditoriums/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH,"/api/v1/auditoriums/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.DELETE,"/api/v1/auditoriums/**").hasRole("ADMIN")

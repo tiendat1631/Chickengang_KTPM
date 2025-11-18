@@ -108,6 +108,17 @@ public class GlobalExceptionHandler {
         return new ResponseEntity<>(response, HttpStatus.NOT_FOUND);
     }
 
+    @ExceptionHandler(AuditoriumInUseException.class)
+    private ResponseEntity<ApiResponse<Void>> handleAuditoriumInUseException (AuditoriumInUseException ex) {
+        ApiResponse<Void> response = new ApiResponse<>(
+                HttpStatus.CONFLICT,
+                null,
+                ex.getMessage(),
+                "AUDITORIUM_IN_USE"
+        );
+        return new ResponseEntity<>(response, HttpStatus.CONFLICT);
+    }
+
     @ExceptionHandler(RuntimeException.class)
     private ResponseEntity<ApiResponse<Void>> handleRuntimeException (RuntimeException ex) {
         ApiResponse<Void> response = new ApiResponse<>(
