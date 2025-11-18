@@ -15,10 +15,12 @@ import java.util.List;
 public class Auditorium {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long Id;
+    private Long id;
     @Column(nullable = false)
-    private String Name;
+    private String name;
 
+    @Column(nullable = false)
+    private Integer capacity;
     // Một phòng có nhiều ghế
     @OneToMany(mappedBy = "auditorium", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Seat> seats = new ArrayList<>();
