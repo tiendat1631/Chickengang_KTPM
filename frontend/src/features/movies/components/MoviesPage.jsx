@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
-import { useNavigate, useSearchParams } from 'react-router-dom'
+import { useNavigate, useSearchParams, useLocation } from 'react-router-dom'
 import { useMovies } from '@/hooks/useMovies'
 import Header from '@/components/common/Header'
 import FilterPanel from '@/components/common/FilterPanel'
@@ -9,8 +9,9 @@ import './MoviesPage.css'
 
 export default function MoviesPage() {
   const navigate = useNavigate()
+  const location = useLocation()
   const [searchParams, setSearchParams] = useSearchParams()
-  const [showFilters, setShowFilters] = useState(false)
+  const [showFilters, setShowFilters] = useState(true)
   const [viewMode, setViewMode] = useState(() => {
     // Load from localStorage or default to 'grid'
     return localStorage.getItem('movieListViewMode') || 'grid'
@@ -37,6 +38,11 @@ export default function MoviesPage() {
     yearTo: filters.yearTo ? Number(filters.yearTo) : undefined,
     status: filters.status || undefined,
   })
+
+  // Scroll to top when navigating to this page
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' })
+  }, [location.pathname])
 
   // Update URL when filters or page changes
   useEffect(() => {
@@ -162,7 +168,7 @@ export default function MoviesPage() {
             </div>
           </div>
 
-          <div className="movies-content">
+          <div className={`movies-content ${!showFilters ? 'movies-content--sidebar-collapsed' : ''}`}>
             {/* Sidebar Filters - Desktop */}
             <div className="sidebar-wrapper">
               <aside className={`movies-sidebar ${showFilters ? 'movies-sidebar--open' : ''}`}>
@@ -171,9 +177,9 @@ export default function MoviesPage() {
                   <button 
                     className="sidebar-close"
                     onClick={toggleFilters}
-                    aria-label="Close filters"
+                    aria-label={showFilters ? "Close filters" : "Open filters"}
                   >
-                    ✕
+                    <span className="sidebar-close-text">✕</span>
                   </button>
                 </div>
                 <FilterPanel
