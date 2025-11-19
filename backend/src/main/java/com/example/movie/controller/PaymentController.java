@@ -2,6 +2,7 @@ package com.example.movie.controller;
 
 import com.example.movie.dto.payment.PaymentConfirmRequest;
 import com.example.movie.dto.payment.PaymentResponse;
+import com.example.movie.dto.payment.PaymentUpdateRequest;
 import com.example.movie.dto.response.ApiResponse;
 import com.example.movie.service.PaymentService;
 import jakarta.validation.Valid;
@@ -45,6 +46,21 @@ public class PaymentController {
                 HttpStatus.OK,
                 response,
                 "Payment completed successfully",
+                null
+        );
+        return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
+
+    @PatchMapping("/{paymentId}")
+    @PreAuthorize("hasAnyRole('CUSTOMER','ADMIN')")
+    public ResponseEntity<ApiResponse<PaymentResponse>> updatePendingPayment(
+            @PathVariable Long paymentId,
+            @Valid @RequestBody PaymentUpdateRequest request) {
+        PaymentResponse response = paymentService.updatePendingPayment(paymentId, request);
+        ApiResponse<PaymentResponse> result = new ApiResponse<>(
+                HttpStatus.OK,
+                response,
+                "Payment updated successfully",
                 null
         );
         return ResponseEntity.status(HttpStatus.OK).body(result);

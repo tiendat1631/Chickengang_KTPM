@@ -9,11 +9,11 @@ import com.example.movie.exception.AuthenticationRequiredException;
 import com.example.movie.exception.SeatNotFoundException;
 import com.example.movie.exception.SeatNotAvailableException;
 import com.example.movie.mapper.BookingMapper;
-import com.example.movie.mapper.ScreeningMapper;
 import com.example.movie.model.*;
 import com.example.movie.repository.*;
 import com.example.movie.service.BookingService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -33,6 +33,7 @@ public class BookingServiceImpl implements BookingService {
     private final UserRepository userRepository;
     private final SeatRepository seatRepository;
     private final TicketRepository ticketRepository;
+    private final PaymentRepository paymentRepository;
 
     @Override
     @Transactional
@@ -213,4 +214,50 @@ public class BookingServiceImpl implements BookingService {
                 .collect(java.util.stream.Collectors.toList());
     }
 
+    @Override
+    @Transactional
+    public BookingResponse cancelBooking(Long id) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new AuthenticationRequiredException("User not authenticated");
+        }
+
+        Booking booking = bookingRepository.findById(id).orElseThrow(() -> new InvalidId(id));
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
+        if (!isAdmin && !booking.getUser().getUsername().equals(authentication.getName())) {
+            throw new AccessDeniedException("You do not have permission to cancel this booking");
+        }
+
+        if (booking.getBookingStatus() != Booking.BookingStatus.PENDING) {
+            throw new RuntimeException("Only pending bookings can be cancelled");
+        }
+
+        Payment payment = paymentRepository.findByBookingId(booking.getId())
+                .orElseThrow(() -> new RuntimeException("No payment found for booking " + id));
+        if (payment.getStatus() != Payment.PaymentStatus.PENDING) {
+            throw new RuntimeException("Only pending payments can be cancelled");
+        }
+
+        booking.setBookingStatus(Booking.BookingStatus.CANCELLED);
+        payment.setStatus(Payment.PaymentStatus.CANCELLED);
+
+        releaseTicketsToInventory(booking);
+
+        paymentRepository.save(payment);
+        Booking savedBooking = bookingRepository.save(booking);
+        return bookingMapper.toResponse(savedBooking);
+    }
+
+    private void releaseTicketsToInventory(Booking booking) {
+        List<Ticket> tickets = ticketRepository.findByBookingId(booking.getId());
+        for (Ticket ticket : tickets) {
+            ticket.setStatus(Ticket.Status.AVAILABLE);
+            ticket.setBooking(null);
+            ticket.setTicketCode(null);
+            ticket.setMovie(booking.getScreening().getMovie());
+            ticket.setAuditorium(booking.getScreening().getAuditorium());
+            ticketRepository.save(ticket);
+        }
+    }
 }

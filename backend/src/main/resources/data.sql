@@ -61,6 +61,9 @@ ALTER TABLE ticket AUTO_INCREMENT = 1;
 ALTER TABLE booking AUTO_INCREMENT = 1;
 ALTER TABLE payment AUTO_INCREMENT = 1;
 
+-- Ensure payment status column can store new enum values (e.g. CANCELLED)
+ALTER TABLE payment MODIFY COLUMN status VARCHAR(20) NOT NULL;
+
 -- Insert auditoriums
 INSERT INTO auditorium (name, capacity) VALUES
 ('Phòng 1', 80),
