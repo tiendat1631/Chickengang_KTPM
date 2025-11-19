@@ -18,9 +18,9 @@ export default defineConfig({
       // Proxy API requests to backend to avoid CORS issues
       '/api': {
         // dùng để chạy local
-        target: 'http://localhost:8080',
+        //target: 'http://localhost:8080',
         // khi chạy docker thì mở này lên
-        //target: 'http://backend:8080',
+        target: 'http://backend:8080',
         changeOrigin: true,
         secure: false,
         configure: (proxy) => {

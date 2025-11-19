@@ -23,7 +23,7 @@ Dự án sử dụng 3 containers:
 Copy file `.env.example` thành `.env` và cập nhật các giá trị nếu cần:
 
 ```bash
-cp .env.example .env
+cp .env .env
 ```
 
 Hoặc tạo file `.env` với nội dung:
