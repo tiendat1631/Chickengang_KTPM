@@ -68,6 +68,32 @@ app.jwt.refresh.expiration-in-seconds=2592000
 java -jar target/movie-0.0.1-SNAPSHOT.jar
 ```
 
+## 🐳 Docker
+
+Xem hướng dẫn chi tiết tại [DOCKER.md](../DOCKER.md)
+
+### Quick Start với Docker
+
+```bash
+# Từ root directory
+docker-compose up -d
+
+# Backend sẽ chạy tại http://localhost:8080
+```
+
+### Docker Development
+
+Để phát triển local nhưng sử dụng database trong Docker:
+
+```bash
+# Chỉ start database
+docker-compose up -d db
+
+# Cập nhật application.properties để sử dụng localhost:3306
+# Chạy backend local như bình thường
+./mvnw spring-boot:run
+```
+
 ---
 
 **Made with ❤️ by ChickenGang KTPM Team**

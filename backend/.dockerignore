@@ -1,0 +1,14 @@
+target/
+.mvn/
+mvnw
+mvnw.cmd
+.git/
+.gitignore
+.idea/
+*.iml
+.vscode/
+*.log
+*.class
+.DS_Store
+node_modules/
+

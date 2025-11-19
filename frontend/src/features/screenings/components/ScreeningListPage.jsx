@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { useMovies } from '@/hooks/useMovies'
+import { useMovie } from '@/hooks/useMovies'
 import { useScreenings } from '@/hooks/useScreenings'
 import { useAuth } from '@/hooks/useAuth'
 import Header from '@/components/common/Header'
@@ -11,18 +11,18 @@ export default function ScreeningListPage() {
   const { movieId } = useParams()
   const navigate = useNavigate()
   const { isAuthenticated } = useAuth()
-  const [movie, setMovie] = useState(null)
   const [screenings, setScreenings] = useState([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
   const movieIdNum = movieId ? parseInt(movieId) : 0
 
+  // Use useMovie hook to get specific movie by ID instead of fetching all movies
   const {
-    data: movieData,
+    data: movie,
     isLoading: movieLoading,
     error: movieError,
-  } = useMovies(0, 100, 'releaseDate,DESC') // Get all movies to find the specific one
+  } = useMovie(movieIdNum)
 
   const {
     data: screeningsData,
@@ -31,17 +31,7 @@ export default function ScreeningListPage() {
   } = useScreenings(movieIdNum)
 
   useEffect(() => {
-    if (movieData && movieIdNum) {
-      // Find the specific movie by ID
-      const foundMovie = movieData.find((m) => m.id === movieIdNum)
-      if (foundMovie) {
-        setMovie(foundMovie)
-      }
-    }
-  }, [movieData, movieIdNum])
-
-  useEffect(() => {
-    if (screeningsData) {
+    if (screeningsData && Array.isArray(screeningsData)) {
       // Transform API data to match our interface
       const transformedScreenings = screeningsData.map((screening) => ({
         id: screening.id,

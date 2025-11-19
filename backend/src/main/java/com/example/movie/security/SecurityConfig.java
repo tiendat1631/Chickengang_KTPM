@@ -91,9 +91,11 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         
-        // Allow specific origins
+        // Allow specific origins (local development and Docker)
         configuration.addAllowedOrigin("http://localhost:3000");
         configuration.addAllowedOrigin("http://127.0.0.1:3000");
+        configuration.addAllowedOrigin("http://frontend:80");
+        configuration.addAllowedOrigin("http://frontend:3000");
        
         
         // Allow all HTTP methods

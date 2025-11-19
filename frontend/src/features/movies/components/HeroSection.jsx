@@ -1,7 +1,14 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import '@/styles/HeroSection.css';
 
 const HeroSection = ({ onGetStarted }) => {
+  const navigate = useNavigate();
+
+  const handleGenreClick = (genre) => {
+    navigate(`/movies?genre=${encodeURIComponent(genre)}`);
+  };
+
   return (
     <section className="hero-section">
       <div className="hero-background">
@@ -49,25 +56,77 @@ const HeroSection = ({ onGetStarted }) => {
           
           <div className="hero-visual">
             <div className="movie-showcase">
-              <div className="movie-poster movie-poster-1">
+              <div 
+                className="movie-poster movie-poster-1"
+                onClick={() => handleGenreClick('Action')}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleGenreClick('Action');
+                  }
+                }}
+                aria-label="Xem phim thể loại Action"
+                style={{ cursor: 'pointer' }}
+              >
                 <div className="poster-content">
                   <div className="poster-icon">🎬</div>
                   <div className="poster-title">Action</div>
                 </div>
               </div>
-              <div className="movie-poster movie-poster-2">
+              <div 
+                className="movie-poster movie-poster-2"
+                onClick={() => handleGenreClick('Romance')}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleGenreClick('Romance');
+                  }
+                }}
+                aria-label="Xem phim thể loại Romance"
+                style={{ cursor: 'pointer' }}
+              >
                 <div className="poster-content">
                   <div className="poster-icon">💕</div>
                   <div className="poster-title">Romance</div>
                 </div>
               </div>
-              <div className="movie-poster movie-poster-3">
+              <div 
+                className="movie-poster movie-poster-3"
+                onClick={() => handleGenreClick('Comedy')}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleGenreClick('Comedy');
+                  }
+                }}
+                aria-label="Xem phim thể loại Comedy"
+                style={{ cursor: 'pointer' }}
+              >
                 <div className="poster-content">
                   <div className="poster-icon">😂</div>
                   <div className="poster-title">Comedy</div>
                 </div>
               </div>
-              <div className="movie-poster movie-poster-4">
+              <div 
+                className="movie-poster movie-poster-4"
+                onClick={() => handleGenreClick('Horror')}
+                role="button"
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleGenreClick('Horror');
+                  }
+                }}
+                aria-label="Xem phim thể loại Horror"
+                style={{ cursor: 'pointer' }}
+              >
                 <div className="poster-content">
                   <div className="poster-icon">👻</div>
                   <div className="poster-title">Horror</div>

@@ -1,6 +1,7 @@
 // JavaScript file - no TypeScript checking
 import React from 'react';
 import PropTypes from 'prop-types';
+import { useNavigate } from 'react-router-dom';
 import '@/styles/MovieCard.css';
 
 /**
@@ -10,20 +11,35 @@ import '@/styles/MovieCard.css';
  * @param {Function} [props.onClick] - Click handler for movie card
  * @param {'default' | 'featured' | 'compact' | 'grid'} [props.variant='default'] - Card variant
  * @param {string} [props.rankTag] - Ranking tag (e.g., "No.1", "Hot")
- * @returns {JSX.Element}
+ * @returns {React.ReactElement}
  */
-const MovieCard = React.memo(({ 
+const MovieCardComponent = ({ 
   movie, 
   onClick, 
   variant = 'default',
   rankTag 
 }) => {
+  const navigate = useNavigate();
+
   /**
    * Handle movie card click
    */
   const handleClick = () => {
     if (onClick && movie.id) {
       onClick(movie);
+    }
+  };
+
+  /**
+   * Handle buy ticket button click - navigate to screenings page
+   */
+  const handleBuyTicket = (e) => {
+    e.stopPropagation(); // Prevent triggering card click
+    if (movie.id && movie.id > 0) {
+      // Navigate to screenings page for this movie
+      navigate(`/movies/${movie.id}/screenings`);
+    } else {
+      console.error('Invalid movie ID for booking:', movie.id);
     }
   };
 
@@ -111,10 +127,8 @@ const MovieCard = React.memo(({
         <div className="movie-card__cta">
           <button 
             className="movie-card__cta-button"
-            onClick={(e) => {
-              e.stopPropagation();
-              // Handle booking
-            }}
+            onClick={handleBuyTicket}
+            aria-label={`Mua vé xem phim ${movie.title}`}
           >
             MUA VÉ
           </button>
@@ -122,11 +136,11 @@ const MovieCard = React.memo(({
       </div>
     </div>
   );
-});
+};
 
-MovieCard.displayName = 'MovieCard';
+MovieCardComponent.displayName = 'MovieCard';
 
-MovieCard.propTypes = {
+MovieCardComponent.propTypes = {
   movie: PropTypes.shape({
     id: PropTypes.number.isRequired,
     title: PropTypes.string.isRequired,
@@ -144,5 +158,7 @@ MovieCard.propTypes = {
   variant: PropTypes.oneOf(['default', 'featured', 'compact', 'grid']),
   rankTag: PropTypes.string
 };
+
+const MovieCard = React.memo(MovieCardComponent);
 
 export default MovieCard;
