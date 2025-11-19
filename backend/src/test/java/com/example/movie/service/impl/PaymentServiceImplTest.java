@@ -118,5 +118,106 @@ class PaymentServiceImplTest {
 
         assertThrows(AccessDeniedException.class, () -> paymentService.updatePendingPayment(7L, request));
     }
+
+    @Test
+    void updatePendingPayment_AdminCanUpdateOtherUserPayment() {
+        Payment payment = new Payment();
+        payment.setId(8L);
+        payment.setStatus(Payment.PaymentStatus.PENDING);
+
+        User user = new User();
+        user.setUsername("owner");
+
+        Booking booking = new Booking();
+        booking.setBookingStatus(Booking.BookingStatus.PENDING);
+        booking.setUser(user);
+        payment.setBooking(booking);
+
+        when(paymentRepository.findById(8L)).thenReturn(Optional.of(payment));
+        when(paymentRepository.save(payment)).thenReturn(payment);
+        PaymentResponse response = new PaymentResponse();
+        when(paymentMapper.toResponse(payment)).thenReturn(response);
+
+        SecurityContextHolder.getContext().setAuthentication(
+                new UsernamePasswordAuthenticationToken(
+                        "admin",
+                        "password",
+                        List.of(() -> "ROLE_ADMIN")
+                )
+        );
+
+        PaymentUpdateRequest request = new PaymentUpdateRequest("CASH", "admin override");
+
+        PaymentResponse result = paymentService.updatePendingPayment(8L, request);
+
+        assertSame(response, result);
+        assertEquals("CASH", payment.getPaymentMethod());
+        assertEquals("admin override", payment.getNote());
+    }
+
+    @Test
+    void completePayment_ShouldUpdateBookingAndTicketsOnSuccess() {
+        Booking booking = new Booking();
+        booking.setId(3L);
+        booking.setBookingStatus(Booking.BookingStatus.PENDING);
+
+        Payment payment = new Payment();
+        payment.setId(9L);
+        payment.setBooking(booking);
+        payment.setStatus(Payment.PaymentStatus.PENDING);
+
+        Ticket ticket = new Ticket();
+        ticket.setStatus(Ticket.Status.BOOKED);
+        ticket.setBooking(booking);
+
+        when(paymentRepository.findById(9L)).thenReturn(Optional.of(payment));
+        when(ticketRepository.findByBookingId(3L)).thenReturn(List.of(ticket));
+        when(paymentRepository.save(payment)).thenReturn(payment);
+        when(bookingRepository.save(booking)).thenReturn(booking);
+        PaymentResponse response = new PaymentResponse();
+        when(paymentMapper.toResponse(payment)).thenReturn(response);
+
+        PaymentResponse result = paymentService.completePayment(9L, "SUCCESS");
+
+        assertSame(response, result);
+        assertEquals(Payment.PaymentStatus.SUCCESS, payment.getStatus());
+        assertEquals(Booking.BookingStatus.PAID, booking.getBookingStatus());
+        assertEquals(Ticket.Status.ISSUED, ticket.getStatus());
+        verify(ticketRepository).save(ticket);
+        verify(bookingRepository).save(booking);
+    }
+
+    @Test
+    void completePayment_ShouldCancelBookingWhenFailed() {
+        Booking booking = new Booking();
+        booking.setId(4L);
+        booking.setScreening(new Screening());
+        booking.setBookingStatus(Booking.BookingStatus.PENDING);
+
+        Payment payment = new Payment();
+        payment.setId(10L);
+        payment.setBooking(booking);
+        payment.setStatus(Payment.PaymentStatus.PENDING);
+
+        Ticket ticket = new Ticket();
+        ticket.setStatus(Ticket.Status.BOOKED);
+        ticket.setBooking(booking);
+
+        when(paymentRepository.findById(10L)).thenReturn(Optional.of(payment));
+        when(ticketRepository.findByBookingId(4L)).thenReturn(List.of(ticket));
+        when(paymentRepository.save(payment)).thenReturn(payment);
+        when(bookingRepository.save(booking)).thenReturn(booking);
+        PaymentResponse response = new PaymentResponse();
+        when(paymentMapper.toResponse(payment)).thenReturn(response);
+
+        PaymentResponse result = paymentService.completePayment(10L, "FAILED");
+
+        assertSame(response, result);
+        assertEquals(Payment.PaymentStatus.FAILED, payment.getStatus());
+        assertEquals(Booking.BookingStatus.CANCELLED, booking.getBookingStatus());
+        assertEquals(Ticket.Status.AVAILABLE, ticket.getStatus());
+        verify(ticketRepository).save(ticket);
+        verify(bookingRepository).save(booking);
+    }
 }
 
