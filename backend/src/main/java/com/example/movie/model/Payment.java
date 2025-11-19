@@ -23,6 +23,7 @@ public class Payment {
     private String note;
 
     @Enumerated(EnumType.STRING)
+    @Column(length = 20)
     private PaymentStatus status;
 
     @OneToOne
@@ -32,6 +33,7 @@ public class Payment {
     public enum PaymentStatus {
         PENDING,
         SUCCESS,
-        FAILED
+        FAILED,
+        CANCELLED
     }
 }

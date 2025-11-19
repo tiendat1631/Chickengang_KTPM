@@ -6,11 +6,22 @@ import Header from '@/components/common/Header'
 import Breadcrumb from '@/components/ui/Breadcrumb'
 import { formatVND } from '@/utils/formatCurrency'
 import apiClient from '@/services/api'
+import { cancelBooking as cancelBookingApi } from '@/services/bookingApi'
+import { updatePaymentMethod as updatePaymentMethodApi } from '@/services/paymentApi'
 
 export default function MyTicketsPage() {
   const navigate = useNavigate()
   const { user, isAuthenticated } = useAuth()
   const [selectedBooking, setSelectedBooking] = useState(null)
+  const [actionMessage, setActionMessage] = useState(null)
+  const [actionError, setActionError] = useState(null)
+  const [isCancelling, setIsCancelling] = useState(false)
+  const [isUpdatingPayment, setIsUpdatingPayment] = useState(false)
+  const [showPaymentForm, setShowPaymentForm] = useState(false)
+  const [paymentForm, setPaymentForm] = useState({
+    method: 'BANK_TRANSFER',
+    note: ''
+  })
 
   // Fetch user's bookings
   const {
@@ -31,7 +42,8 @@ export default function MyTicketsPage() {
   // Fetch payment for selected booking
   const {
     data: payment,
-    isLoading: paymentLoading
+    isLoading: paymentLoading,
+    refetch: refetchPayment
   } = useQuery({
     queryKey: ['payment', selectedBooking?.id],
     queryFn: async () => {
@@ -42,17 +54,28 @@ export default function MyTicketsPage() {
     enabled: !!selectedBooking?.id
   })
 
-  // No need for redirect here - ProtectedRoute already handles it
-  // useEffect(() => {
-  //   if (!isAuthenticated) {
-  //     navigate('/login', {
-  //       state: { 
-  //         message: 'Vui lòng đăng nhập để xem vé của bạn',
-  //         returnTo: '/my-tickets'
-  //       }
-  //     })
-  //   }
-  // }, [isAuthenticated, navigate])
+  useEffect(() => {
+    if (!selectedBooking && bookings && bookings.length > 0) {
+      setSelectedBooking(bookings[0])
+    }
+  }, [bookings, selectedBooking])
+
+  useEffect(() => {
+    if (payment) {
+      setPaymentForm({
+        method: payment.paymentMethod || 'BANK_TRANSFER',
+        note: payment.note || ''
+      })
+    } else {
+      setShowPaymentForm(false)
+    }
+  }, [payment])
+
+  useEffect(() => {
+    setActionMessage(null)
+    setActionError(null)
+    setShowPaymentForm(false)
+  }, [selectedBooking?.id])
 
   const formatTime = (dateString) => {
     const date = new Date(dateString)
@@ -70,6 +93,76 @@ export default function MyTicketsPage() {
       month: 'long',
       day: 'numeric'
     })
+  }
+
+  const getPaymentMethodLabel = (method) => {
+    if (method === 'CASH') return 'Tiền mặt'
+    if (method === 'BANK_TRANSFER') return 'Chuyển khoản'
+    return method || 'Không xác định'
+  }
+
+  const getPaymentStatusLabel = (status) => {
+    if (status === 'PENDING') return 'Chờ thanh toán'
+    if (status === 'SUCCESS') return 'Đã thanh toán'
+    if (status === 'FAILED') return 'Thất bại'
+    if (status === 'CANCELLED') return 'Đã hủy'
+    return status || 'Không xác định'
+  }
+
+  const pendingActionsAvailable =
+    selectedBooking &&
+    payment &&
+    selectedBooking.bookingStatus === 'PENDING' &&
+    payment.status === 'PENDING'
+
+  const handleCancelBooking = async () => {
+    if (!selectedBooking) return
+    const confirmed = window.confirm('Bạn có chắc chắn muốn hủy đặt vé này?')
+    if (!confirmed) return
+
+    setIsCancelling(true)
+    setActionMessage(null)
+    setActionError(null)
+    try {
+      await cancelBookingApi(selectedBooking.id)
+      setActionMessage('Hủy đặt vé thành công.')
+      await refetch()
+      await refetchPayment()
+    } catch (err) {
+      const message = err?.response?.data?.message || 'Hủy đặt vé thất bại.'
+      setActionError(message)
+    } finally {
+      setIsCancelling(false)
+    }
+  }
+
+  const handlePaymentUpdate = async () => {
+    if (!payment) return
+    setIsUpdatingPayment(true)
+    setActionMessage(null)
+    setActionError(null)
+    try {
+      await updatePaymentMethodApi(payment.id, {
+        paymentMethod: paymentForm.method,
+        note: paymentForm.note
+      })
+      setActionMessage('Cập nhật phương thức thanh toán thành công.')
+      await refetchPayment()
+      await refetch()
+      setShowPaymentForm(false)
+    } catch (err) {
+      const message = err?.response?.data?.message || 'Cập nhật phương thức thất bại.'
+      setActionError(message)
+    } finally {
+      setIsUpdatingPayment(false)
+    }
+  }
+
+  const handlePaymentFormChange = (field, value) => {
+    setPaymentForm((prev) => ({
+      ...prev,
+      [field]: value
+    }))
   }
 
   const getStatusBadge = (booking, payment) => {
@@ -201,7 +294,7 @@ export default function MyTicketsPage() {
                           )}
                           
                           <div className="text-xs text-gray-500">
-                            Đặt lúc: {booking.createdOn ? formatDate(booking.createdOn) : 'N/A'}
+                            Đặt lúc: {booking.createOn ? formatDate(booking.createOn) : 'N/A'}
                           </div>
                         </div>
                         
@@ -330,12 +423,81 @@ export default function MyTicketsPage() {
                         <h4 className="text-lg font-semibold text-gray-900">Thông tin thanh toán</h4>
                         <div className="p-4 bg-blue-50 rounded-lg">
                           <div className="text-sm text-gray-600 space-y-1">
-                            <div><span className="font-medium">Phương thức:</span> {payment.paymentMethod === 'CASH' ? 'Tiền mặt' : 'Chuyển khoản'}</div>
-                            <div><span className="font-medium">Trạng thái:</span> {payment.status === 'PENDING' ? 'Chờ thanh toán' : payment.status === 'SUCCESS' ? 'Đã thanh toán' : 'Thất bại'}</div>
+                            <div><span className="font-medium">Phương thức:</span> {getPaymentMethodLabel(payment.paymentMethod)}</div>
+                            <div><span className="font-medium">Trạng thái:</span> {getPaymentStatusLabel(payment.status)}</div>
                             <div><span className="font-medium">Số tiền:</span> {formatVND(payment.amount)}</div>
                             {payment.note && <div><span className="font-medium">Ghi chú:</span> {payment.note}</div>}
                           </div>
                         </div>
+                      </div>
+                    )}
+
+                    {pendingActionsAvailable && (
+                      <div className="space-y-4 p-4 bg-yellow-50 rounded-xl border border-yellow-200">
+                        <div>
+                          <h4 className="text-lg font-semibold text-yellow-900">Đang chờ duyệt</h4>
+                          <p className="text-sm text-yellow-800 mt-1">
+                            Bạn có thể hủy vé hoặc đổi phương thức thanh toán trước khi quản trị viên duyệt đơn này.
+                          </p>
+                        </div>
+                        {actionMessage && (
+                          <div className="text-sm text-green-700 bg-green-50 border border-green-200 rounded-lg px-3 py-2">
+                            {actionMessage}
+                          </div>
+                        )}
+                        {actionError && (
+                          <div className="text-sm text-red-700 bg-red-50 border border-red-200 rounded-lg px-3 py-2">
+                            {actionError}
+                          </div>
+                        )}
+                        <div className="flex flex-col sm:flex-row gap-3">
+                          <button
+                            className="flex-1 px-4 py-3 rounded-lg font-semibold border border-red-300 text-red-700 bg-white hover:bg-red-50 transition-colors disabled:opacity-60"
+                            onClick={handleCancelBooking}
+                            disabled={isCancelling}
+                          >
+                            {isCancelling ? 'Đang hủy...' : 'Hủy đặt vé'}
+                          </button>
+                          <button
+                            className="flex-1 px-4 py-3 rounded-lg font-semibold border border-blue-300 text-blue-700 bg-white hover:bg-blue-50 transition-colors disabled:opacity-60"
+                            onClick={() => setShowPaymentForm((prev) => !prev)}
+                            disabled={isUpdatingPayment}
+                          >
+                            {showPaymentForm ? 'Đóng' : 'Đổi phương thức thanh toán'}
+                          </button>
+                        </div>
+                        {showPaymentForm && (
+                          <div className="space-y-3 bg-white border border-yellow-200 rounded-lg p-4">
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">Phương thức</label>
+                              <select
+                                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                value={paymentForm.method}
+                                onChange={(e) => handlePaymentFormChange('method', e.target.value)}
+                              >
+                                <option value="BANK_TRANSFER">Chuyển khoản</option>
+                                <option value="CASH">Tiền mặt</option>
+                              </select>
+                            </div>
+                            <div>
+                              <label className="block text-sm font-medium text-gray-700 mb-1">Ghi chú cho quản trị viên</label>
+                              <textarea
+                                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none"
+                                rows={3}
+                                value={paymentForm.note}
+                                onChange={(e) => handlePaymentFormChange('note', e.target.value)}
+                                placeholder="Ví dụ: Tôi muốn thanh toán bằng tiền mặt khi nhận vé."
+                              />
+                            </div>
+                            <button
+                              className="w-full px-4 py-3 rounded-lg font-semibold bg-blue-600 text-white hover:bg-blue-700 transition-colors disabled:opacity-60"
+                              onClick={handlePaymentUpdate}
+                              disabled={isUpdatingPayment}
+                            >
+                              {isUpdatingPayment ? 'Đang cập nhật...' : 'Xác nhận thay đổi'}
+                            </button>
+                          </div>
+                        )}
                       </div>
                     )}
 

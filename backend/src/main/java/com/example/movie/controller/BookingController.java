@@ -12,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RequiredArgsConstructor
@@ -21,6 +22,7 @@ public class BookingController {
     private final BookingService bookingService;
 
     @PostMapping
+    @PreAuthorize("hasAnyRole('CUSTOMER','ADMIN')")
     public ResponseEntity<ApiResponse<BookingResponse>> createBooking(@Valid @RequestBody CreateBookingRequest createBookingRequest){
         BookingResponse created = bookingService.createBooking(createBookingRequest);
         ApiResponse<BookingResponse> result = new ApiResponse<>(
@@ -67,6 +69,19 @@ public class BookingController {
                 HttpStatus.OK,
                 bookings,
                 "get bookings success",
+                null
+        );
+        return ResponseEntity.status(HttpStatus.OK).body(result);
+    }
+
+    @PatchMapping("/{id}/cancel")
+    @PreAuthorize("hasAnyRole('CUSTOMER','ADMIN')")
+    public ResponseEntity<ApiResponse<BookingResponse>> cancelBooking(@PathVariable Long id) {
+        BookingResponse cancelled = bookingService.cancelBooking(id);
+        ApiResponse<BookingResponse> result = new ApiResponse<>(
+                HttpStatus.OK,
+                cancelled,
+                "booking cancelled",
                 null
         );
         return ResponseEntity.status(HttpStatus.OK).body(result);
