@@ -22,5 +22,6 @@ public class BookingResponse {
     private String username;
     private BookingScreeningDTO screening;
     private List<BookingSeatDTO> seats;
+    private List<BookingTicketDTO> tickets;
 
 }

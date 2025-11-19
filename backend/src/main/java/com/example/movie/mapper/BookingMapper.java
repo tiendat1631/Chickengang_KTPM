@@ -51,7 +51,7 @@ public class BookingMapper {
                 .auditorium(auditoriumSummary)
                 .build();
         
-        // Map Tickets to BookingSeatDTO list
+        // Map Tickets to BookingSeatDTO list (for backward compatibility)
         List<BookingSeatDTO> seats = booking.getTickets() != null 
                 ? booking.getTickets().stream()
                     .map(ticket -> BookingSeatDTO.builder()
@@ -60,6 +60,31 @@ public class BookingMapper {
                             .number(ticket.getSeat().getNumber())
                             .seatType(ticket.getSeat().getSeatType().toString())
                             .build())
+                    .collect(Collectors.toList())
+                : List.of();
+        
+        // Map Tickets to BookingTicketDTO list (with ticketCode and status)
+        List<BookingTicketDTO> tickets = booking.getTickets() != null 
+                ? booking.getTickets().stream()
+                    .map(ticket -> {
+                        BookingSeatDTO seatDTO = ticket.getSeat() != null
+                                ? BookingSeatDTO.builder()
+                                        .id(ticket.getSeat().getId())
+                                        .rowLabel(ticket.getSeat().getRowLabel())
+                                        .number(ticket.getSeat().getNumber())
+                                        .seatType(ticket.getSeat().getSeatType() != null 
+                                                ? ticket.getSeat().getSeatType().toString() 
+                                                : "NORMAL")
+                                        .build()
+                                : null;
+                        
+                        return BookingTicketDTO.builder()
+                                .id(ticket.getId())
+                                .ticketCode(ticket.getTicketCode())
+                                .status(ticket.getStatus())
+                                .seat(seatDTO)
+                                .build();
+                    })
                     .collect(Collectors.toList())
                 : List.of();
         
@@ -72,6 +97,7 @@ public class BookingMapper {
                 .username(booking.getUser().getUsername())
                 .screening(screeningDTO)
                 .seats(seats)
+                .tickets(tickets)
                 .build();
     }
 }

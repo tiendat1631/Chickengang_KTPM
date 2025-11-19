@@ -22,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
+import java.util.Random;
 
 @Service
 @RequiredArgsConstructor
@@ -100,6 +101,10 @@ public class BookingServiceImpl implements BookingService {
                 existingTicket.setBooking(savedBooking);
                 existingTicket.setMovie(screening.getMovie());
                 existingTicket.setAuditorium(screening.getAuditorium());
+                // Generate ticketCode if not already set
+                if (existingTicket.getTicketCode() == null || existingTicket.getTicketCode().isEmpty()) {
+                    existingTicket.setTicketCode(generateTicketCode());
+                }
                 ticketRepository.save(existingTicket);
             } else {
                 // Create new ticket
@@ -110,6 +115,8 @@ public class BookingServiceImpl implements BookingService {
                 newTicket.setScreening(screening);
                 newTicket.setSeat(seat);
                 newTicket.setBooking(savedBooking);
+                // Generate ticketCode when creating ticket
+                newTicket.setTicketCode(generateTicketCode());
                 ticketRepository.save(newTicket);
             }
         }
@@ -121,6 +128,25 @@ public class BookingServiceImpl implements BookingService {
         String dateStr = LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd"));
         long count = bookingRepository.count() + 1;
         return String.format("BK-%s-%03d", dateStr, count);
+    }
+
+    private String generateTicketCode() {
+        // Generate unique ticket code (12 characters)
+        String chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+        StringBuilder code = new StringBuilder();
+        Random random = new Random();
+        
+        // Ensure uniqueness by checking against existing tickets
+        String ticketCode;
+        do {
+            code.setLength(0);
+            for (int i = 0; i < 12; i++) {
+                code.append(chars.charAt(random.nextInt(chars.length())));
+            }
+            ticketCode = code.toString();
+        } while (ticketRepository.existsByTicketCode(ticketCode));
+        
+        return ticketCode;
     }
 
     @Override

@@ -24,7 +24,8 @@ const AdminAuditoriumManagement = () => {
     name: '',
     rows: '',
     columns: '',
-    description: ''
+    originalRows: '',
+    originalColumns: ''
   });
 
   useEffect(() => {
@@ -85,61 +86,111 @@ const AdminAuditoriumManagement = () => {
       return;
     }
     
-    if (!formData.rows || parseInt(formData.rows) <= 0) {
-      toast.error('Số dãy phải là số nguyên dương!');
-      return;
-    }
-    
-    if (!formData.columns || parseInt(formData.columns) <= 0) {
-      toast.error('Số ghế mỗi dãy phải là số nguyên dương!');
-      return;
-    }
-    
-    try {
-      // Convert rows and columns to integers for API request
-      const requestData = {
-        name: formData.name.trim(),
-        rows: parseInt(formData.rows, 10),
-        columns: parseInt(formData.columns, 10)
-      };
+    if (editingAuditorium) {
+      // Update: validate all fields if provided
+      if (formData.rows && parseInt(formData.rows) <= 0) {
+        toast.error('Số dãy phải là số nguyên dương!');
+        return;
+      }
       
-      if (editingAuditorium) {
-        // Update existing auditorium
+      if (formData.columns && parseInt(formData.columns) <= 0) {
+        toast.error('Số ghế mỗi dãy phải là số nguyên dương!');
+        return;
+      }
+      
+      try {
+        const requestData = {
+          name: formData.name.trim()
+        };
+        
+        // Only include rows and columns if they actually changed from original values
+        const rowsChanged = formData.rows && formData.rows !== '' && 
+                           formData.rows !== formData.originalRows;
+        const columnsChanged = formData.columns && formData.columns !== '' && 
+                              formData.columns !== formData.originalColumns;
+        
+        if (rowsChanged) {
+          requestData.rows = parseInt(formData.rows, 10);
+        }
+        if (columnsChanged) {
+          requestData.columns = parseInt(formData.columns, 10);
+        }
+        
         await apiClient.patch(`/v1/auditoriums/${editingAuditorium.id}`, requestData);
         toast.success('Cập nhật phòng chiếu thành công!');
-      } else {
-        // Create new auditorium
+        
+        // Reset form and refresh data
+        setFormData({
+          name: '',
+          rows: '',
+          columns: '',
+          originalRows: '',
+          originalColumns: ''
+        });
+        setShowAddForm(false);
+        setEditingAuditorium(null);
+        fetchAuditoriums();
+      } catch (error) {
+        console.error('Error updating auditorium:', error);
+        handleError(error);
+      }
+    } else {
+      // Create: validate all fields
+      if (!formData.rows || parseInt(formData.rows) <= 0) {
+        toast.error('Số dãy phải là số nguyên dương!');
+        return;
+      }
+      
+      if (!formData.columns || parseInt(formData.columns) <= 0) {
+        toast.error('Số ghế mỗi dãy phải là số nguyên dương!');
+        return;
+      }
+      
+      try {
+        const requestData = {
+          name: formData.name.trim(),
+          rows: parseInt(formData.rows, 10),
+          columns: parseInt(formData.columns, 10)
+        };
         await apiClient.post('/v1/auditoriums', requestData);
         toast.success('Thêm phòng chiếu mới thành công!');
+        
+        // Reset form and refresh data
+        setFormData({
+          name: '',
+          rows: '',
+          columns: '',
+          originalRows: '',
+          originalColumns: ''
+        });
+        setShowAddForm(false);
+        setEditingAuditorium(null);
+        fetchAuditoriums();
+      } catch (error) {
+        console.error('Error creating auditorium:', error);
+        handleError(error);
       }
-      
-      // Reset form and refresh data
-      setFormData({
-        name: '',
-        rows: '',
-        columns: '',
-        description: ''
-      });
-      setShowAddForm(false);
-      setEditingAuditorium(null);
-      fetchAuditoriums();
-    } catch (error) {
-      console.error('Error saving auditorium:', error);
-      
-      // Better error handling
-      if (error.response?.status === 400) {
-        toast.error('Dữ liệu không hợp lệ! Vui lòng kiểm tra lại thông tin.');
-      } else if (error.response?.status === 401) {
-        toast.error('Bạn cần đăng nhập lại!');
-      } else if (error.response?.status === 403) {
-        toast.error('Bạn không có quyền thực hiện thao tác này!');
-      } else if (error.response?.status === 404) {
-        toast.error('Không tìm thấy phòng chiếu!');
-      } else if (error.response?.status >= 500) {
-        toast.error('Lỗi máy chủ! Vui lòng thử lại sau.');
-      } else {
-        toast.error('Có lỗi xảy ra khi lưu phòng chiếu!');
-      }
+    }
+  };
+
+  const handleError = (error) => {
+    // Better error handling
+    if (error.response?.status === 400) {
+      toast.error('Dữ liệu không hợp lệ! Vui lòng kiểm tra lại thông tin.');
+    } else if (error.response?.status === 401) {
+      toast.error('Bạn cần đăng nhập lại!');
+    } else if (error.response?.status === 403) {
+      toast.error('Bạn không có quyền thực hiện thao tác này!');
+    } else if (error.response?.status === 404) {
+      toast.error('Không tìm thấy phòng chiếu!');
+    } else if (error.response?.status === 409) {
+      // Conflict - auditorium in use
+      const errorMessage = error.response?.data?.message || 'Phòng chiếu đang được sử dụng. Không thể thay đổi cấu hình!';
+      toast.error(errorMessage);
+    } else if (error.response?.status >= 500) {
+      toast.error('Lỗi máy chủ! Vui lòng thử lại sau.');
+    } else {
+      toast.error('Có lỗi xảy ra khi lưu phòng chiếu!');
     }
   };
 
@@ -158,7 +209,8 @@ const AdminAuditoriumManagement = () => {
       name: auditorium.name || '',
       rows: rows,
       columns: columns,
-      description: auditorium.description || ''
+      originalRows: rows, // Store original values to compare
+      originalColumns: columns
     });
     setShowAddForm(true);
   };
@@ -198,8 +250,7 @@ const AdminAuditoriumManagement = () => {
     setFormData({
       name: '',
       rows: '',
-      columns: '',
-      description: ''
+      columns: ''
     });
   };
 
@@ -311,16 +362,6 @@ const AdminAuditoriumManagement = () => {
                 <small className="form-hint">Số lượng ghế trong mỗi dãy</small>
               </div>
 
-              <div className="form-group">
-                <label>Mô tả</label>
-                <textarea
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  rows={4}
-                />
-              </div>
-
               <div className="form-actions">
                 <button type="button" className="btn btn-secondary" onClick={handleCancel}>
                   Hủy
@@ -377,7 +418,6 @@ const AdminAuditoriumManagement = () => {
                   ) : (
                     <p><strong>Cấu hình:</strong> Chưa có thông tin</p>
                   )}
-                  <p><strong>Mô tả:</strong> {auditorium.description || 'Chưa có mô tả'}</p>
                 </div>
               </div>
             ))}
@@ -421,18 +461,45 @@ const AdminAuditoriumManagement = () => {
                 </div>
               ) : seats.length > 0 ? (
                 <div className="seats-container">
-                  <div className="seats-grid">
-                    {seats.map((seat) => (
+                  {(() => {
+                    // Group seats by row and calculate columns
+                    const seatsByRow = {};
+                    seats.forEach(seat => {
+                      if (!seatsByRow[seat.rowLabel]) {
+                        seatsByRow[seat.rowLabel] = [];
+                      }
+                      seatsByRow[seat.rowLabel].push(seat);
+                    });
+                    
+                    // Sort rows and seats within each row
+                    const sortedRows = Object.keys(seatsByRow).sort();
+                    sortedRows.forEach(rowLabel => {
+                      seatsByRow[rowLabel].sort((a, b) => a.number - b.number);
+                    });
+                    
+                    // Calculate max columns (seats per row)
+                    const maxColumns = Math.max(...sortedRows.map(row => seatsByRow[row].length));
+                    
+                    return (
                       <div 
-                        key={seat.id} 
-                        className={`seat-item seat-${seat.seatType?.toLowerCase() || 'normal'}`}
-                        title={`${seat.rowLabel}${seat.number} - ${seat.seatType || 'NORMAL'}`}
+                        className="seats-grid" 
+                        style={{ gridTemplateColumns: `repeat(${maxColumns}, 1fr)` }}
                       >
-                        <span className="seat-label">{seat.rowLabel}{seat.number}</span>
-                        <span className="seat-type-badge">{seat.seatType || 'NORMAL'}</span>
+                        {sortedRows.map(rowLabel => 
+                          seatsByRow[rowLabel].map((seat) => (
+                            <div 
+                              key={seat.id} 
+                              className={`seat-item seat-${seat.seatType?.toLowerCase() || 'normal'}`}
+                              title={`${seat.rowLabel}${seat.number} - ${seat.seatType || 'NORMAL'}`}
+                            >
+                              <span className="seat-label">{seat.rowLabel}{seat.number}</span>
+                              <span className="seat-type-badge">{seat.seatType || 'NORMAL'}</span>
+                            </div>
+                          ))
+                        )}
                       </div>
-                    ))}
-                  </div>
+                    );
+                  })()}
                   
                   <div className="seats-summary">
                     <p><strong>Tổng số ghế:</strong> {seats.length}</p>

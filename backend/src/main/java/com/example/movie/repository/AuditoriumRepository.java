@@ -6,8 +6,13 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.EntityGraph;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.Optional;
+
 public interface AuditoriumRepository extends JpaRepository<Auditorium, Long> {
     
     @EntityGraph(attributePaths = {"seats"})
     Page<Auditorium> findAll(Pageable pageable);
+    
+    @EntityGraph(attributePaths = {"seats"})
+    Optional<Auditorium> findById(Long id);
 }

@@ -60,4 +60,9 @@ public interface TicketRepository extends JpaRepository<Ticket, Long> {
      * Count tickets by auditorium ID
      */
     long countByAuditoriumId(Long auditoriumId);
+    
+    /**
+     * Check if ticket code exists
+     */
+    boolean existsByTicketCode(String ticketCode);
 }

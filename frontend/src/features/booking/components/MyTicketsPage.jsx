@@ -159,8 +159,11 @@ export default function MyTicketsPage() {
               <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
                 <div className="bg-gradient-to-r from-blue-50 to-white px-6 py-4 border-b border-gray-200">
                   <h3 className="text-2xl font-bold text-gray-900 mb-1">
-                    Danh sách vé ({bookings.length})
+                    Danh sách đặt chỗ ({bookings.length})
                   </h3>
+                  <p className="text-sm text-gray-600 mt-1">
+                    Mỗi đặt chỗ có thể gồm nhiều vé
+                  </p>
                 </div>
                 
                 <div className="p-6 space-y-4">
@@ -184,7 +187,8 @@ export default function MyTicketsPage() {
                           </div>
                           
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600 mb-2">
-                            <div><span className="font-medium">Mã vé:</span> <span className="font-mono">{booking.bookingCode}</span></div>
+                            <div><span className="font-medium">Mã đặt chỗ:</span> <span className="font-mono">{booking.bookingCode}</span></div>
+                            <div><span className="font-medium">Số vé:</span> <span className="font-semibold text-blue-600">{booking.tickets?.length || booking.seats?.length || 0} vé</span></div>
                             <div><span className="font-medium">Suất chiếu:</span> {booking.screening?.startTime ? formatTime(booking.screening.startTime) : 'N/A'}</div>
                             <div><span className="font-medium">Phòng:</span> {booking.screening?.auditorium?.name || 'N/A'}</div>
                             <div><span className="font-medium">Tổng tiền:</span> {formatVND(booking.totalPrice)}</div>
@@ -224,9 +228,12 @@ export default function MyTicketsPage() {
                   <div className="p-6 space-y-6">
                     {/* Booking Code */}
                     <div className="p-4 bg-green-50 rounded-lg border border-green-200">
-                      <h4 className="text-lg font-semibold text-green-900 mb-2">Mã vé</h4>
+                      <h4 className="text-lg font-semibold text-green-900 mb-2">Mã đặt chỗ</h4>
                       <div className="text-xl font-bold text-green-700 font-mono">
                         {selectedBooking.bookingCode}
+                      </div>
+                      <div className="text-sm text-green-600 mt-1">
+                        {selectedBooking.tickets?.length || selectedBooking.seats?.length || 0} vé trong đặt chỗ này
                       </div>
                     </div>
 
@@ -240,12 +247,82 @@ export default function MyTicketsPage() {
                           <div><span className="font-medium">Ngày:</span> {selectedBooking.screening?.startTime ? formatDate(selectedBooking.screening.startTime) : 'N/A'}</div>
                           <div><span className="font-medium">Phòng:</span> {selectedBooking.screening?.auditorium?.name || 'N/A'}</div>
                           <div><span className="font-medium">Định dạng:</span> {selectedBooking.screening?.format || 'N/A'}</div>
-                          {selectedBooking.seats && selectedBooking.seats.length > 0 && (
-                            <div><span className="font-medium">Ghế ngồi:</span> {selectedBooking.seats.map(seat => `${seat.rowLabel}${seat.number}`).join(', ')}</div>
-                          )}
                         </div>
                       </div>
                     </div>
+
+                    {/* Individual Tickets */}
+                    {selectedBooking.tickets && selectedBooking.tickets.length > 0 ? (
+                      <div className="space-y-3">
+                        <h4 className="text-lg font-semibold text-gray-900">
+                          Danh sách vé ({selectedBooking.tickets.length})
+                        </h4>
+                        <div className="space-y-2">
+                          {selectedBooking.tickets.map((ticket, index) => (
+                            <div key={ticket.id || index} className="p-4 bg-blue-50 rounded-lg border border-blue-200">
+                              <div className="flex items-start justify-between">
+                                <div className="flex-1">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <div className="text-sm font-semibold text-blue-900">
+                                      Vé #{index + 1}
+                                    </div>
+                                    {ticket.ticketCode && (
+                                      <div className="px-2 py-1 bg-blue-100 rounded border border-blue-300">
+                                        <span className="text-xs text-blue-800 font-medium">Mã vé:</span>
+                                        <span className="text-xs text-blue-900 font-mono font-bold ml-1">
+                                          {ticket.ticketCode}
+                                        </span>
+                                      </div>
+                                    )}
+                                  </div>
+                                  {ticket.seat && (
+                                    <div className="text-sm text-gray-700 mb-1">
+                                      <span className="font-medium">Ghế:</span> 
+                                      <span className="ml-1 font-semibold text-gray-900">
+                                        {ticket.seat.rowLabel}{ticket.seat.number}
+                                      </span>
+                                      {ticket.seat.seatType && (
+                                        <span className="ml-2 px-2 py-0.5 rounded text-xs bg-blue-200 text-blue-800 font-medium">
+                                          {ticket.seat.seatType}
+                                        </span>
+                                      )}
+                                    </div>
+                                  )}
+                                  {ticket.status && (
+                                    <div className="text-xs text-gray-600 mt-2">
+                                      <span className="font-medium">Trạng thái:</span>
+                                      <span className={`ml-1 px-2 py-0.5 rounded ${
+                                        ticket.status === 'ISSUED' ? 'bg-green-100 text-green-800' :
+                                        ticket.status === 'BOOKED' ? 'bg-yellow-100 text-yellow-800' :
+                                        ticket.status === 'USED' ? 'bg-gray-100 text-gray-800' :
+                                        ticket.status === 'CANCELLED' ? 'bg-red-100 text-red-800' :
+                                        'bg-gray-100 text-gray-800'
+                                      }`}>
+                                        {ticket.status === 'ISSUED' ? 'Đã phát hành' : 
+                                         ticket.status === 'BOOKED' ? 'Đã đặt' : 
+                                         ticket.status === 'USED' ? 'Đã sử dụng' : 
+                                         ticket.status === 'CANCELLED' ? 'Đã hủy' : ticket.status}
+                                      </span>
+                                    </div>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : selectedBooking.seats && selectedBooking.seats.length > 0 ? (
+                      <div className="space-y-3">
+                        <h4 className="text-lg font-semibold text-gray-900">
+                          Ghế đã đặt ({selectedBooking.seats.length})
+                        </h4>
+                        <div className="p-4 bg-gray-50 rounded-lg">
+                          <div className="text-sm text-gray-600">
+                            <span className="font-medium">Ghế ngồi:</span> {selectedBooking.seats.map(seat => `${seat.rowLabel}${seat.number}`).join(', ')}
+                          </div>
+                        </div>
+                      </div>
+                    ) : null}
 
                     {/* Payment Information */}
                     {payment && (
