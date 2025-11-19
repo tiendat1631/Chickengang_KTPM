@@ -49,6 +49,10 @@ app.jwt.refresh.expiration-in-seconds=2592000
 - `POST /api/v1/movies` - Add movie (Admin)
 - `PATCH /api/v1/movies/{id}` - Update movie (Admin)
 - `DELETE /api/v1/movies/{id}` - Delete movie (Admin)
+- `PATCH /api/v1/bookings/{id}/cancel` - Hủy đặt vé ở trạng thái `PENDING` (chủ sở hữu hoặc admin)
+- `PATCH /api/v1/payments/{id}` - Đổi phương thức thanh toán khi thanh toán đang `PENDING` (chủ sở hữu hoặc admin)
+
+> Các thao tác hủy/đổi chỉ thành công khi cả Booking và Payment đang ở trạng thái `PENDING`. Việc hủy sẽ đưa Booking sang `CANCELLED`, Payment sang `CANCELLED` và trả ghế về trạng thái `AVAILABLE`.
 
 ## 🧪 Testing
 

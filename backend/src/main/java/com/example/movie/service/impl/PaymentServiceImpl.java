@@ -2,12 +2,17 @@ package com.example.movie.service.impl;
 
 import com.example.movie.dto.payment.PaymentConfirmRequest;
 import com.example.movie.dto.payment.PaymentResponse;
+import com.example.movie.dto.payment.PaymentUpdateRequest;
+import com.example.movie.exception.AuthenticationRequiredException;
 import com.example.movie.exception.InvalidId;
 import com.example.movie.mapper.PaymentMapper;
 import com.example.movie.model.*;
 import com.example.movie.repository.*;
 import com.example.movie.service.PaymentService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -114,7 +119,7 @@ public class PaymentServiceImpl implements PaymentService {
                 ticket.setTicketCode(generateTicketCode());
                 ticketRepository.save(ticket);
             }
-        } else if (paymentStatus == Payment.PaymentStatus.FAILED) {
+        } else if (paymentStatus == Payment.PaymentStatus.FAILED || paymentStatus == Payment.PaymentStatus.CANCELLED) {
             // Update booking status to CANCELLED
             Booking booking = payment.getBooking();
             booking.setBookingStatus(Booking.BookingStatus.CANCELLED);
@@ -135,6 +140,36 @@ public class PaymentServiceImpl implements PaymentService {
 
         Payment savedPayment = paymentRepository.save(payment);
         return paymentMapper.toResponse(savedPayment);
+    }
+
+    @Override
+    @Transactional
+    public PaymentResponse updatePendingPayment(Long paymentId, PaymentUpdateRequest request) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new AuthenticationRequiredException("User not authenticated");
+        }
+
+        Payment payment = paymentRepository.findById(paymentId)
+                .orElseThrow(() -> new InvalidId(paymentId));
+
+        Booking booking = payment.getBooking();
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
+        if (!isAdmin && !booking.getUser().getUsername().equals(authentication.getName())) {
+            throw new AccessDeniedException("You do not have permission to update this payment");
+        }
+
+        if (payment.getStatus() != Payment.PaymentStatus.PENDING ||
+                booking.getBookingStatus() != Booking.BookingStatus.PENDING) {
+            throw new RuntimeException("Only pending payments can be updated");
+        }
+
+        payment.setPaymentMethod(request.getPaymentMethod());
+        payment.setNote(request.getNote());
+
+        Payment updatedPayment = paymentRepository.save(payment);
+        return paymentMapper.toResponse(updatedPayment);
     }
 
     @Override
