@@ -22,7 +22,6 @@ import java.util.List;
 public class ScreeningController {
     private final ScreeningService screeningService;
 
-    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<ApiResponse<ScreeningResponse>> createScreening (@Valid @RequestBody ScreeningRequest screeningRequest) {
         ScreeningResponse created = screeningService.createScreening(screeningRequest);

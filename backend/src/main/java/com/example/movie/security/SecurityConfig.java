@@ -46,7 +46,7 @@ public class SecurityConfig {
 
                         // USER MANAGEMENT
                         // Allow user registration (POST) without authentication
-                        .requestMatchers(HttpMethod.POST, "/api/v1/users").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/users").hasRole("ADMIN")
                         // Admin-only operations for user management
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/**").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.PATCH, "/api/v1/users/**").hasRole("ADMIN")
@@ -62,7 +62,11 @@ public class SecurityConfig {
 
 
                         // SCREENING
-                        .requestMatchers("/api/v1/screenings/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/screenings/**").permitAll()
+                        // Chỉ ADMIN mới được phép tạo/sửa/xoá suất chiếu
+                        .requestMatchers(HttpMethod.POST, "/api/v1/screenings/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/screenings/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/screenings/**").hasRole("ADMIN")
 
                         // BOOKING - Require authentication
                         .requestMatchers("/api/v1/bookings/**").authenticated()
