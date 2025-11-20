@@ -94,30 +94,25 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        
-        // Allow specific origins (local development and Docker)
+
         configuration.addAllowedOrigin("http://localhost:3000");
         configuration.addAllowedOrigin("http://127.0.0.1:3000");
-        configuration.addAllowedOrigin("http://frontend:80");
-        configuration.addAllowedOrigin("http://frontend:3000");
-       
-        
-        // Allow all HTTP methods
+
+        // Domain FE deploy trên Railway
+        configuration.addAllowedOrigin("https://zucchini-communication-production.up.railway.app");
+
         configuration.addAllowedMethod("*");
-        
-        // Allow all headers
         configuration.addAllowedHeader("*");
-        
-        // Allow credentials (cookies, authorization headers)
         configuration.setAllowCredentials(true);
-        
-        // Expose headers that frontend can access
+
         configuration.addExposedHeader("Authorization");
         configuration.addExposedHeader("Content-Type");
-        
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
-        
+
         return source;
     }
+
+
 }
