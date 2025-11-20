@@ -13,7 +13,7 @@ services:
       - "3307:3306"
     volumes:
       - mysql-data:/var/lib/mysql
-      - ./backend/src/main/resources/data.sql:/docker-entrypoint-initdb.d/data.sql:ro
+      #- ./backend/src/main/resources/data.sql:/docker-entrypoint-initdb.d/data.sql:ro
     networks:
       - moviebooking-network
     restart: unless-stopped
