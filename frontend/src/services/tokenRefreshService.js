@@ -53,7 +53,7 @@ class TokenRefreshService {
   async checkAndRefreshToken() {
     try {
       const token = await getToken();
-      
+
       if (!token) {
         console.log('[TokenRefreshService] No token found, skipping refresh check');
         return;
@@ -84,7 +84,7 @@ class TokenRefreshService {
 
     // Refresh if less than threshold seconds remaining
     const shouldRefresh = timeToExpiry < this.refreshThresholdSeconds && timeToExpiry > 0;
-    
+
     if (shouldRefresh) {
       console.log(`[TokenRefreshService] Token expires in ${Math.round(timeToExpiry)}s, refreshing...`);
     }
@@ -107,7 +107,7 @@ class TokenRefreshService {
 
     try {
       const refreshToken = await getRefreshToken();
-      
+
       if (!refreshToken) {
         console.warn('[TokenRefreshService] No refresh token available');
         this.isRefreshing = false;
@@ -129,14 +129,14 @@ class TokenRefreshService {
       });
 
       const { accessToken } = response.data.data;
-      
+
       if (accessToken) {
         // Update token in localStorage
         localStorage.setItem('access_token', accessToken);
-        
+
         // Dispatch event to notify other components
-        window.dispatchEvent(new CustomEvent('tokenRefreshed', { 
-          detail: { accessToken } 
+        window.dispatchEvent(new CustomEvent('tokenRefreshed', {
+          detail: { accessToken }
         }));
 
         console.log('[TokenRefreshService] Token refreshed successfully');
@@ -149,13 +149,13 @@ class TokenRefreshService {
     } catch (error) {
       console.error('[TokenRefreshService] Token refresh failed:', error);
       this.isRefreshing = false;
-      
+
       // Stop proactive refresh if refresh token is invalid
       if (error.response?.status === 401 || error.response?.status === 403) {
         console.warn('[TokenRefreshService] Refresh token invalid, stopping proactive refresh');
         this.stopProactiveRefresh();
       }
-      
+
       return false;
     }
   }

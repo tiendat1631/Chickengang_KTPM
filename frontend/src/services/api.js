@@ -5,7 +5,7 @@ import { getToken, removeToken } from '@/lib/auth.js';
 
 // API Configuration - Use proxy in development, direct URL in production
 //const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? '/api' : 'http://localhost:8080');
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 // Để debug xem nó nhận link nào
 console.log('Current API BASE URL:', API_BASE_URL);
 const API_TIMEOUT = parseInt(import.meta.env.VITE_API_TIMEOUT || '30000');
@@ -22,7 +22,7 @@ const processQueue = (error, token = null) => {
       prom.resolve(token);
     }
   });
-  
+
   failedQueue = [];
 };
 
@@ -74,7 +74,7 @@ apiClient.interceptors.response.use(
       // Check if this is a booking or payment endpoint
       const isBookingEndpoint = originalRequest.url?.includes('/bookings');
       const isPaymentEndpoint = originalRequest.url?.includes('/payments');
-      
+
       // If already refreshing, queue this request
       if (isRefreshing) {
         return new Promise((resolve, reject) => {
@@ -91,10 +91,10 @@ apiClient.interceptors.response.use(
 
       originalRequest._retry = true;
       isRefreshing = true;
-      
+
       // Try to refresh token first
       const refreshToken = localStorage.getItem('refresh_token');
-      
+
       if (refreshToken) {
         try {
           // Use a separate axios instance to avoid infinite loop
@@ -106,33 +106,33 @@ apiClient.interceptors.response.use(
               'Content-Type': 'application/json',
             },
           });
-          
+
           console.warn(`${isBookingEndpoint ? 'Booking' : isPaymentEndpoint ? 'Payment' : 'API'} endpoint returned 401, attempting token refresh`);
-          
-          const refreshResponse = await refreshClient.post('/v1/auth/refresh', {
-            refreshToken,
-          });
+
+            const refreshResponse = await refreshClient.post('/auth/refresh', {
+                refreshToken,
+            });
           const { accessToken } = refreshResponse.data.data;
-          
+
           // Save new token to localStorage
           localStorage.setItem('access_token', accessToken);
-          
+
           // Update ONLY the original request header (not global defaults)
           originalRequest.headers['Authorization'] = `Bearer ${accessToken}`;
-          
+
           console.log('[API] Token refreshed successfully, retrying request with new token');
           console.log('[API] New token (first 20 chars):', accessToken.substring(0, 20) + '...');
-          
+
           // Dispatch custom event to notify components of token refresh
-          window.dispatchEvent(new CustomEvent('tokenRefreshed', { 
-            detail: { accessToken } 
+          window.dispatchEvent(new CustomEvent('tokenRefreshed', {
+            detail: { accessToken }
           }));
-          
+
           // Process queued requests with new token
           processQueue(null, accessToken);
-          
+
           isRefreshing = false;
-          
+
           // Retry original request with new token
           return apiClient(originalRequest);
         } catch (refreshError) {
@@ -140,7 +140,7 @@ apiClient.interceptors.response.use(
           console.error('[API] Refresh error status:', refreshError.response?.status);
           processQueue(refreshError, null);
           isRefreshing = false;
-          
+
           // For booking/payment endpoints, mark as refresh failed
           if (isBookingEndpoint || isPaymentEndpoint) {
             originalRequest._refreshFailed = true;
@@ -160,7 +160,7 @@ apiClient.interceptors.response.use(
         console.warn('No refresh token available');
         isRefreshing = false;
         processQueue(new Error('No refresh token'), null);
-        
+
         if (isBookingEndpoint || isPaymentEndpoint) {
           originalRequest._refreshFailed = true;
         } else {

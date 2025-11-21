@@ -95,11 +95,7 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.addAllowedOrigin("http://localhost:3000");
-        configuration.addAllowedOrigin("http://127.0.0.1:3000");
-
-        // Domain FE deploy trên Railway
-        configuration.addAllowedOrigin("https://zucchini-communication-production.up.railway.app");
+        configuration.setAllowedOriginPatterns(java.util.List.of("*"));
 
         configuration.addAllowedMethod("*");
         configuration.addAllowedHeader("*");
