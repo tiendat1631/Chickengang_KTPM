@@ -9,7 +9,7 @@ React Web application cho Movie Booking System.
 npm install
 
 # Setup environment
-cp env.example .env
+cp .env .env
 
 # Run development server
 npm run dev

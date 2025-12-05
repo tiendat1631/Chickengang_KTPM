@@ -94,30 +94,21 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        
-        // Allow specific origins (local development and Docker)
-        configuration.addAllowedOrigin("http://localhost:3000");
-        configuration.addAllowedOrigin("http://127.0.0.1:3000");
-        configuration.addAllowedOrigin("http://frontend:80");
-        configuration.addAllowedOrigin("http://frontend:3000");
-       
-        
-        // Allow all HTTP methods
+
+        configuration.setAllowedOriginPatterns(java.util.List.of("*"));
+
         configuration.addAllowedMethod("*");
-        
-        // Allow all headers
         configuration.addAllowedHeader("*");
-        
-        // Allow credentials (cookies, authorization headers)
         configuration.setAllowCredentials(true);
-        
-        // Expose headers that frontend can access
+
         configuration.addExposedHeader("Authorization");
         configuration.addExposedHeader("Content-Type");
-        
+
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
-        
+
         return source;
     }
+
+
 }
