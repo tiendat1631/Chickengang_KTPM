@@ -108,9 +108,9 @@ export default function SeatSelectionPage() {
 
   const formatTime = (dateString) => {
     const date = new Date(dateString)
-    return date.toLocaleTimeString('vi-VN', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
+    return date.toLocaleTimeString('vi-VN', {
+      hour: '2-digit',
+      minute: '2-digit'
     })
   }
 
@@ -122,6 +122,11 @@ export default function SeatSelectionPage() {
       if (isSelected) {
         return prev.filter(s => s.id !== seat.id)
       } else {
+        // Check max seat limit (Requirement #32)
+        if (prev.length >= 10) {
+          alert('Bạn chỉ có thể chọn tối đa 10 ghế')
+          return prev
+        }
         return [...prev, seat]
       }
     })
@@ -140,12 +145,12 @@ export default function SeatSelectionPage() {
       alert('Vui lòng chọn ít nhất một ghế')
       return
     }
-    
+
     if (!screening) {
       alert('Không tìm thấy thông tin suất chiếu')
       return
     }
-    
+
     // Prepare booking data
     const bookingData = {
       screening: screening,
@@ -155,17 +160,17 @@ export default function SeatSelectionPage() {
       })),
       totalPrice: getTotalPrice()
     }
-    
+
     // Navigate to booking page with data
-    navigate(`/booking/${movieId}`, { 
-      state: bookingData 
+    navigate(`/booking/${movieId}`, {
+      state: bookingData
     })
   }
 
   if (loading) {
     return (
       <div className="seat-selection-page">
-        <Header onSearch={() => {}} />
+        <Header onSearch={() => { }} />
         <div className="container">
           <div className="loading">Đang tải...</div>
         </div>
@@ -176,7 +181,7 @@ export default function SeatSelectionPage() {
   if (error || !screening) {
     return (
       <div className="seat-selection-page">
-        <Header onSearch={() => {}} />
+        <Header onSearch={() => { }} />
         <div className="container">
           <div className="error">{error || 'Không tìm thấy suất chiếu'}</div>
         </div>
@@ -186,13 +191,13 @@ export default function SeatSelectionPage() {
 
   return (
     <div className="seat-selection-page">
-      <Header onSearch={() => {}} />
-      
+      <Header onSearch={() => { }} />
+
       {/* Synced Header Section */}
       <header className="bg-gradient-to-r from-purple-800 to-gray-800">
         <div className="container">
           {/* Breadcrumb */}
-          <Breadcrumb 
+          <Breadcrumb
             items={[
               { label: "Trang chủ", href: "/" },
               { label: screening.movie.title, href: `/movies/${movieId}` },
@@ -200,7 +205,7 @@ export default function SeatSelectionPage() {
               { label: "Chọn ghế" }
             ]}
           />
-          
+
           {/* Page Title */}
           <div className="py-6">
             <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 tracking-tight">
@@ -238,26 +243,25 @@ export default function SeatSelectionPage() {
                 }),
                 10 // minimum 10 columns
               )
-              
+
               // Get unique row labels from seats data
               const uniqueRowLabels = [...new Set(seats.map(seat => seat.rowLabel))].sort()
-              
+
               return uniqueRowLabels.map((rowLabel) => {
                 const rowSeats = seats.filter(seat => seat.rowLabel === rowLabel)
-                
+
                 return (
                   <div key={rowLabel} className="seat-row">
                     <div className="row-label">{rowLabel}</div>
-                    <div 
+                    <div
                       className="seat-row-grid"
                       style={{ gridTemplateColumns: `repeat(${maxSeatsPerRow}, 1fr)` }}
                     >
                       {rowSeats.map((seat) => (
                         <button
                           key={seat.id}
-                          className={`seat ${getDisplayStatus(seat.status)} ${seat.seatType.toLowerCase()} ${
-                            selectedSeats.some(s => s.id === seat.id) ? 'selected' : ''
-                          }`}
+                          className={`seat ${getDisplayStatus(seat.status)} ${seat.seatType.toLowerCase()} ${selectedSeats.some(s => s.id === seat.id) ? 'selected' : ''
+                            }`}
                           onClick={() => handleSeatClick(seat)}
                           disabled={seat.status !== 'AVAILABLE'}
                           title={`${seat.rowLabel}${seat.number} - ${formatVND(getSeatPrice(seat))}`}
@@ -311,19 +315,19 @@ export default function SeatSelectionPage() {
               <p>Chưa chọn ghế nào</p>
             )}
           </div>
-          
+
           <div className="total-price">
             <h3>Tổng tiền: <span className="whitespace-nowrap">{formatVND(getTotalPrice())}</span></h3>
           </div>
 
           <div className="action-buttons">
-            <Link 
-              to={`/movies/${movieId}/screenings`} 
+            <Link
+              to={`/movies/${movieId}/screenings`}
               className="btn btn-secondary"
             >
               ← Quay lại
             </Link>
-            <button 
+            <button
               className="btn btn-primary"
               onClick={handleProceedToBooking}
               disabled={selectedSeats.length === 0}

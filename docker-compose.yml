@@ -1,3 +1,5 @@
+name: moviebooking
+
 services:
   db:
     env_file:
