@@ -64,11 +64,6 @@ class BookingConcurrencyTest {
     }
 
     @Test
-    @org.junit.jupiter.api.Disabled("KNOWN ISSUE: BookingServiceImpl lacks proper database-level locking. " +
-            "This test correctly identifies that concurrent bookings can both succeed when they shouldn't. " +
-            "FIX REQUIRED: Add @Lock(LockModeType.PESSIMISTIC_WRITE) to ticketRepository.findByScreeningIdAndSeatId() "
-            +
-            "or use @Version on Ticket entity for optimistic locking.")
     void concurrentBooking_ShouldAllowOnlyOneSuccess() throws InterruptedException {
         // Setup test data
         User user1 = new User();
