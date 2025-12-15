@@ -145,6 +145,7 @@ public class BookingServiceTest {
 
         when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(booking));
         when(paymentRepository.findByBookingId(bookingId)).thenReturn(Optional.of(payment));
+        when(bookingRepository.save(any(Booking.class))).thenReturn(booking);
         when(bookingMapper.toResponse(any(Booking.class))).thenReturn(new BookingResponse());
 
         // Act

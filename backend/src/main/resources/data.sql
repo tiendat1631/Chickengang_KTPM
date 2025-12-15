@@ -34,7 +34,7 @@ INSERT INTO movie (title, director, actors, genres, release_date, duration, lang
 ('The Hunger Games: The Ballad of Songbirds & Snakes', 'Francis Lawrence', 'Tom Blyth, Rachel Zegler', 'Action, Adventure, Drama', '2023-11-17', '157 min', 'English', 'PG-13', 'Years before he would become the tyrannical President of Panem, 18-year-old Coriolanus Snow is the last hope for his fading lineage.', 'NOW_SHOWING');
 
 -- Users: store BCrypt-hashed passwords to align with PasswordEncoder
--- Password for both users = "123456" (BCrypt pre-hashed)
+-- Password for both users = "password" (BCrypt pre-hashed)
 -- Hash generated with BCrypt (10 rounds). Update if encoder strength changes.
 SET @pwd := '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi';
 
