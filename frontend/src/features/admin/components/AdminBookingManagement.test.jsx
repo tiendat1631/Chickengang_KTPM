@@ -2,11 +2,11 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import AdminBookingManagement from './AdminBookingManagement';
-import { useAuth } from '@/hooks/useAuth.js';
+import { useAuth } from '@/features/auth/hooks/useAuth.js';
 import apiClient from '@/services/api.js';
 
 // Mock Dependencies
-vi.mock('@/hooks/useAuth.js');
+vi.mock('@/features/auth/hooks/useAuth.js');
 vi.mock('@/services/api.js');
 vi.mock('react-hot-toast', () => ({
     default: {

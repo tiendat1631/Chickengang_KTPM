@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useNavigate, useSearchParams, useLocation } from 'react-router-dom'
-import { useMovies } from '@/hooks/useMovies'
+import { useMovies } from '@/features/movies/hooks/useMovies'
 import Header from '@/components/common/Header'
 import FilterPanel from '@/components/common/FilterPanel'
 import MovieList from './MovieList.jsx'

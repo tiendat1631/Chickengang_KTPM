@@ -2,10 +2,10 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import SeatSelectionPage from './SeatSelectionPage';
-import { useScreening, useSeats } from '@/hooks/useScreenings';
+import { useScreening, useSeats } from '@/features/screenings/hooks/useScreenings';
 
 // Mock Dependencies
-vi.mock('@/hooks/useScreenings');
+vi.mock('@/features/screenings/hooks/useScreenings');
 vi.mock('@/components/common/Header', () => ({
     default: () => <div data-testid="header">Header</div>
 }));

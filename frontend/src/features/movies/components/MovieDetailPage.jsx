@@ -3,7 +3,7 @@ import { useParams, Link, Navigate, useNavigate } from 'react-router-dom'
 import Header from '@/components/common/Header'
 import Breadcrumb from '@/components/ui/Breadcrumb'
 import apiClient from '@/services/api'
-import { useScreenings } from '@/hooks/useScreenings'
+import { useScreenings } from '@/features/screenings/hooks/useScreenings'
 import { formatVND } from '@/utils/formatCurrency'
 
 export default function MovieDetailPage() {

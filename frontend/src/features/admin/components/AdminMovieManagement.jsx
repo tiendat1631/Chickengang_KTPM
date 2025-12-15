@@ -1,8 +1,8 @@
 // JavaScript file - no TypeScript checking
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth.js';
-import { useMovies } from '@/hooks/useMovies.js';
+import { useAuth } from '@/features/auth/hooks/useAuth.js';
+import { useMovies } from '@/features/movies/hooks/useMovies.js';
 import apiClient from '@/services/api.js';
 import toast from 'react-hot-toast';
 import Pagination from '@/components/common/Pagination.jsx';
@@ -42,9 +42,9 @@ const AdminMovieManagement = () => {
   // Use the useMovies hook with search and filters
   const searchFilters = searchQuery ? { ...filters, search: searchQuery } : filters;
   const { data: moviesData, isLoading, error, refetch } = useMovies(
-    currentPage, 
-    pageSize, 
-    filters.sort, 
+    currentPage,
+    pageSize,
+    filters.sort,
     searchFilters
   );
 
@@ -91,53 +91,53 @@ const AdminMovieManagement = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     // Form validation
     if (!formData.title.trim()) {
       toast.error('Tên phim không được để trống!');
       return;
     }
-    
+
     if (!formData.director.trim()) {
       toast.error('Tên đạo diễn không được để trống!');
       return;
     }
-    
+
     if (!formData.actors.trim()) {
       toast.error('Tên diễn viên không được để trống!');
       return;
     }
-    
+
     if (!formData.genres.trim()) {
       toast.error('Thể loại không được để trống!');
       return;
     }
-    
+
     if (!formData.releaseDate) {
       toast.error('Ngày phát hành không được để trống!');
       return;
     }
-    
+
     if (!formData.duration.trim()) {
       toast.error('Thời lượng không được để trống!');
       return;
     }
-    
+
     if (!formData.language.trim()) {
       toast.error('Ngôn ngữ không được để trống!');
       return;
     }
-    
+
     if (!formData.rated) {
       toast.error('Độ tuổi không được để trống!');
       return;
     }
-    
+
     if (!formData.description.trim()) {
       toast.error('Mô tả không được để trống!');
       return;
     }
-    
+
     try {
       if (editingMovie) {
         // Update existing movie
@@ -148,7 +148,7 @@ const AdminMovieManagement = () => {
         await apiClient.post('/v1/movies', formData);
         toast.success('Thêm phim mới thành công!');
       }
-      
+
       // Reset form and refresh data
       setFormData({
         title: '',
@@ -157,17 +157,17 @@ const AdminMovieManagement = () => {
         genres: '',
         releaseDate: '',
         duration: '',
-      language: '',
-      rated: '',
-      description: '',
-      status: ''
-    });
-    setShowAddForm(false);
-    setEditingMovie(null);
-    refetch();
+        language: '',
+        rated: '',
+        description: '',
+        status: ''
+      });
+      setShowAddForm(false);
+      setEditingMovie(null);
+      refetch();
     } catch (error) {
       console.error('Error saving movie:', error);
-      
+
       // Better error handling
       if (error.response?.status === 400) {
         toast.error('Dữ liệu không hợp lệ! Vui lòng kiểm tra lại thông tin.');
@@ -210,7 +210,7 @@ const AdminMovieManagement = () => {
         refetch();
       } catch (error) {
         console.error('Error deleting movie:', error);
-        
+
         // Better error handling
         if (error.response?.status === 401) {
           toast.error('Bạn cần đăng nhập lại!');
@@ -260,7 +260,7 @@ const AdminMovieManagement = () => {
     <div className="admin-movie-management">
       <div className="page-header">
         <h1>Quản lý phim</h1>
-        <button 
+        <button
           className="btn btn-primary"
           onClick={() => setShowAddForm(true)}
         >
@@ -446,13 +446,13 @@ const AdminMovieManagement = () => {
                   <div className="movie-header">
                     <h3>{movie.title}</h3>
                     <div className="movie-actions">
-                      <button 
+                      <button
                         className="btn btn-sm btn-outline"
                         onClick={() => handleEdit(movie)}
                       >
                         Sửa
                       </button>
-                      <button 
+                      <button
                         className="btn btn-sm btn-danger"
                         onClick={() => handleDelete(movie.id)}
                       >
@@ -474,7 +474,7 @@ const AdminMovieManagement = () => {
                 </div>
               ))}
             </div>
-            
+
             {moviesData && moviesData.totalPages > 1 && (
               <Pagination
                 currentPage={moviesData.currentPage}

@@ -1,7 +1,7 @@
 // JavaScript file - no TypeScript checking
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth.js';
+import { useAuth } from '@/features/auth/hooks/useAuth.js';
 import apiClient from '@/services/api.js';
 import toast from 'react-hot-toast';
 import './AdminDashboard.css';

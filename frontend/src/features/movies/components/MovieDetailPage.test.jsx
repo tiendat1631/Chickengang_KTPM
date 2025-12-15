@@ -3,11 +3,11 @@ import { MemoryRouter, Route, Routes } from 'react-router-dom';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import MovieDetailPage from '@/features/movies/components/MovieDetailPage';
 import apiClient from '@/services/api';
-import { useScreenings } from '@/hooks/useScreenings';
+import { useScreenings } from '@/features/screenings/hooks/useScreenings';
 
 // Mock dependencies
 vi.mock('@/services/api');
-vi.mock('@/hooks/useScreenings');
+vi.mock('@/features/screenings/hooks/useScreenings');
 
 // Mock child components
 vi.mock('@/components/common/Header', () => ({

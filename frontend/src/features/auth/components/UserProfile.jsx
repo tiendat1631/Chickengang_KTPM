@@ -1,7 +1,7 @@
 // JavaScript file - no TypeScript checking
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '@/hooks/useAuth.js';
+import { useAuth } from '@/features/auth/hooks/useAuth.js';
 import apiClient from '@/services/api.js';
 import toast from 'react-hot-toast';
 import './UserProfile.css';
@@ -47,7 +47,7 @@ const UserProfile = () => {
         createdAt: user.createdAt || new Date().toISOString(),
         updatedAt: user.updatedAt || new Date().toISOString()
       };
-      
+
       setUserData(userDetails);
       setFormData({
         username: userDetails.username || '',
@@ -75,13 +75,13 @@ const UserProfile = () => {
     e.preventDefault();
     try {
       setIsSaving(true);
-      
+
       // Since we don't have a user update endpoint, we'll just update local state
       // In a real app, you'd have a PATCH /api/v1/users/{id} endpoint
       const updatedUser = { ...userData, ...formData };
       setUserData(updatedUser);
       setIsEditing(false);
-      
+
       // Show success message
       toast.success('Cập nhật thông tin cá nhân thành công!');
     } catch (error) {
@@ -154,7 +154,7 @@ const UserProfile = () => {
         </div>
         <div className="profile-actions">
           {!isEditing ? (
-            <button 
+            <button
               className="btn btn-primary"
               onClick={() => setIsEditing(true)}
             >
@@ -162,14 +162,14 @@ const UserProfile = () => {
             </button>
           ) : (
             <div className="edit-actions">
-              <button 
+              <button
                 className="btn btn-secondary"
                 onClick={handleCancel}
                 disabled={isSaving}
               >
                 Hủy
               </button>
-              <button 
+              <button
                 className="btn btn-primary"
                 onClick={handleSave}
                 disabled={isSaving}

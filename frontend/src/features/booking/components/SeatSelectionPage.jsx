@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link, useNavigate } from 'react-router-dom'
-import { useScreening, useSeats } from '@/hooks/useScreenings'
+import { useScreening, useSeats } from '@/features/screenings/hooks/useScreenings'
 import Header from '@/components/common/Header'
 import Breadcrumb from '@/components/ui/Breadcrumb'
 import './SeatSelectionPage.css'

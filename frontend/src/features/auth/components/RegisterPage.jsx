@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { useRegister } from '../../../hooks/useAuth'
+import { useRegister } from '@/features/auth/hooks/useAuth'
 import toast from 'react-hot-toast'
 
 export default function RegisterPage() {
@@ -25,7 +25,7 @@ export default function RegisterPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
+
     if (!formData.username || !formData.email || !formData.password || !formData.phoneNumber || !formData.address) {
       toast.error('Vui lòng nhập đầy đủ thông tin')
       return
@@ -37,9 +37,9 @@ export default function RegisterPage() {
     }
 
     register(
-      { 
-        username: formData.username, 
-        email: formData.email, 
+      {
+        username: formData.username,
+        email: formData.email,
         password: formData.password,
         phoneNumber: formData.phoneNumber,
         address: formData.address

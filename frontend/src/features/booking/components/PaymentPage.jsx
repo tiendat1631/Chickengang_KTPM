@@ -6,7 +6,7 @@ import Breadcrumb from '@/components/ui/Breadcrumb'
 import { formatVND } from '@/utils/formatCurrency'
 import apiClient from '@/services/api'
 import toast from 'react-hot-toast'
-import { useAuth } from '@/hooks/useAuth'
+import { useAuth } from '@/features/auth/hooks/useAuth'
 
 export default function PaymentPage() {
   const { movieId } = useParams()
@@ -36,14 +36,14 @@ export default function PaymentPage() {
     },
     onSuccess: (/** @type {any} */ booking) => {
       console.log('Booking created successfully:', booking)
-      
+
       // Validate booking response has id
       if (!booking || !booking.id) {
         console.error('Booking response missing id:', booking)
         toast.error('Lỗi tạo đơn đặt vé. Vui lòng thử lại.')
         return
       }
-      
+
       // After creating booking, confirm payment
       confirmPaymentMutation.mutate({
         bookingId: booking.id,
@@ -53,15 +53,15 @@ export default function PaymentPage() {
     },
     onError: (/** @type {any} */ error) => {
       console.error('Booking creation error:', error)
-      
+
       // Handle 401 specifically - only redirect if token refresh also failed
       if (error?.response?.status === 401) {
         const refreshFailed = error.config?._refreshFailed === true
-        
+
         if (refreshFailed) {
           toast.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.')
           navigate('/login', {
-            state: { 
+            state: {
               message: 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.',
               returnTo: `/booking/${movieId}/payment`
             }
@@ -72,7 +72,7 @@ export default function PaymentPage() {
           return
         }
       }
-      
+
       const errorMessage = error?.response?.data?.message || 'Tạo đơn đặt vé thất bại'
       toast.error(errorMessage)
     }
@@ -95,15 +95,15 @@ export default function PaymentPage() {
     },
     onError: (/** @type {any} */ error) => {
       console.error('Payment confirmation error:', error)
-      
+
       // Handle 401 specifically - only redirect if token refresh also failed
       if (error?.response?.status === 401) {
         const refreshFailed = error.config?._refreshFailed === true
-        
+
         if (refreshFailed) {
           toast.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.')
           navigate('/login', {
-            state: { 
+            state: {
               message: 'Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.',
               returnTo: `/booking/${movieId}/payment`
             }
@@ -115,13 +115,13 @@ export default function PaymentPage() {
           return
         }
       }
-      
+
       // Handle 400 Bad Request (likely invalid bookingId)
       if (error?.response?.status === 400) {
         toast.error('Dữ liệu đặt vé không hợp lệ. Vui lòng thử lại.')
         return
       }
-      
+
       const errorMessage = error?.response?.data?.message || 'Xác nhận thanh toán thất bại'
       toast.error(errorMessage)
     }
@@ -131,7 +131,7 @@ export default function PaymentPage() {
     // Get booking data from location state or localStorage
     const stateData = location.state
     const storedData = localStorage.getItem('bookingData')
-    
+
     try {
       if (stateData) {
         setBookingData(stateData)
@@ -150,9 +150,9 @@ export default function PaymentPage() {
 
   const formatTime = (dateString) => {
     const date = new Date(dateString)
-    return date.toLocaleTimeString('vi-VN', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
+    return date.toLocaleTimeString('vi-VN', {
+      hour: '2-digit',
+      minute: '2-digit'
     })
   }
 
@@ -179,7 +179,7 @@ export default function PaymentPage() {
     if (!isAuthenticated || !user?.id) {
       toast.error('Vui lòng đăng nhập để đặt vé')
       navigate('/login', {
-        state: { 
+        state: {
           message: 'Vui lòng đăng nhập để đặt vé',
           returnTo: `/booking/${movieId}/payment`
         }
@@ -203,7 +203,7 @@ export default function PaymentPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800">
-        <Header onSearch={() => {}} />
+        <Header onSearch={() => { }} />
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-white text-xl font-medium">Đang tải...</div>
         </div>
@@ -214,12 +214,12 @@ export default function PaymentPage() {
   if (error || !bookingData) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800">
-        <Header onSearch={() => {}} />
+        <Header onSearch={() => { }} />
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="bg-white rounded-xl shadow-lg p-8 max-w-md mx-4 text-center">
             <div className="text-red-600 text-lg font-medium mb-4">{error || 'Không tìm thấy thông tin đặt vé'}</div>
-            <Link 
-              to={`/movies/${movieId}`} 
+            <Link
+              to={`/movies/${movieId}`}
               className="inline-block px-6 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 transition-all"
             >
               Quay lại trang phim
@@ -233,11 +233,11 @@ export default function PaymentPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-600 via-purple-700 to-purple-800">
       {/* Main Header */}
-      <Header onSearch={() => {}} />
-      
+      <Header onSearch={() => { }} />
+
       {/* Breadcrumb Navigation */}
       <div className="bg-gradient-to-r from-purple-800 to-gray-800">
-        <Breadcrumb 
+        <Breadcrumb
           items={[
             { label: "Trang chủ", href: "/" },
             { label: bookingData.screening.movie.title, href: `/movies/${movieId}` },
@@ -247,7 +247,7 @@ export default function PaymentPage() {
             { label: "Thanh toán" }
           ]}
         />
-        
+
         {/* Page title and subtitle */}
         <div className="max-w-6xl mx-auto px-3 py-6 md:px-4">
           <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 tracking-tight drop-shadow-lg">
@@ -269,7 +269,7 @@ export default function PaymentPage() {
                 Tóm tắt đơn hàng
               </h3>
             </div>
-            
+
             <div className="p-6 space-y-6">
               {/* Movie Information */}
               <div className="flex items-start space-x-4 p-4 bg-gray-50 rounded-lg">
@@ -286,7 +286,7 @@ export default function PaymentPage() {
                   </div>
                 </div>
               </div>
-              
+
               {/* Selected Seats */}
               <div className="p-4 bg-blue-50 rounded-lg border border-blue-200">
                 <h4 className="text-lg font-semibold text-gray-900 mb-3">Ghế đã chọn</h4>
@@ -301,7 +301,7 @@ export default function PaymentPage() {
                   )}
                 </div>
               </div>
-              
+
               {/* Payment Summary */}
               <div className="p-4 bg-green-50 rounded-lg border border-green-200">
                 <h4 className="text-lg font-semibold text-gray-900 mb-3">Tóm tắt thanh toán</h4>
@@ -332,7 +332,7 @@ export default function PaymentPage() {
                 Phương thức thanh toán
               </h3>
             </div>
-            
+
             <div className="p-6 space-y-6">
               {/* Payment Method Selection */}
               <div>
@@ -354,7 +354,7 @@ export default function PaymentPage() {
                       <div className="text-sm text-gray-500">Thanh toán tại quầy trước giờ chiếu 30 phút</div>
                     </div>
                   </label>
-                  
+
                   <label className="flex items-center p-4 border border-gray-200 rounded-lg cursor-pointer hover:bg-gray-50">
                     <input
                       type="radio"
@@ -413,22 +413,22 @@ export default function PaymentPage() {
 
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row justify-end space-y-3 sm:space-y-0 sm:space-x-4">
-                <button 
+                <button
                   className="px-6 py-3 border border-gray-300 rounded-lg text-gray-700 font-medium hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 transition-colors"
                   onClick={handleBackToBooking}
                 >
                   ← Quay lại
                 </button>
-                <button 
+                <button
                   className="px-8 py-3 bg-gradient-to-r from-purple-600 to-blue-600 text-white rounded-lg font-semibold hover:from-purple-700 hover:to-blue-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-offset-2 transition-all transform hover:scale-105 shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
                   onClick={handleSubmitPayment}
                   disabled={createBookingMutation.isPending || confirmPaymentMutation.isPending}
                 >
-                  {createBookingMutation.isPending 
-                    ? 'Đang tạo đơn đặt vé...' 
+                  {createBookingMutation.isPending
+                    ? 'Đang tạo đơn đặt vé...'
                     : confirmPaymentMutation.isPending
-                    ? 'Đang xác nhận thanh toán...'
-                    : '💳 Xác nhận thanh toán'
+                      ? 'Đang xác nhận thanh toán...'
+                      : '💳 Xác nhận thanh toán'
                   }
                 </button>
               </div>
