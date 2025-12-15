@@ -11,7 +11,7 @@ import com.example.movie.repository.TicketRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -26,27 +26,27 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@org.junit.jupiter.api.extension.ExtendWith(org.mockito.junit.jupiter.MockitoExtension.class)
 class PaymentServiceImplTest {
 
+    @org.mockito.Mock
     private PaymentRepository paymentRepository;
+
+    @org.mockito.Mock
     private BookingRepository bookingRepository;
+
+    @org.mockito.Mock
     private TicketRepository ticketRepository;
+
+    @org.mockito.Mock
     private PaymentMapper paymentMapper;
+
+    @org.mockito.InjectMocks
     private PaymentServiceImpl paymentService;
 
     @BeforeEach
     void setUp() {
-        paymentRepository = Mockito.mock(PaymentRepository.class);
-        bookingRepository = Mockito.mock(BookingRepository.class);
-        ticketRepository = Mockito.mock(TicketRepository.class);
-        paymentMapper = Mockito.mock(PaymentMapper.class);
-
-        paymentService = new PaymentServiceImpl(
-                paymentRepository,
-                bookingRepository,
-                ticketRepository,
-                paymentMapper
-        );
+        // Mocks are initialized by @ExtendWith(MockitoExtension.class)
     }
 
     @AfterEach
@@ -77,9 +77,7 @@ class PaymentServiceImplTest {
                 new UsernamePasswordAuthenticationToken(
                         "customer",
                         "password",
-                        List.of(() -> "ROLE_CUSTOMER")
-                )
-        );
+                        List.of(() -> "ROLE_CUSTOMER")));
 
         PaymentUpdateRequest request = new PaymentUpdateRequest("BANK_TRANSFER", "Switching");
 
@@ -110,9 +108,7 @@ class PaymentServiceImplTest {
                 new UsernamePasswordAuthenticationToken(
                         "other",
                         "password",
-                        List.of(() -> "ROLE_CUSTOMER")
-                )
-        );
+                        List.of(() -> "ROLE_CUSTOMER")));
 
         PaymentUpdateRequest request = new PaymentUpdateRequest("CASH", null);
 
@@ -142,9 +138,7 @@ class PaymentServiceImplTest {
                 new UsernamePasswordAuthenticationToken(
                         "admin",
                         "password",
-                        List.of(() -> "ROLE_ADMIN")
-                )
-        );
+                        List.of(() -> "ROLE_ADMIN")));
 
         PaymentUpdateRequest request = new PaymentUpdateRequest("CASH", "admin override");
 
@@ -220,4 +214,3 @@ class PaymentServiceImplTest {
         verify(bookingRepository).save(booking);
     }
 }
-
