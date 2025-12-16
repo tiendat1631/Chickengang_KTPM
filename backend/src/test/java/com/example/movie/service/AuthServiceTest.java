@@ -7,6 +7,7 @@ import com.example.movie.dto.user.UserResponse;
 import com.example.movie.exception.EmailAlreadyExistException;
 import com.example.movie.exception.InvalidCredentialException;
 import com.example.movie.exception.UserNotFoundException;
+import com.example.movie.exception.UsernameAlreadyExistException;
 import com.example.movie.model.User;
 import com.example.movie.repository.UserRepository;
 import com.example.movie.security.SecurityUtil;
@@ -18,8 +19,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtException;
 
 import java.time.LocalDateTime;
+import java.time.Instant;
+import java.util.Map;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -53,6 +59,8 @@ class AuthServiceTest {
         user.setEmail("test@example.com");
         user.setPassword("encodedPassword");
         user.setRole(User.UserRole.CUSTOMER);
+        user.setPhoneNumber("1234567890");
+        user.setAddress("123 Street");
         user.setCreatedAt(LocalDateTime.now());
         user.setUpdatedAt(LocalDateTime.now());
 
@@ -96,6 +104,16 @@ class AuthServiceTest {
     }
 
     @Test
+    void register_WhenUsernameExists_ThrowsException() {
+        // Arrange
+        when(userRepository.existsByUsername("testuser")).thenReturn(true);
+
+        // Act & Assert
+        assertThrows(UsernameAlreadyExistException.class, () -> authService.register(registerRequest));
+        verify(userRepository, never()).save(any(User.class));
+    }
+
+    @Test
     void login_Success() {
         // Arrange
         when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
@@ -129,5 +147,45 @@ class AuthServiceTest {
 
         // Act & Assert
         assertThrows(UserNotFoundException.class, () -> authService.login(loginRequest));
+    }
+
+    @Test
+    void refreshToken_WithValidToken_ReturnsNewAccessToken() {
+        // Arrange
+        JwtDecoder jwtDecoder = mock(JwtDecoder.class);
+        when(securityUtil.getJwtDecoder()).thenReturn(jwtDecoder);
+
+        Instant now = Instant.now();
+        Jwt jwt = new Jwt(
+                "refreshTokenValue",
+                now,
+                now.plusSeconds(3600),
+                Map.of("alg", "HS512"),
+                Map.of("sub", "testuser")
+        );
+        when(jwtDecoder.decode("validRefreshToken")).thenReturn(jwt);
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
+        when(securityUtil.createAccessToken(user)).thenReturn("newAccessToken");
+
+        // Act
+        AuthResponse response = authService.refreshToken("validRefreshToken");
+
+        // Assert
+        assertNotNull(response);
+        assertEquals("newAccessToken", response.getAccessToken());
+        assertEquals("validRefreshToken", response.getRefreshToken());
+        assertEquals("testuser", response.getUsername());
+    }
+
+    @Test
+    void refreshToken_WithInvalidToken_ThrowsRuntimeException() {
+        // Arrange
+        JwtDecoder jwtDecoder = mock(JwtDecoder.class);
+        when(securityUtil.getJwtDecoder()).thenReturn(jwtDecoder);
+        when(jwtDecoder.decode("badToken")).thenThrow(new JwtException("invalid"));
+
+        // Act & Assert
+        RuntimeException ex = assertThrows(RuntimeException.class, () -> authService.refreshToken("badToken"));
+        assertEquals("Invalid refresh token", ex.getMessage());
     }
 }
