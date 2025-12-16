@@ -2,7 +2,6 @@ package com.example.movie.service.impl;
 
 import com.example.movie.dto.payment.PaymentResponse;
 import com.example.movie.dto.payment.PaymentUpdateRequest;
-import com.example.movie.exception.AuthenticationRequiredException;
 import com.example.movie.mapper.PaymentMapper;
 import com.example.movie.model.*;
 import com.example.movie.repository.BookingRepository;

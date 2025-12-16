@@ -12,7 +12,7 @@ services:
       MYSQL_PASSWORD: ${MYSQL_PASSWORD:-password}
       MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
     ports:
-      - "3307:3306"
+      - "3306:3306"
     volumes:
       - mysql-data:/var/lib/mysql
       - ./backend/src/main/resources/data.sql:/docker-entrypoint-initdb.d/data.sql:ro
@@ -40,7 +40,7 @@ services:
     env_file:
       - .env
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/${MYSQL_DATABASE:-moviebooking}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/${MYSQL_DATABASE:-moviebooking}
       SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-movieuser}
       SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-password}
     ports:

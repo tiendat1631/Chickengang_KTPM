@@ -7,6 +7,7 @@ import com.example.movie.dto.auth.RefreshTokenRequest;
 import com.example.movie.dto.response.ApiResponse;
 import com.example.movie.dto.user.UserResponse;
 import com.example.movie.service.AuthService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,38 +25,36 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse<UserResponse>> register(@RequestBody RegisterRequest registerRequest) {
+    public ResponseEntity<ApiResponse<UserResponse>> register(@Valid @RequestBody RegisterRequest registerRequest) {
         UserResponse created = authService.register(registerRequest);
         ApiResponse<UserResponse> result = new ApiResponse<>(
                 HttpStatus.CREATED,
                 created,
                 "register successfully",
-                null
-        );
+                null);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse<AuthResponse>> login (@RequestBody LoginRequest loginRequest) {
+    public ResponseEntity<ApiResponse<AuthResponse>> login(@Valid @RequestBody LoginRequest loginRequest) {
         AuthResponse created = authService.login(loginRequest);
         ApiResponse<AuthResponse> result = new ApiResponse<>(
                 HttpStatus.OK,
                 created,
                 "login successfully",
-                null
-        );
+                null);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
     @PostMapping("/refresh")
-    public ResponseEntity<ApiResponse<AuthResponse>> refreshToken(@RequestBody RefreshTokenRequest refreshTokenRequest) {
+    public ResponseEntity<ApiResponse<AuthResponse>> refreshToken(
+            @RequestBody RefreshTokenRequest refreshTokenRequest) {
         AuthResponse response = authService.refreshToken(refreshTokenRequest.getRefreshToken());
         ApiResponse<AuthResponse> result = new ApiResponse<>(
                 HttpStatus.OK,
                 response,
                 "Token refreshed successfully",
-                null
-        );
+                null);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 }
