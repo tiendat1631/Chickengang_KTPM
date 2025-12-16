@@ -3,7 +3,6 @@ package com.example.movie.service;
 import com.example.movie.dto.booking.BookingResponse;
 import com.example.movie.dto.booking.CreateBookingRequest;
 import com.example.movie.exception.AuthenticationRequiredException;
-import com.example.movie.exception.InvalidId;
 import com.example.movie.mapper.BookingMapper;
 import com.example.movie.model.*;
 import com.example.movie.repository.*;

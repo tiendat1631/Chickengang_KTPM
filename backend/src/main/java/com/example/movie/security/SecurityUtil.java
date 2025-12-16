@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Date;
 
 @Service
 @RequiredArgsConstructor
@@ -73,5 +74,19 @@ public class SecurityUtil {
 
     public JwtDecoder getJwtDecoder() {
         return jwtDecoder;
+    }
+
+    public Date getExpirationDateFromToken(String token) {
+        try {
+            // Sử dụng jwtDecoder đã có sẵn trong class này (hoặc inject vào nếu chưa có)
+            Jwt jwt = jwtDecoder.decode(token);
+
+            Instant expiresAt = jwt.getExpiresAt();
+            return expiresAt != null ? Date.from(expiresAt) : new Date();
+        } catch (JwtValidationException e) {
+            // Trường hợp token lỗi hoặc đã hết hạn từ trước
+            // Trả về thời gian hiện tại để không lưu vào DB (hoặc xử lý tùy ý)
+            return new Date();
+        }
     }
 }

@@ -4,11 +4,14 @@ import com.example.movie.dto.auth.AuthResponse;
 import com.example.movie.dto.auth.LoginRequest;
 import com.example.movie.dto.auth.RegisterRequest;
 import com.example.movie.dto.user.UserResponse;
+import com.example.movie.exception.AccountDisabledException;
 import com.example.movie.exception.EmailAlreadyExistException;
 import com.example.movie.exception.InvalidCredentialException;
 import com.example.movie.exception.UserNotFoundException;
 import com.example.movie.exception.UsernameAlreadyExistException;
+import com.example.movie.model.InvalidatedToken;
 import com.example.movie.model.User;
+import com.example.movie.repository.InvalidatedTokenRepository;
 import com.example.movie.repository.UserRepository;
 import com.example.movie.security.SecurityUtil;
 import com.example.movie.service.AuthService;
@@ -19,23 +22,26 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
+
 @Service
 @RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
     private final UserRepository userRepository;
-    private final PasswordEncoder  passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
     private final SecurityUtil securityUtil;
+    private final InvalidatedTokenRepository invalidatedTokenRepository;
 
     @Override
     @Transactional
-    public UserResponse register (RegisterRequest registerRequest) {
-        if(userRepository.existsByUsername(registerRequest.getUsername()))
-                throw new UsernameAlreadyExistException(registerRequest.getUsername());
+    public UserResponse register(RegisterRequest registerRequest) {
+        if (userRepository.existsByUsername(registerRequest.getUsername()))
+            throw new UsernameAlreadyExistException(registerRequest.getUsername());
 
-        if(userRepository.existsByEmail(registerRequest.getEmail()))
+        if (userRepository.existsByEmail(registerRequest.getEmail()))
             throw new EmailAlreadyExistException(registerRequest.getEmail());
 
-        User.UserRole role =User.UserRole.CUSTOMER;
+        User.UserRole role = User.UserRole.CUSTOMER;
 
         User user = new User();
         user.setUsername(registerRequest.getUsername());
@@ -54,18 +60,24 @@ public class AuthServiceImpl implements AuthService {
                 .updatedAt(saved.getUpdatedAt())
                 .build();
     }
+
     @Override
-    public AuthResponse login (LoginRequest loginRequest) {
+    public AuthResponse login(LoginRequest loginRequest) {
         // 1.tìm user theo username
         User user = userRepository.findByUsername(loginRequest.getUsername())
-                .orElseThrow(()->new UserNotFoundException(loginRequest.getUsername()));
+                .orElseThrow(() -> new UserNotFoundException(loginRequest.getUsername()));
 
         // 2.kiểm tra password
         if (!passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
             throw new InvalidCredentialException();
         }
 
-        // 3. Sinhtoken
+        // 3. Kiểm tra tài khoản có bị vô hiệu hóa không
+        if (!user.getIsActive()) {
+            throw new AccountDisabledException("Account disabled");
+        }
+
+        // 4. Sinh token
         String accessToken = securityUtil.createAccessToken(user);
         String refreshToken = securityUtil.createRefreshToken(user.getUsername());
 
@@ -81,6 +93,33 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
     }
+    @Override
+    public void logout(String authHeader) {
+        // Kiểm tra header hợp lệ
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return;
+        }
+
+        try {
+            String token = authHeader.substring(7); // Cắt bỏ chữ "Bearer "
+
+            // Lấy thời gian hết hạn của token để lưu vào DB
+            // (Giả sử SecurityUtil của bạn có hàm getExpirationDateFromToken)
+            Date expiryDate = securityUtil.getExpirationDateFromToken(token);
+
+            // Lưu token vào Blacklist
+            InvalidatedToken invalidatedToken = InvalidatedToken.builder()
+                    .id(token)
+                    .expiryTime(expiryDate)
+                    .build();
+
+            invalidatedTokenRepository.save(invalidatedToken);
+
+        } catch (Exception e) {
+            // Log lỗi nếu token không đúng định dạng...
+            throw new RuntimeException("Logout failed");
+        }
+    }
 
     @Override
     public AuthResponse refreshToken(String refreshToken) {
@@ -88,14 +127,14 @@ public class AuthServiceImpl implements AuthService {
             // Decode refresh token to get username
             Jwt jwt = securityUtil.getJwtDecoder().decode(refreshToken);
             String username = jwt.getSubject();
-            
+
             // Find user by username
             User user = userRepository.findByUsername(username)
                     .orElseThrow(() -> new RuntimeException("User not found"));
-            
+
             // Generate new access token
             String newAccessToken = securityUtil.createAccessToken(user);
-            
+
             return AuthResponse.builder()
                     .id(user.getId())
                     .username(user.getUsername())
@@ -106,7 +145,7 @@ public class AuthServiceImpl implements AuthService {
                     .accessToken(newAccessToken)
                     .refreshToken(refreshToken) // Keep the same refresh token
                     .build();
-                    
+
         } catch (Exception e) {
             throw new RuntimeException("Invalid refresh token");
         }

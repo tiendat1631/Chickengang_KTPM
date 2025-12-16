@@ -5,7 +5,6 @@ import com.example.movie.dto.movie.MovieSearchRequest;
 import com.example.movie.dto.response.PageResponse;
 import com.example.movie.exception.InvalidId;
 import com.example.movie.service.MovieService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
