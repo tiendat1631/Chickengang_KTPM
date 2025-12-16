@@ -40,6 +40,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@org.springframework.transaction.annotation.Transactional
 class AdminAccessTest {
 
     @Autowired
@@ -92,7 +93,8 @@ class AdminAccessTest {
         customerToken = securityUtil.createAccessToken(customerUser);
     }
 
-    // ===================== TEST CASE 1: Admin accesses admin portal =====================
+    // ===================== TEST CASE 1: Admin accesses admin portal
+    // =====================
     @Nested
     @DisplayName("Admin Accesses Admin Portal")
     class AdminPortalAccessTests {
@@ -101,7 +103,7 @@ class AdminAccessTest {
         @DisplayName("Admin can access admin dashboard → 200 OK")
         void adminCanAccessAdminDashboard() throws Exception {
             mockMvc.perform(get("/api/v1/users")
-                            .header("Authorization", "Bearer " + adminToken))
+                    .header("Authorization", "Bearer " + adminToken))
                     .andExpect(status().isOk());
         }
 
@@ -109,7 +111,7 @@ class AdminAccessTest {
         @DisplayName("Customer cannot access admin dashboard → 403 Forbidden")
         void customerCannotAccessAdminDashboard() throws Exception {
             mockMvc.perform(get("/api/v1/users")
-                            .header("Authorization", "Bearer " + customerToken))
+                    .header("Authorization", "Bearer " + customerToken))
                     .andExpect(status().isForbidden());
         }
 

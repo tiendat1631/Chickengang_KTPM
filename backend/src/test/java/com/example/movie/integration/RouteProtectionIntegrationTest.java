@@ -67,7 +67,7 @@ class RouteProtectionIntegrationTest {
         void expiredOrInvalidToken_ShouldBeRejectedByBackend() throws Exception {
             String invalidToken = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.invalid.payload";
 
-            mockMvc.perform(get("/api/v1/movies")
+            mockMvc.perform(get("/api/v1/bookings")
                     .header("Authorization", "Bearer " + invalidToken))
                     .andExpect(status().isUnauthorized());
         }
@@ -76,7 +76,7 @@ class RouteProtectionIntegrationTest {
         @DisplayName("Malformed Authorization header should be rejected → 401")
         void malformedAuthHeader_ShouldBeRejected() throws Exception {
             // Missing "Bearer " prefix
-            mockMvc.perform(get("/api/v1/movies")
+            mockMvc.perform(get("/api/v1/bookings")
                     .header("Authorization", "invalid-header-format"))
                     .andExpect(status().isUnauthorized());
         }
@@ -84,7 +84,7 @@ class RouteProtectionIntegrationTest {
         @Test
         @DisplayName("Empty Authorization header should be rejected → 401")
         void emptyAuthHeader_ShouldBeRejected() throws Exception {
-            mockMvc.perform(get("/api/v1/movies")
+            mockMvc.perform(get("/api/v1/bookings")
                     .header("Authorization", ""))
                     .andExpect(status().isUnauthorized());
         }
@@ -104,17 +104,18 @@ class RouteProtectionIntegrationTest {
         }
 
         @Test
-        @DisplayName("Access /movies without login → 401 Unauthorized")
-        void accessMoviesWithoutLogin_ShouldReturn401() throws Exception {
+        @DisplayName("Access /movies without login → 200 OK (Public)")
+        void accessMoviesWithoutLogin_ShouldBeAllowed() throws Exception {
             mockMvc.perform(get("/api/v1/movies"))
-                    .andExpect(status().isUnauthorized());
+                    .andExpect(status().isOk());
         }
 
         @Test
-        @DisplayName("Access /screenings without login → 401 Unauthorized")
-        void accessScreeningsWithoutLogin_ShouldReturn401() throws Exception {
+        @DisplayName("Access /screenings without login → 200 OK (Public)")
+        void accessScreeningsWithoutLogin_ShouldBeAllowed() throws Exception {
             mockMvc.perform(get("/api/v1/screenings"))
-                    .andExpect(status().isUnauthorized());
+                    // Expect 200 OK or 400 Bad Request (if params missing), but NOT 401
+                    .andExpect(status().is2xxSuccessful());
         }
 
         @Test

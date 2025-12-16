@@ -1,31 +1,18 @@
 package com.example.movie.testutil;
 
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.testcontainers.containers.MySQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
+@Testcontainers
 public abstract class TestContainersConfig {
 
-    static final MySQLContainer<?> mysql = new MySQLContainer<>("mysql:8.0")
-            .withDatabaseName("test")
-            .withUsername("test")
-            .withPassword("test");
+    // @ServiceConnection tự động cấu hình spring.datasource.url, username, password
+    @Container
+    @ServiceConnection
+    static final MySQLContainer<?> mysql = new MySQLContainer<>("mysql:8.0");
 
-    static {
-        mysql.start();
-    }
-
-    @DynamicPropertySource
-    static void registerProperties(DynamicPropertyRegistry registry) {
-        registry.add("spring.datasource.url", mysql::getJdbcUrl);
-        registry.add("spring.datasource.username", mysql::getUsername);
-        registry.add("spring.datasource.password", mysql::getPassword);
-        // use Hibernate ddl auto create-drop for isolation in tests
-        registry.add("spring.jpa.hibernate.ddl-auto", () -> "update");
-    }
-
-    public static void main(String[] args) {
-        System.out.println("Java version: " + System.getProperty("java.version"));
-        System.out.println("Javac version: " + System.getProperty("java.compiler"));
-    }
+    // Không cần block static { mysql.start() } nữa vì @Testcontainers tự quản lý
+    // Không cần @DynamicPropertySource thủ công nữa
 }

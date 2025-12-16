@@ -35,6 +35,12 @@ public class AuthServiceImpl implements AuthService {
     @Override
     @Transactional
     public UserResponse register(RegisterRequest registerRequest) {
+        if (registerRequest.getUsername() == null || registerRequest.getUsername().trim().isEmpty() ||
+                registerRequest.getEmail() == null || registerRequest.getEmail().trim().isEmpty() ||
+                registerRequest.getPassword() == null || registerRequest.getPassword().trim().isEmpty()) {
+            throw new IllegalArgumentException("Required fields are missing");
+        }
+
         if (userRepository.existsByUsername(registerRequest.getUsername()))
             throw new UsernameAlreadyExistException(registerRequest.getUsername());
 
@@ -93,6 +99,7 @@ public class AuthServiceImpl implements AuthService {
                 .build();
 
     }
+
     @Override
     public void logout(String authHeader) {
         // Kiểm tra header hợp lệ

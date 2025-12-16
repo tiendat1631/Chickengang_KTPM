@@ -1,15 +1,15 @@
 name: Frontend CD
 
 on:
-  push:
-    branches: [ "main", "master", "develop" ]
-    paths:
-      - 'frontend/**'
-      - '.github/workflows/frontend-cd.yml'
+  workflow_run:
+    workflows: ["Frontend CI"]
+    types:
+      - completed
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' && contains(fromJSON('["main", "master", "develop"]'), github.event.workflow_run.head_branch) }}
     defaults:
       run:
         working-directory: ./frontend
@@ -22,8 +22,11 @@ jobs:
       with:
         node-version: '20'
 
-    - name: Deploy to Production
-      run: |
-        echo "Deploying to Vercel/Netlify..."
-        # npm install && npm run build
-        # npx vercel --prod --token ${{ secrets.VERCEL_TOKEN }}
+    - name: Pull Vercel Environment Information
+      run: npx vercel pull --yes --environment=production --token=${{ secrets.VERCEL_TOKEN }}
+
+    - name: Build Project Artifacts
+      run: npx vercel build --prod --token=${{ secrets.VERCEL_TOKEN }}
+
+    - name: Deploy Project Artifacts to Vercel
+      run: npx vercel deploy --prebuilt --prod --token=${{ secrets.VERCEL_TOKEN }}
