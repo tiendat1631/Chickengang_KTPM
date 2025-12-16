@@ -20,7 +20,7 @@ services:
       - moviebooking-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}" ]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -52,7 +52,7 @@ services:
       - moviebooking-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health"]
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health" ]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -77,7 +77,7 @@ services:
       - moviebooking-network
     restart: unless-stopped
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/health"]
+      test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/health" ]
       interval: 30s
       timeout: 3s
       retries: 3
@@ -89,6 +89,22 @@ services:
         reservations:
           memory: 128M
 
+  k6:
+    image: grafana/k6:master-with-browser
+    container_name: moviebooking-k6
+    # Command to run the browser test automatically
+    command: run /scripts/browser_test.js
+    environment:
+      - K6_BROWSER_ENABLED=true
+      - K6_BROWSER_HEADLESS=true
+      - BASE_URL=http://frontend
+    volumes:
+      - ./performance:/scripts
+    networks:
+      - moviebooking-network
+    depends_on:
+      - frontend
+
 volumes:
   mysql-data:
     driver: local
@@ -96,4 +112,3 @@ volumes:
 networks:
   moviebooking-network:
     driver: bridge
-

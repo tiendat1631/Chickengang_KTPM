@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { useState, useEffect } from 'react';
 import { AuthService } from '@/services/authService.js';
 import { storeTokens, removeToken, getToken, getUserData, isTokenExpired } from '@/lib/auth.js';
-import { queryKeys } from './useQueryClient.js';
+import { queryKeys } from '@/hooks/useQueryClient.js';
 import { tokenRefreshService } from '@/services/tokenRefreshService.js';
 
 /**
@@ -28,13 +28,13 @@ export const useLogin = () => {
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      
+
       // Store tokens and user data securely
       await storeTokens(response.accessToken, response.refreshToken, userData);
-      
+
       // Update current user in cache
       queryClient.setQueryData(queryKeys.auth.currentUser, userData);
-      
+
       // Invalidate and refetch user-related queries
       queryClient.invalidateQueries({ queryKey: queryKeys.auth.currentUser });
     },
@@ -69,7 +69,7 @@ export const useLogout = () => {
     onSuccess: async () => {
       // Remove tokens from storage
       await removeToken();
-      
+
       // Clear all cached data
       queryClient.clear();
     },
@@ -86,7 +86,7 @@ export const useLogout = () => {
 export const useAuth = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState(null);
-  
+
   const loginMutation = useLogin();
   const registerMutation = useRegister();
   const logoutMutation = useLogout();
@@ -100,7 +100,7 @@ export const useAuth = () => {
           const userData = await getUserData();
           if (userData) {
             setUser(userData);
-            
+
             // Start proactive token refresh if token is valid
             if (!isTokenExpired(token)) {
               tokenRefreshService.startProactiveRefresh();
@@ -134,10 +134,10 @@ export const useAuth = () => {
     };
 
     checkAuth();
-    
+
     // Add event listener for token refresh
     window.addEventListener('tokenRefreshed', handleTokenRefresh);
-    
+
     // Cleanup event listener and stop proactive refresh
     return () => {
       window.removeEventListener('tokenRefreshed', handleTokenRefresh);
@@ -169,10 +169,10 @@ export const useAuth = () => {
           updatedAt: new Date().toISOString(),
         };
         setUser(userData);
-        
+
         // Start proactive token refresh after successful login
         tokenRefreshService.startProactiveRefresh();
-        
+
         options?.onSuccess?.(response);
       },
     });
@@ -187,10 +187,10 @@ export const useAuth = () => {
       ...options,
       onSuccess: () => {
         setUser(null);
-        
+
         // Stop proactive token refresh on logout
         tokenRefreshService.stopProactiveRefresh();
-        
+
         options?.onSuccess?.();
       },
     });

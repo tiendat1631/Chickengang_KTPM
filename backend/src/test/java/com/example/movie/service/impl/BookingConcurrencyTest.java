@@ -9,7 +9,7 @@ import com.example.movie.repository.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
 
@@ -27,35 +27,36 @@ import static org.mockito.Mockito.*;
  * Tests that the system correctly handles race conditions when two users
  * attempt to book the same seat simultaneously.
  */
+@org.junit.jupiter.api.extension.ExtendWith(org.mockito.junit.jupiter.MockitoExtension.class)
 class BookingConcurrencyTest {
 
+    @org.mockito.Mock
     private BookingRepository bookingRepository;
+
+    @org.mockito.Mock
     private BookingMapper bookingMapper;
+
+    @org.mockito.Mock
     private ScreeningRepository screeningRepository;
+
+    @org.mockito.Mock
     private UserRepository userRepository;
+
+    @org.mockito.Mock
     private SeatRepository seatRepository;
+
+    @org.mockito.Mock
     private TicketRepository ticketRepository;
+
+    @org.mockito.Mock
     private PaymentRepository paymentRepository;
+
+    @org.mockito.InjectMocks
     private BookingServiceImpl bookingService;
 
     @BeforeEach
     void setUp() {
-        bookingRepository = Mockito.mock(BookingRepository.class);
-        bookingMapper = Mockito.mock(BookingMapper.class);
-        screeningRepository = Mockito.mock(ScreeningRepository.class);
-        userRepository = Mockito.mock(UserRepository.class);
-        seatRepository = Mockito.mock(SeatRepository.class);
-        ticketRepository = Mockito.mock(TicketRepository.class);
-        paymentRepository = Mockito.mock(PaymentRepository.class);
-
-        bookingService = new BookingServiceImpl(
-                bookingRepository,
-                bookingMapper,
-                screeningRepository,
-                userRepository,
-                seatRepository,
-                ticketRepository,
-                paymentRepository);
+        // Mocks are initialized by @ExtendWith(MockitoExtension.class)
     }
 
     @AfterEach
@@ -93,13 +94,14 @@ class BookingConcurrencyTest {
         when(userRepository.findByUsername("user2")).thenReturn(Optional.of(user2));
         when(screeningRepository.findById(1L)).thenReturn(Optional.of(screening));
         when(seatRepository.findAllById(List.of(1L))).thenReturn(List.of(seat));
-        when(bookingRepository.count()).thenReturn(0L);
-        when(bookingRepository.save(any(Booking.class))).thenAnswer(invocation -> {
+        lenient().when(bookingRepository.count()).thenReturn(0L);
+        lenient().when(bookingRepository.save(any(Booking.class))).thenAnswer(invocation -> {
             Booking saved = invocation.getArgument(0);
             saved.setId(100L + ticketBookedCount.get());
             return saved;
         });
-        when(bookingMapper.toResponse(any(Booking.class))).thenReturn(BookingResponse.builder().id(100L).build());
+        lenient().when(bookingMapper.toResponse(any(Booking.class)))
+                .thenReturn(BookingResponse.builder().id(100L).build());
 
         // Simulate the ticket status with synchronized check-and-set
         // This ensures only one thread can successfully "book" the seat

@@ -10,7 +10,7 @@ import com.example.movie.repository.*;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mockito;
+
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -24,254 +24,244 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
+@org.junit.jupiter.api.extension.ExtendWith(org.mockito.junit.jupiter.MockitoExtension.class)
 class BookingServiceImplTest {
 
-    private BookingRepository bookingRepository;
-    private BookingMapper bookingMapper;
-    private ScreeningRepository screeningRepository;
-    private UserRepository userRepository;
-    private SeatRepository seatRepository;
-    private TicketRepository ticketRepository;
-    private PaymentRepository paymentRepository;
-    private BookingServiceImpl bookingService;
+        @org.mockito.Mock
+        private BookingRepository bookingRepository;
 
-    @BeforeEach
-    void setUp() {
-        bookingRepository = Mockito.mock(BookingRepository.class);
-        bookingMapper = Mockito.mock(BookingMapper.class);
-        screeningRepository = Mockito.mock(ScreeningRepository.class);
-        userRepository = Mockito.mock(UserRepository.class);
-        seatRepository = Mockito.mock(SeatRepository.class);
-        ticketRepository = Mockito.mock(TicketRepository.class);
-        paymentRepository = Mockito.mock(PaymentRepository.class);
+        @org.mockito.Mock
+        private BookingMapper bookingMapper;
 
-        bookingService = new BookingServiceImpl(
-                bookingRepository,
-                bookingMapper,
-                screeningRepository,
-                userRepository,
-                seatRepository,
-                ticketRepository,
-                paymentRepository
-        );
-    }
+        @org.mockito.Mock
+        private ScreeningRepository screeningRepository;
 
-    @AfterEach
-    void tearDown() {
-        SecurityContextHolder.clearContext();
-    }
+        @org.mockito.Mock
+        private UserRepository userRepository;
 
-    @Test
-    void createBooking_ShouldPersistBookingAndTickets() {
-        SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken(
-                        "owner",
-                        "password",
-                        List.of(() -> "ROLE_CUSTOMER")
-                )
-        );
+        @org.mockito.Mock
+        private SeatRepository seatRepository;
 
-        User user = new User();
-        user.setId(10L);
-        user.setUsername("owner");
+        @org.mockito.Mock
+        private TicketRepository ticketRepository;
 
-        Screening screening = new Screening();
-        screening.setId(5L);
-        screening.setMovie(new Movie());
-        screening.setAuditorium(new Auditorium());
+        @org.mockito.Mock
+        private PaymentRepository paymentRepository;
 
-        Seat seat1 = new Seat();
-        seat1.setId(1L);
-        seat1.setRowLabel("A");
-        seat1.setNumber(1);
+        @org.mockito.InjectMocks
+        private BookingServiceImpl bookingService;
 
-        Seat seat2 = new Seat();
-        seat2.setId(2L);
-        seat2.setRowLabel("A");
-        seat2.setNumber(2);
+        @BeforeEach
+        void setUp() {
+                // Mocks are initialized by @ExtendWith(MockitoExtension.class)
+        }
 
-        when(userRepository.findByUsername("owner")).thenReturn(Optional.of(user));
-        when(screeningRepository.findById(5L)).thenReturn(Optional.of(screening));
-        when(seatRepository.findAllById(List.of(1L, 2L))).thenReturn(List.of(seat1, seat2));
-        when(bookingRepository.count()).thenReturn(0L);
-        when(bookingRepository.save(any(Booking.class))).thenAnswer(invocation -> {
-            Booking saved = invocation.getArgument(0);
-            saved.setId(99L);
-            return saved;
-        });
-        when(bookingMapper.toResponse(any(Booking.class))).thenReturn(BookingResponse.builder().id(99L).build());
+        @AfterEach
+        void tearDown() {
+                SecurityContextHolder.clearContext();
+        }
 
-        CreateBookingRequest request = new CreateBookingRequest();
-        request.setScreeningId(5L);
-        request.setSeatIds(List.of(1L, 2L));
-        request.setTotalPrice(200f);
+        @Test
+        void createBooking_ShouldPersistBookingAndTickets() {
+                SecurityContextHolder.getContext().setAuthentication(
+                                new UsernamePasswordAuthenticationToken(
+                                                "owner",
+                                                "password",
+                                                List.of(() -> "ROLE_CUSTOMER")));
 
-        BookingResponse result = bookingService.createBooking(request);
+                User user = new User();
+                user.setId(10L);
+                user.setUsername("owner");
 
-        assertEquals(99L, result.getId());
-        verify(bookingRepository).save(any(Booking.class));
-        verify(ticketRepository, times(2)).save(any(Ticket.class));
-    }
+                Screening screening = new Screening();
+                screening.setId(5L);
+                screening.setMovie(new Movie());
+                screening.setAuditorium(new Auditorium());
 
-    @Test
-    void createBooking_ShouldFailWhenSeatUnavailable() {
-        SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken(
-                        "owner",
-                        "password",
-                        List.of(() -> "ROLE_CUSTOMER")
-                )
-        );
+                Seat seat1 = new Seat();
+                seat1.setId(1L);
+                seat1.setRowLabel("A");
+                seat1.setNumber(1);
 
-        User user = new User();
-        user.setUsername("owner");
+                Seat seat2 = new Seat();
+                seat2.setId(2L);
+                seat2.setRowLabel("A");
+                seat2.setNumber(2);
 
-        Screening screening = new Screening();
-        screening.setId(5L);
+                when(userRepository.findByUsername("owner")).thenReturn(Optional.of(user));
+                when(screeningRepository.findById(5L)).thenReturn(Optional.of(screening));
+                when(seatRepository.findAllById(List.of(1L, 2L))).thenReturn(List.of(seat1, seat2));
+                when(bookingRepository.count()).thenReturn(0L);
+                when(bookingRepository.save(any(Booking.class))).thenAnswer(invocation -> {
+                        Booking saved = invocation.getArgument(0);
+                        saved.setId(99L);
+                        return saved;
+                });
+                when(bookingMapper.toResponse(any(Booking.class)))
+                                .thenReturn(BookingResponse.builder().id(99L).build());
 
-        Seat seat1 = new Seat();
-        seat1.setId(1L);
+                CreateBookingRequest request = new CreateBookingRequest();
+                request.setScreeningId(5L);
+                request.setSeatIds(List.of(1L, 2L));
+                request.setTotalPrice(200f);
 
-        Ticket reservedTicket = new Ticket();
-        reservedTicket.setStatus(Ticket.Status.BOOKED);
+                BookingResponse result = bookingService.createBooking(request);
 
-        when(userRepository.findByUsername("owner")).thenReturn(Optional.of(user));
-        when(screeningRepository.findById(5L)).thenReturn(Optional.of(screening));
-        when(seatRepository.findAllById(List.of(1L))).thenReturn(List.of(seat1));
-        when(ticketRepository.findByScreeningIdAndSeatId(5L, 1L)).thenReturn(reservedTicket);
+                assertEquals(99L, result.getId());
+                verify(bookingRepository).save(any(Booking.class));
+                verify(ticketRepository, times(2)).save(any(Ticket.class));
+        }
 
-        CreateBookingRequest request = new CreateBookingRequest();
-        request.setScreeningId(5L);
-        request.setSeatIds(List.of(1L));
-        request.setTotalPrice(100f);
+        @Test
+        void createBooking_ShouldFailWhenSeatUnavailable() {
+                SecurityContextHolder.getContext().setAuthentication(
+                                new UsernamePasswordAuthenticationToken(
+                                                "owner",
+                                                "password",
+                                                List.of(() -> "ROLE_CUSTOMER")));
 
-        assertThrows(SeatNotAvailableException.class, () -> bookingService.createBooking(request));
-    }
+                User user = new User();
+                user.setUsername("owner");
 
-    @Test
-    void createBooking_ShouldRequireAuthentication() {
-        CreateBookingRequest request = new CreateBookingRequest();
-        request.setScreeningId(1L);
-        request.setSeatIds(List.of(1L));
-        request.setTotalPrice(100f);
+                Screening screening = new Screening();
+                screening.setId(5L);
 
-        assertThrows(AuthenticationRequiredException.class, () -> bookingService.createBooking(request));
-    }
+                Seat seat1 = new Seat();
+                seat1.setId(1L);
 
-    @Test
-    void cancelBooking_ShouldReleaseTicketsAndUpdateStatuses() {
-        User user = new User();
-        user.setUsername("owner");
+                Ticket reservedTicket = new Ticket();
+                reservedTicket.setStatus(Ticket.Status.BOOKED);
 
-        Booking booking = new Booking();
-        booking.setId(1L);
-        booking.setBookingStatus(Booking.BookingStatus.PENDING);
-        booking.setUser(user);
-        Screening screening = new Screening();
-        screening.setMovie(new Movie());
-        screening.setAuditorium(new Auditorium());
-        booking.setScreening(screening);
+                when(userRepository.findByUsername("owner")).thenReturn(Optional.of(user));
+                when(screeningRepository.findById(5L)).thenReturn(Optional.of(screening));
+                when(seatRepository.findAllById(List.of(1L))).thenReturn(List.of(seat1));
+                when(ticketRepository.findByScreeningIdAndSeatId(5L, 1L)).thenReturn(reservedTicket);
 
-        Payment payment = new Payment();
-        payment.setStatus(Payment.PaymentStatus.PENDING);
-        payment.setBooking(booking);
+                CreateBookingRequest request = new CreateBookingRequest();
+                request.setScreeningId(5L);
+                request.setSeatIds(List.of(1L));
+                request.setTotalPrice(100f);
 
-        Ticket ticket = new Ticket();
-        ticket.setStatus(Ticket.Status.BOOKED);
-        ticket.setSeat(new Seat());
+                assertThrows(SeatNotAvailableException.class, () -> bookingService.createBooking(request));
+        }
 
-        when(bookingRepository.findById(1L)).thenReturn(Optional.of(booking));
-        when(paymentRepository.findByBookingId(1L)).thenReturn(Optional.of(payment));
-        when(ticketRepository.findByBookingId(1L)).thenReturn(List.of(ticket));
-        when(paymentRepository.save(payment)).thenReturn(payment);
-        when(bookingRepository.save(booking)).thenReturn(booking);
-        BookingResponse response = BookingResponse.builder().id(1L).build();
-        when(bookingMapper.toResponse(any(Booking.class))).thenReturn(response);
+        @Test
+        void createBooking_ShouldRequireAuthentication() {
+                CreateBookingRequest request = new CreateBookingRequest();
+                request.setScreeningId(1L);
+                request.setSeatIds(List.of(1L));
+                request.setTotalPrice(100f);
 
-        SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken(
-                        "owner",
-                        "password",
-                        List.of(() -> "ROLE_CUSTOMER")
-                )
-        );
+                assertThrows(AuthenticationRequiredException.class, () -> bookingService.createBooking(request));
+        }
 
-        BookingResponse result = bookingService.cancelBooking(1L);
+        @Test
+        void cancelBooking_ShouldReleaseTicketsAndUpdateStatuses() {
+                User user = new User();
+                user.setUsername("owner");
 
-        assertSame(response, result);
-        assertEquals(Booking.BookingStatus.CANCELLED, booking.getBookingStatus());
-        assertEquals(Payment.PaymentStatus.CANCELLED, payment.getStatus());
-        assertEquals(Ticket.Status.AVAILABLE, ticket.getStatus());
-        verify(ticketRepository, times(1)).save(ticket);
-        verify(paymentRepository).save(payment);
-        verify(bookingRepository).save(booking);
-    }
+                Booking booking = new Booking();
+                booking.setId(1L);
+                booking.setBookingStatus(Booking.BookingStatus.PENDING);
+                booking.setUser(user);
+                Screening screening = new Screening();
+                screening.setMovie(new Movie());
+                screening.setAuditorium(new Auditorium());
+                booking.setScreening(screening);
 
-    @Test
-    void cancelBooking_ShouldThrowWhenUserIsNotOwner() {
-        User user = new User();
-        user.setUsername("owner");
+                Payment payment = new Payment();
+                payment.setStatus(Payment.PaymentStatus.PENDING);
+                payment.setBooking(booking);
 
-        Booking booking = new Booking();
-        booking.setId(2L);
-        booking.setBookingStatus(Booking.BookingStatus.PENDING);
-        booking.setUser(user);
+                Ticket ticket = new Ticket();
+                ticket.setStatus(Ticket.Status.BOOKED);
+                ticket.setSeat(new Seat());
 
-        when(bookingRepository.findById(2L)).thenReturn(Optional.of(booking));
+                when(bookingRepository.findById(1L)).thenReturn(Optional.of(booking));
+                when(paymentRepository.findByBookingId(1L)).thenReturn(Optional.of(payment));
+                when(ticketRepository.findByBookingId(1L)).thenReturn(List.of(ticket));
+                when(paymentRepository.save(payment)).thenReturn(payment);
+                when(bookingRepository.save(booking)).thenReturn(booking);
+                BookingResponse response = BookingResponse.builder().id(1L).build();
+                when(bookingMapper.toResponse(any(Booking.class))).thenReturn(response);
 
-        SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken(
-                        "other",
-                        "password",
-                        List.of(() -> "ROLE_CUSTOMER")
-                )
-        );
+                SecurityContextHolder.getContext().setAuthentication(
+                                new UsernamePasswordAuthenticationToken(
+                                                "owner",
+                                                "password",
+                                                List.of(() -> "ROLE_CUSTOMER")));
 
-        assertThrows(AccessDeniedException.class, () -> bookingService.cancelBooking(2L));
-    }
+                BookingResponse result = bookingService.cancelBooking(1L);
 
-    @Test
-    void cancelBooking_AdminCanCancelAnyBooking() {
-        User user = new User();
-        user.setUsername("customer");
+                assertSame(response, result);
+                assertEquals(Booking.BookingStatus.CANCELLED, booking.getBookingStatus());
+                assertEquals(Payment.PaymentStatus.CANCELLED, payment.getStatus());
+                assertEquals(Ticket.Status.AVAILABLE, ticket.getStatus());
+                verify(ticketRepository, times(1)).save(ticket);
+                verify(paymentRepository).save(payment);
+                verify(bookingRepository).save(booking);
+        }
 
-        Booking booking = new Booking();
-        booking.setId(3L);
-        booking.setBookingStatus(Booking.BookingStatus.PENDING);
-        booking.setUser(user);
-        Screening screening = new Screening();
-        screening.setMovie(new Movie());
-        screening.setAuditorium(new Auditorium());
-        booking.setScreening(screening);
+        @Test
+        void cancelBooking_ShouldThrowWhenUserIsNotOwner() {
+                User user = new User();
+                user.setUsername("owner");
 
-        Payment payment = new Payment();
-        payment.setStatus(Payment.PaymentStatus.PENDING);
-        payment.setBooking(booking);
+                Booking booking = new Booking();
+                booking.setId(2L);
+                booking.setBookingStatus(Booking.BookingStatus.PENDING);
+                booking.setUser(user);
 
-        Ticket ticket = new Ticket();
-        ticket.setStatus(Ticket.Status.BOOKED);
+                when(bookingRepository.findById(2L)).thenReturn(Optional.of(booking));
 
-        when(bookingRepository.findById(3L)).thenReturn(Optional.of(booking));
-        when(paymentRepository.findByBookingId(3L)).thenReturn(Optional.of(payment));
-        when(ticketRepository.findByBookingId(3L)).thenReturn(List.of(ticket));
-        when(bookingRepository.save(booking)).thenReturn(booking);
-        when(paymentRepository.save(payment)).thenReturn(payment);
-        BookingResponse response = BookingResponse.builder().id(3L).build();
-        when(bookingMapper.toResponse(any(Booking.class))).thenReturn(response);
+                SecurityContextHolder.getContext().setAuthentication(
+                                new UsernamePasswordAuthenticationToken(
+                                                "other",
+                                                "password",
+                                                List.of(() -> "ROLE_CUSTOMER")));
 
-        SecurityContextHolder.getContext().setAuthentication(
-                new UsernamePasswordAuthenticationToken(
-                        "admin",
-                        "password",
-                        List.of(() -> "ROLE_ADMIN")
-                )
-        );
+                assertThrows(AccessDeniedException.class, () -> bookingService.cancelBooking(2L));
+        }
 
-        BookingResponse result = bookingService.cancelBooking(3L);
+        @Test
+        void cancelBooking_AdminCanCancelAnyBooking() {
+                User user = new User();
+                user.setUsername("customer");
 
-        assertSame(response, result);
-        assertEquals(Booking.BookingStatus.CANCELLED, booking.getBookingStatus());
-        verify(bookingRepository).save(booking);
-    }
+                Booking booking = new Booking();
+                booking.setId(3L);
+                booking.setBookingStatus(Booking.BookingStatus.PENDING);
+                booking.setUser(user);
+                Screening screening = new Screening();
+                screening.setMovie(new Movie());
+                screening.setAuditorium(new Auditorium());
+                booking.setScreening(screening);
+
+                Payment payment = new Payment();
+                payment.setStatus(Payment.PaymentStatus.PENDING);
+                payment.setBooking(booking);
+
+                Ticket ticket = new Ticket();
+                ticket.setStatus(Ticket.Status.BOOKED);
+
+                when(bookingRepository.findById(3L)).thenReturn(Optional.of(booking));
+                when(paymentRepository.findByBookingId(3L)).thenReturn(Optional.of(payment));
+                when(ticketRepository.findByBookingId(3L)).thenReturn(List.of(ticket));
+                when(bookingRepository.save(booking)).thenReturn(booking);
+                when(paymentRepository.save(payment)).thenReturn(payment);
+                BookingResponse response = BookingResponse.builder().id(3L).build();
+                when(bookingMapper.toResponse(any(Booking.class))).thenReturn(response);
+
+                SecurityContextHolder.getContext().setAuthentication(
+                                new UsernamePasswordAuthenticationToken(
+                                                "admin",
+                                                "password",
+                                                List.of(() -> "ROLE_ADMIN")));
+
+                BookingResponse result = bookingService.cancelBooking(3L);
+
+                assertSame(response, result);
+                assertEquals(Booking.BookingStatus.CANCELLED, booking.getBookingStatus());
+                verify(bookingRepository).save(booking);
+        }
 }
-

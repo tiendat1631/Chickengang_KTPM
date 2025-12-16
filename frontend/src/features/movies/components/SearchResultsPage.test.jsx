@@ -2,7 +2,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import SearchResultsPage from './SearchResultsPage';
-import { useSearchMovies } from '@/hooks/useMovies';
+import { useSearchMovies } from '@/features/movies/hooks/useMovies';
 
 // Mock child components
 vi.mock('@/components/common/Header', () => ({
@@ -16,7 +16,7 @@ vi.mock('@/components/common/Header', () => ({
     )
 }));
 
-vi.mock('@/components/common/MovieCard', () => ({
+vi.mock('@/features/movies/components/MovieCard', () => ({
     default: ({ movie, onClick }) => (
         <div data-testid="movie-card" onClick={onClick}>
             {movie.title}
@@ -34,7 +34,7 @@ vi.mock('@/components/common/Pagination', () => ({
 }));
 
 // Mock the hook
-vi.mock('@/hooks/useMovies', () => ({
+vi.mock('@/features/movies/hooks/useMovies', () => ({
     useSearchMovies: vi.fn()
 }));
 

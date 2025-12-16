@@ -1,15 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { useSearchMovies } from '@/hooks/useMovies.js';
+import { useSearchMovies } from '@/features/movies/hooks/useMovies.js';
 import Header from '@/components/common/Header.jsx';
-import MovieCard from '@/components/common/MovieCard.jsx';
+import MovieCard from '@/features/movies/components/MovieCard.jsx';
 import Pagination from '@/components/common/Pagination.jsx';
 import './SearchResultsPage.css';
 
 const SearchResultsPage = () => {
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
-  
+
   const query = searchParams.get('q') || '';
   const [currentPage, setCurrentPage] = useState(Number(searchParams.get('page')) || 0);
   const [pageSize, setPageSize] = useState(Number(searchParams.get('size')) || 20);
@@ -20,7 +20,7 @@ const SearchResultsPage = () => {
     status: searchParams.get('status') || undefined,
     sort: searchParams.get('sort') || undefined,
   });
-  
+
   const { data: searchData, isLoading, error } = useSearchMovies(query, currentPage, pageSize, filters);
 
   // Update URL when filters or page changes
@@ -34,7 +34,7 @@ const SearchResultsPage = () => {
     if (filters.yearTo) params.set('yearTo', filters.yearTo.toString());
     if (filters.status) params.set('status', filters.status);
     if (filters.sort) params.set('sort', filters.sort);
-    
+
     setSearchParams(params);
   }, [query, currentPage, pageSize, filters, setSearchParams]);
 
@@ -83,13 +83,13 @@ const SearchResultsPage = () => {
         <h1 className="search-title">
           Kết quả tìm kiếm cho: "{query}"
         </h1>
-        
+
         {searchData && (
           <p className="search-count">
             Tìm thấy {searchData.totalElements} kết quả
           </p>
         )}
-        
+
         {isLoading ? (
           <div className="loading">Đang tìm kiếm...</div>
         ) : error ? (
@@ -98,14 +98,14 @@ const SearchResultsPage = () => {
           <>
             <div className="movies-grid">
               {searchData.content.map((movie) => (
-                <MovieCard 
-                  key={movie.id} 
+                <MovieCard
+                  key={movie.id}
                   movie={movie}
                   onClick={() => handleMovieClick(movie)}
                 />
               ))}
             </div>
-            
+
             {searchData.totalPages > 1 && (
               <Pagination
                 currentPage={searchData.currentPage}

@@ -2,7 +2,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { vi, describe, it, expect, beforeEach } from 'vitest';
 import MoviesPage from './MoviesPage';
-import { useMovies } from '@/hooks/useMovies';
+import { useMovies } from '@/features/movies/hooks/useMovies';
 
 // Mock child components to simplify test
 vi.mock('@/components/common/Header', () => ({
@@ -39,7 +39,7 @@ vi.mock('@/components/common/Pagination', () => ({
 }));
 
 // Mock the hook
-vi.mock('@/hooks/useMovies', () => ({
+vi.mock('@/features/movies/hooks/useMovies', () => ({
     useMovies: vi.fn()
 }));
 

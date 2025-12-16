@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
-import { useLogin } from '../../../hooks/useAuth'
+import { useLogin } from '@/features/auth/hooks/useAuth'
 import { getUserRole } from '../../../lib/auth.js'
 import toast from 'react-hot-toast'
 
@@ -11,13 +11,13 @@ export default function LoginPage() {
   const { mutate: login, isPending: isLoggingIn } = loginMutation
   const navigate = useNavigate()
   const location = useLocation()
-  
+
   // Get return URL from location state or localStorage
   const returnTo = location.state?.returnTo || localStorage.getItem('intendedBookingUrl') || '/'
 
   const handleSubmit = async (e) => {
     e.preventDefault()
-    
+
     if (!username || !password) {
       toast.error('Vui lòng nhập đầy đủ thông tin')
       return
@@ -28,10 +28,10 @@ export default function LoginPage() {
       {
         onSuccess: async () => {
           toast.success('Đăng nhập thành công')
-          
+
           // Check user role to determine redirect destination
           const role = await getUserRole()
-          
+
           if (role === 'ADMIN') {
             // Admin user - redirect to admin panel or intended admin URL
             const intendedAdminUrl = localStorage.getItem('intendedAdminUrl')

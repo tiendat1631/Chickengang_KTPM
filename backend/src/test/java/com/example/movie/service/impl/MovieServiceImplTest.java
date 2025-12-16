@@ -23,17 +23,21 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+@org.junit.jupiter.api.extension.ExtendWith(org.mockito.junit.jupiter.MockitoExtension.class)
 class MovieServiceImplTest {
 
+    @org.mockito.Mock
     private MovieRepository movieRepository;
+
+    @org.mockito.Mock
     private MovieMapper movieMapper;
+
+    @org.mockito.InjectMocks
     private MovieServiceImpl movieService;
 
     @BeforeEach
     void setUp() {
-        movieRepository = Mockito.mock(MovieRepository.class);
-        movieMapper = Mockito.mock(MovieMapper.class);
-        movieService = new MovieServiceImpl(movieRepository, movieMapper);
+        // Mocks are initialized by @ExtendWith(MockitoExtension.class)
     }
 
     @Test
@@ -69,4 +73,3 @@ class MovieServiceImplTest {
         assertThat(specCaptor.getValue()).isNotNull();
     }
 }
-

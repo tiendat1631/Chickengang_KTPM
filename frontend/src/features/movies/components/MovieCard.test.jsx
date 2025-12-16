@@ -1,7 +1,7 @@
 import { render, screen, fireEvent } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { vi, describe, it, expect } from 'vitest';
-import MovieCard from '@/components/common/MovieCard';
+import MovieCard from './MovieCard';
 
 // Mock useNavigate
 const mockNavigate = vi.fn();

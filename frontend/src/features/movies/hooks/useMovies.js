@@ -1,7 +1,7 @@
 // JavaScript file - no TypeScript checking
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '@/services/api.js';
-import { queryKeys } from './useQueryClient.js';
+import { queryKeys } from '@/hooks/useQueryClient.js';
 
 /**
  * Hook to get all movies with pagination and filters
@@ -25,7 +25,7 @@ export const useMovies = (page = 0, size = 10, sort, filters = {}) => {
         ...(filters.yearTo && { yearTo: filters.yearTo.toString() }),
         ...(filters.status && { status: filters.status }),
       });
-      
+
       const response = await apiClient.get(`/v1/movies?${params}`);
       return response.data.data; // Returns PageResponse with content, totalElements, etc.
     },
@@ -71,7 +71,7 @@ export const useSearchMovies = (query, page = 0, size = 10, filters = {}) => {
         ...(filters.status && { status: filters.status }),
         ...(filters.sort && { sort: filters.sort }),
       });
-      
+
       const response = await apiClient.get(`/v1/movies?${params}`);
       return response.data.data; // Returns PageResponse
     },

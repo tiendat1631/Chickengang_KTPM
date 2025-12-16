@@ -155,4 +155,66 @@ public class BookingServiceTest {
         assertEquals(Payment.PaymentStatus.CANCELLED, payment.getStatus());
         verify(bookingRepository, times(1)).save(booking);
     }
+
+    @Test
+    void shouldReturnUserBookings_WhenAuthenticated() {
+        // Arrange
+        Booking booking = new Booking();
+        booking.setId(1L);
+        booking.setUser(user);
+
+        when(bookingRepository.findByUserIdWithDetails(user.getId())).thenReturn(List.of(booking));
+        when(bookingMapper.toResponse(any(Booking.class))).thenReturn(new BookingResponse());
+
+        // Act
+        List<BookingResponse> results = bookingService.getBookingsByUserId(user.getId());
+
+        // Assert
+        assertNotNull(results);
+        assertEquals(1, results.size());
+        verify(bookingRepository, times(1)).findByUserIdWithDetails(user.getId());
+    }
+
+    @Test
+    void shouldThrowException_WhenCancellingConfirmedBooking() {
+        // Arrange
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getName()).thenReturn("testuser");
+
+        Booking booking = new Booking();
+        booking.setId(1L);
+        booking.setBookingStatus(Booking.BookingStatus.PAID); // PAID status (Confirmed)
+        booking.setUser(user);
+
+        when(bookingRepository.findById(1L)).thenReturn(Optional.of(booking));
+
+        // Act & Assert
+        assertThrows(RuntimeException.class, () -> bookingService.cancelBooking(1L));
+        verify(bookingRepository, never()).save(booking); // Should not save
+    }
+
+    @Test
+    void shouldThrowException_WhenBookingUnavailableSeat() {
+        // Arrange
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getName()).thenReturn("testuser");
+
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
+        when(screeningRepository.findById(10L)).thenReturn(Optional.of(screening));
+        when(seatRepository.findAllById(any())).thenReturn(List.of(seat));
+
+        Ticket bookedTicket = new Ticket();
+        bookedTicket.setStatus(Ticket.Status.BOOKED);
+
+        // Mock that the seat is already booked for this screening
+        when(ticketRepository.findByScreeningIdAndSeatId(10L, 100L)).thenReturn(bookedTicket);
+
+        // Act & Assert
+        // Expect SeatNotAvailableException (or RuntimeException if not specific)
+        // Checking Service Impl: throws SeatNotAvailableException
+        assertThrows(com.example.movie.exception.SeatNotAvailableException.class,
+                () -> bookingService.createBooking(createRequest));
+    }
 }
