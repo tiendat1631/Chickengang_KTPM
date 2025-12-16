@@ -304,6 +304,59 @@ class AuthServiceTest {
         verify(userRepository, never()).existsByEmail(any());
     }
 
+    // ----------------- CÁC TEST CASE VỀ FORMAT (ĐANG THIẾU) -----------------
+
+    @Test
+    @DisplayName("Register - Format: Should throw exception when Email is invalid")
+    void shouldThrowException_WhenEmailFormatIsInvalid() {
+        // Arrange
+        registerRequest.setEmail("email-khong-hop-le"); // Không có @ và domain
+
+        // Act & Assert
+        // Giả sử Service ném IllegalArgumentException khi sai format
+        Exception exception = assertThrows(RuntimeException.class, () -> authService.register(registerRequest));
+
+        // Kiểm tra message lỗi (nếu service có trả về message cụ thể)
+        // assertTrue(exception.getMessage().contains("format"));
+    }
+
+    @Test
+    @DisplayName("Register - Format: Should throw exception when Phone Number is invalid")
+    void shouldThrowException_WhenPhoneFormatIsInvalid() {
+        // Arrange
+        registerRequest.setPhoneNumber("123"); // Quá ngắn, không phải sđt chuẩn
+
+        // Act & Assert
+        assertThrows(RuntimeException.class, () -> authService.register(registerRequest));
+    }
+
+    @Test
+    @DisplayName("Register - Format: Should throw exception when Password is too weak")
+    void shouldThrowException_WhenPasswordIsWeak() {
+        // Arrange
+        registerRequest.setPassword("123"); // Ngắn hơn 8 ký tự
+
+        // Act & Assert
+        assertThrows(RuntimeException.class, () -> authService.register(registerRequest));
+    }
+
+    @Test
+    @DisplayName("Register - Validation: Should throw exception when required fields are empty or null")
+    void shouldThrowException_WhenRequiredFieldsAreMissing() {
+        // 1. Arrange - Tạo request với các trường bị thiếu/rỗng
+        RegisterRequest invalidRequest = new RegisterRequest();
+        invalidRequest.setUsername(""); // Rỗng
+        invalidRequest.setEmail(null);  // Null
+        invalidRequest.setPassword("  "); // Chỉ có khoảng trắng
+
+        // 2. Act & Assert
+        // Mong đợi Service ném ra lỗi (Ví dụ: IllegalArgumentException hoặc RuntimeException)
+        assertThrows(RuntimeException.class, () -> authService.register(invalidRequest));
+
+        // 3. Verify - Quan trọng: Đảm bảo không bao giờ gọi hàm save vào DB
+        verify(userRepository, never()).save(any());
+    }
+
     // Login
     @Test
     @DisplayName("Should return JWT tokens when CUSTOMER logs in with valid credentials")

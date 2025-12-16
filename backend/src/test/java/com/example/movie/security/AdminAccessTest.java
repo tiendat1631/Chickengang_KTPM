@@ -92,6 +92,35 @@ class AdminAccessTest {
         customerToken = securityUtil.createAccessToken(customerUser);
     }
 
+    // ===================== TEST CASE 1: Admin accesses admin portal =====================
+    @Nested
+    @DisplayName("Admin Accesses Admin Portal")
+    class AdminPortalAccessTests {
+
+        @Test
+        @DisplayName("Admin can access admin dashboard → 200 OK")
+        void adminCanAccessAdminDashboard() throws Exception {
+            mockMvc.perform(get("/api/v1/users")
+                            .header("Authorization", "Bearer " + adminToken))
+                    .andExpect(status().isOk());
+        }
+
+        @Test
+        @DisplayName("Customer cannot access admin dashboard → 403 Forbidden")
+        void customerCannotAccessAdminDashboard() throws Exception {
+            mockMvc.perform(get("/api/v1/users")
+                            .header("Authorization", "Bearer " + customerToken))
+                    .andExpect(status().isForbidden());
+        }
+
+        @Test
+        @DisplayName("Anonymous user cannot access admin dashboard → 401 Unauthorized")
+        void anonymousCannotAccessAdminDashboard() throws Exception {
+            mockMvc.perform(get("/api/v1/users"))
+                    .andExpect(status().isUnauthorized());
+        }
+    }
+
     // ===================== TEST CASE 2: ADMIN MANAGES MOVIES =====================
 
     @Nested
