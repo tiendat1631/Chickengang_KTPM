@@ -1,0 +1,29 @@
+name: Frontend CD
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend-cd.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+
+    - name: Deploy to Production
+      run: |
+        echo "Deploying to Vercel/Netlify..."
+        # npm install && npm run build
+        # npx vercel --prod --token ${{ secrets.VERCEL_TOKEN }}
