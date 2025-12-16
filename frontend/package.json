@@ -11,7 +11,8 @@
     "start": "vite",
     "test": "vitest",
     "lint": "eslint . --ext .js,.jsx",
-    "lint:fix": "eslint . --ext .js,.jsx --fix"
+    "lint:fix": "eslint . --ext .js,.jsx --fix",
+    "perf-test": "lhci autorun"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.2",
@@ -33,6 +34,7 @@
     "tailwindcss": "^4.1.17"
   },
   "devDependencies": {
+    "@lhci/cli": "^0.15.1",
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.3.0",
     "@testing-library/user-event": "^14.6.1",
