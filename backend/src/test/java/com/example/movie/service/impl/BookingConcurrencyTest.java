@@ -94,13 +94,14 @@ class BookingConcurrencyTest {
         when(userRepository.findByUsername("user2")).thenReturn(Optional.of(user2));
         when(screeningRepository.findById(1L)).thenReturn(Optional.of(screening));
         when(seatRepository.findAllById(List.of(1L))).thenReturn(List.of(seat));
-        when(bookingRepository.count()).thenReturn(0L);
-        when(bookingRepository.save(any(Booking.class))).thenAnswer(invocation -> {
+        lenient().when(bookingRepository.count()).thenReturn(0L);
+        lenient().when(bookingRepository.save(any(Booking.class))).thenAnswer(invocation -> {
             Booking saved = invocation.getArgument(0);
             saved.setId(100L + ticketBookedCount.get());
             return saved;
         });
-        when(bookingMapper.toResponse(any(Booking.class))).thenReturn(BookingResponse.builder().id(100L).build());
+        lenient().when(bookingMapper.toResponse(any(Booking.class)))
+                .thenReturn(BookingResponse.builder().id(100L).build());
 
         // Simulate the ticket status with synchronized check-and-set
         // This ensures only one thread can successfully "book" the seat

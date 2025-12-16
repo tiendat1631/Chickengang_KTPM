@@ -1,6 +1,5 @@
 package com.example.movie.model;
 
-
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -11,12 +10,12 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
-
 @NoArgsConstructor
 @AllArgsConstructor
 @Data
 @Entity
-public class User  {
+@Table(name = "user")
+public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -44,25 +43,20 @@ public class User  {
     private LocalDateTime createdAt;
     @UpdateTimestamp
     private LocalDateTime updatedAt;
-//    @OneToMany
-//    @JoinColumn(name = "user_id")
-//    @JsonIgnore
-//    private List<Booking> bookings;
+    // @OneToMany
+    // @JoinColumn(name = "user_id")
+    // @JsonIgnore
+    // private List<Booking> bookings;
 
     @Column(nullable = false, unique = true)
     private String username;
 
-
     private LocalDate dateOfBirth;
-
 
     public enum UserRole {
         ADMIN,
 
         CUSTOMER
     }
-
-
-
 
 }

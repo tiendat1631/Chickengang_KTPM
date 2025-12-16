@@ -15,6 +15,6 @@ public class CreateBookingRequest {
     private List<Long> seatIds;
 
     @NotNull(message = "Total price cannot be null")
+    @jakarta.validation.constraints.Min(value = 0, message = "Total price must be positive")
     private Float totalPrice;
 }
-

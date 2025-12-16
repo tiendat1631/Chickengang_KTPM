@@ -59,20 +59,20 @@ export default function MovieDetailPage() {
       try {
         setLoading(true)
         setError(null)
-        
+
         // Try to fetch from API first
         try {
           console.log(`Fetching movie with ID: ${movieId}`)
           const response = await apiClient.get(`/v1/movies/${movieId}`)
           console.log('API Response:', response.data)
-          
+
           if (response.data && response.data.data) {
             const movieData = response.data.data
             // Convert releaseDate from LocalDate to string if needed
             const formattedMovie = {
               ...movieData,
-              releaseDate: typeof movieData.releaseDate === 'string' 
-                ? movieData.releaseDate 
+              releaseDate: typeof movieData.releaseDate === 'string'
+                ? movieData.releaseDate
                 : movieData.releaseDate?.toString() || ''
             }
             setMovie(formattedMovie)
@@ -84,7 +84,7 @@ export default function MovieDetailPage() {
           console.error('API Error:', apiError)
           setError('Không thể tải dữ liệu phim')
         }
-        
+
         // Note: Screenings will be loaded separately via useScreenings hook
       } catch (err) {
         console.error('Fetch error:', err)
@@ -99,9 +99,9 @@ export default function MovieDetailPage() {
 
   const formatTime = (dateString) => {
     const date = new Date(dateString)
-    return date.toLocaleTimeString('vi-VN', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
+    return date.toLocaleTimeString('vi-VN', {
+      hour: '2-digit',
+      minute: '2-digit'
     })
   }
 
@@ -122,7 +122,7 @@ export default function MovieDetailPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
-        <Header onSearch={() => {}} />
+        <Header onSearch={() => { }} />
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-white text-xl font-medium">Đang tải thông tin phim...</div>
         </div>
@@ -133,21 +133,21 @@ export default function MovieDetailPage() {
   if (error || !movie) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
-        <Header onSearch={() => {}} />
+        <Header onSearch={() => { }} />
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="bg-white/10 backdrop-blur-sm rounded-xl p-8 max-w-md mx-4 text-center border border-white/20">
             <div className="text-6xl mb-4">🎬</div>
             <h2 className="text-white text-xl font-semibold mb-4">Không tìm thấy phim</h2>
             <p className="text-white/70 mb-6">Phim bạn đang tìm kiếm không tồn tại hoặc đã bị xóa.</p>
             <div className="flex flex-col gap-3">
-              <Link 
-                to="/" 
+              <Link
+                to="/"
                 className="bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
               >
                 ← Về trang chủ
               </Link>
-              <Link 
-                to="/movies/search" 
+              <Link
+                to="/movies/search"
                 className="bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
               >
                 🔍 Tìm kiếm phim khác
@@ -162,11 +162,11 @@ export default function MovieDetailPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-purple-900 via-blue-900 to-indigo-900">
       {/* Main Header */}
-      <Header onSearch={() => {}} />
-      
+      <Header onSearch={() => { }} />
+
       {/* Breadcrumb Navigation */}
       <div className="bg-gradient-to-r from-purple-800 to-gray-800">
-        <Breadcrumb 
+        <Breadcrumb
           items={[
             { label: "Trang chủ", href: "/" },
             { label: movie.title }
@@ -185,12 +185,12 @@ export default function MovieDetailPage() {
                 <div className="absolute top-4 left-4 bg-red-600 text-white text-xs font-bold px-2 py-1 rounded-full">
                   NỔI BẬT
                 </div>
-                
+
                 {/* Rating Badge */}
                 <div className="absolute top-4 right-4 bg-black text-white text-xs font-bold px-2 py-1 rounded-full">
                   T16
                 </div>
-                
+
                 {/* Movie Poster Placeholder */}
                 <div className="flex flex-col items-center justify-center py-12">
                   <div className="text-6xl text-gray-300 mb-4">🎬</div>
@@ -207,7 +207,7 @@ export default function MovieDetailPage() {
               <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">
                 {movie.title}
               </h1>
-              
+
               {/* Movie Information */}
               <div className="space-y-3 text-white">
                 <div className="flex items-center">
@@ -223,26 +223,26 @@ export default function MovieDetailPage() {
                   <span>{formatDate(movie.releaseDate)}</span>
                 </div>
               </div>
-              
+
               {/* Genre Tags */}
               <div className="flex flex-wrap gap-2">
                 {movie.genres.split(',').map((genre, index) => (
-                  <span 
-                    key={`${movie.id}-genre-${index}`} 
+                  <span
+                    key={`${movie.id}-genre-${index}`}
                     className="bg-gray-700 text-white px-3 py-1 rounded-full text-sm font-medium"
                   >
                     {genre.trim()}
                   </span>
                 ))}
               </div>
-              
+
               {/* Action Buttons */}
               <div className="flex flex-col sm:flex-row gap-4 pt-4">
                 <button className="flex items-center justify-center bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors">
                   <span className="mr-2">▶️</span>
                   Xem Trailer
                 </button>
-                <button 
+                <button
                   className="flex items-center justify-center bg-red-600 hover:bg-red-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
                   onClick={() => navigate(`/movies/${movie.id}/screenings`)}
                 >
@@ -260,8 +260,8 @@ export default function MovieDetailPage() {
           {screenings.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {screenings.map((screening) => (
-                <div 
-                  key={screening.id} 
+                <div
+                  key={screening.id}
                   className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 hover:bg-white/20 transition-colors cursor-pointer"
                   onClick={() => handleScreeningClick(screening)}
                 >
@@ -276,11 +276,10 @@ export default function MovieDetailPage() {
                     </div>
                   </div>
                   <div className="flex justify-end">
-                    <span className={`px-2 py-1 rounded text-xs font-medium ${
-                      screening.status === 'ACTIVE' 
-                        ? 'bg-green-600 text-white' 
-                        : 'bg-red-600 text-white'
-                    }`}>
+                    <span className={`px-2 py-1 rounded text-xs font-medium ${screening.status === 'ACTIVE'
+                      ? 'bg-green-600 text-white'
+                      : 'bg-red-600 text-white'
+                      }`}>
                       {screening.status === 'ACTIVE' ? 'Có vé' : 'Hết vé'}
                     </span>
                   </div>
@@ -292,16 +291,16 @@ export default function MovieDetailPage() {
               <p className="text-white/70 text-lg">Chưa có suất chiếu nào</p>
             </div>
           )}
-          
+
           <div className="flex flex-col sm:flex-row gap-4 mt-8">
-            <Link 
-              to="/" 
+            <Link
+              to="/"
               className="flex items-center justify-center bg-gray-700 hover:bg-gray-600 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
             >
               ← Quay lại trang chủ
             </Link>
-            <Link 
-              to={`/movies/${movie.id}/screenings`} 
+            <Link
+              to={`/movies/${movie.id}/screenings`}
               className="flex items-center justify-center bg-purple-600 hover:bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold transition-colors"
             >
               Xem tất cả suất chiếu

@@ -117,4 +117,85 @@ public class MovieRepositoryTest {
         // Then
         assertThat(results).isEmpty();
     }
+
+    @Test
+    void shouldFilterByMultipleCriteria() {
+        // Given: Filter by Genre "Action" and Release Year >= 2019
+        Specification<Movie> spec = Specification.where(MovieSpecification.filterByGenre("Action"))
+                .and(MovieSpecification.filterByYearRange(2019, null));
+
+        // When
+        List<Movie> results = movieRepository.findAll(spec);
+
+        // Then
+        assertThat(results).hasSize(1);
+        assertThat(results.get(0).getTitle()).isEqualTo("Avengers: Endgame");
+    }
+
+    @Test
+    void shouldSortMoviesByTitle_Ascending() {
+        // Given
+        Specification<Movie> spec = Specification.where(null);
+        org.springframework.data.domain.Sort sort = org.springframework.data.domain.Sort
+                .by(org.springframework.data.domain.Sort.Direction.ASC, "title");
+
+        // When
+        List<Movie> results = movieRepository.findAll(spec, sort);
+
+        // Then
+        assertThat(results).hasSize(2);
+        assertThat(results.get(0).getTitle()).isEqualTo("Avengers: Endgame"); // A comes before T
+        assertThat(results.get(1).getTitle()).isEqualTo("The Hangover");
+    }
+
+    @Test
+    void shouldSortMoviesByReleaseDate_Descending() {
+        // Given
+        Specification<Movie> spec = Specification.where(null);
+        org.springframework.data.domain.Sort sort = org.springframework.data.domain.Sort
+                .by(org.springframework.data.domain.Sort.Direction.DESC, "releaseDate");
+
+        // When
+        List<Movie> results = movieRepository.findAll(spec, sort);
+
+        // Then
+        assertThat(results).hasSize(2);
+        assertThat(results.get(0).getTitle()).isEqualTo("Avengers: Endgame"); // 2019
+        assertThat(results.get(1).getTitle()).isEqualTo("The Hangover"); // 2009
+    }
+
+    @Test
+    void shouldNotReturnResults_WhenSqlInjectionAttempted() {
+        // Given: A common SQL Injection payload
+        String sqlInjectionPayload = "Avengers' OR '1'='1";
+        Specification<Movie> spec = MovieSpecification.searchByKeyword(sqlInjectionPayload);
+
+        // When
+        List<Movie> results = movieRepository.findAll(spec);
+
+        // Then
+        // Should treat payload as literal string "Avengers' OR '1'='1"
+        // and NOT execute the OR condition which would return all movies.
+        assertThat(results).isEmpty();
+    }
+
+    @Test
+    void shouldExecuteSearchQueryEfficiently() {
+        // Given
+        Specification<Movie> spec = MovieSpecification.searchByKeyword("Avengers");
+        int iterations = 100;
+
+        // When
+        long startTime = System.currentTimeMillis();
+        for (int i = 0; i < iterations; i++) {
+            movieRepository.findAll(spec);
+        }
+        long endTime = System.currentTimeMillis();
+        long duration = endTime - startTime;
+
+        // Then
+        // 100 queries should definitely complete within 2 seconds (2000ms) even on
+        // slower environments
+        assertThat(duration).isLessThan(2000);
+    }
 }

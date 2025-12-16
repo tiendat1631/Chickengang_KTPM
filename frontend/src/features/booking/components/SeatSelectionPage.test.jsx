@@ -163,4 +163,45 @@ describe('SeatSelectionPage', () => {
 
         alertMock.mockRestore();
     });
+    it('shows error when seat data fetch fails', async () => {
+        useSeats.mockReturnValue({
+            data: null,
+            isLoading: false,
+            error: { message: 'Failed to fetch seats' }
+        });
+
+        render(
+            <MemoryRouter>
+                <SeatSelectionPage />
+            </MemoryRouter>
+        );
+
+        await waitFor(() => {
+            expect(screen.getByText(/Failed to fetch seats/i)).toBeInTheDocument();
+        });
+    });
+
+    it('disables confirm button when 0 seats are selected (Minimum requirement)', async () => {
+        useSeats.mockReturnValue({
+            data: mockSeats,
+            isLoading: false,
+            error: null
+        });
+
+        render(
+            <MemoryRouter>
+                <SeatSelectionPage />
+            </MemoryRouter>
+        );
+
+        await waitFor(() => screen.getByTitle(/A1/));
+
+        // Ensure no seats are selected (default)
+        // Button text is "Tiếp tục đặt vé" (from source)
+        const confirmButton = screen.getByText('Tiếp tục đặt vé');
+
+        // Current implementation DISABLES the button when 0 seats, 
+        // effectively preventing next step (which is what we want to test)
+        expect(confirmButton).toBeDisabled();
+    });
 });
