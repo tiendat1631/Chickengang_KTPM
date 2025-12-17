@@ -217,4 +217,110 @@ public class BookingServiceTest {
         assertThrows(com.example.movie.exception.SeatNotAvailableException.class,
                 () -> bookingService.createBooking(createRequest));
     }
+
+    @Test
+    void testCreateBooking_ShouldGenerateUniqueBookingAndTicketCodes() {
+        // Arrange
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getName()).thenReturn("testuser");
+
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
+        when(screeningRepository.findById(10L)).thenReturn(Optional.of(screening));
+        when(seatRepository.findAllById(any())).thenReturn(List.of(seat));
+        when(ticketRepository.findByScreeningIdAndSeatId(10L, 100L)).thenReturn(null);
+
+        // Capture saved booking to verify Booking Code
+        when(bookingRepository.save(any(Booking.class))).thenAnswer(invocation -> {
+            Booking b = invocation.getArgument(0);
+            b.setId(123L);
+            return b;
+        });
+
+        // Capture saved ticket to verify Ticket Code
+        when(ticketRepository.save(any(Ticket.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        when(bookingMapper.toResponse(any(Booking.class))).thenReturn(new BookingResponse());
+
+        // Act
+        bookingService.createBooking(createRequest);
+
+        // Assert
+        // Verify Booking Code Generated
+        verify(bookingRepository).save(
+                argThat(booking -> booking.getBookingCode() != null && booking.getBookingCode().startsWith("BK-")));
+
+        // Verify Ticket Code Generated
+        verify(ticketRepository)
+                .save(argThat(ticket -> ticket.getTicketCode() != null && ticket.getTicketCode().length() == 12));
+    }
+
+    @Test
+    void testCancelBooking_ShouldReleaseTickets() {
+        // Arrange
+        Long bookingId = 123L;
+
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getName()).thenReturn("testuser");
+
+        Booking booking = new Booking();
+        booking.setId(bookingId);
+        booking.setBookingStatus(Booking.BookingStatus.PENDING);
+        booking.setUser(user);
+        booking.setScreening(screening);
+
+        Payment payment = new Payment();
+        payment.setStatus(Payment.PaymentStatus.PENDING);
+
+        Ticket ticket = new Ticket();
+        ticket.setStatus(Ticket.Status.BOOKED);
+        ticket.setBooking(booking);
+
+        when(bookingRepository.findById(bookingId)).thenReturn(Optional.of(booking));
+        when(paymentRepository.findByBookingId(bookingId)).thenReturn(Optional.of(payment));
+        when(ticketRepository.findByBookingId(bookingId)).thenReturn(List.of(ticket));
+        when(bookingRepository.save(any(Booking.class))).thenReturn(booking);
+        when(bookingMapper.toResponse(any(Booking.class))).thenReturn(new BookingResponse());
+
+        // Act
+        bookingService.cancelBooking(bookingId);
+
+        // Assert
+        // Verify tickets are released (M3-13)
+        verify(ticketRepository).save(argThat(t -> t.getStatus() == Ticket.Status.AVAILABLE &&
+                t.getBooking() == null &&
+                t.getTicketCode() == null));
+    }
+
+    @Test
+    void testGetBooking_InvalidId_ShouldThrowException() { // M3-32
+        // Arrange
+        Long invalidId = 999L;
+        when(bookingRepository.findById(invalidId)).thenReturn(Optional.empty());
+
+        // Act & Assert
+        assertThrows(com.example.movie.exception.InvalidId.class,
+                () -> bookingService.getBooking(invalidId));
+    }
+
+    @Test
+    void testCreateBooking_DatabaseError_ShouldThrowException() { // M3-31
+        // Arrange
+        when(securityContext.getAuthentication()).thenReturn(authentication);
+        when(authentication.isAuthenticated()).thenReturn(true);
+        when(authentication.getName()).thenReturn("testuser");
+
+        when(userRepository.findByUsername("testuser")).thenReturn(Optional.of(user));
+        when(screeningRepository.findById(10L)).thenReturn(Optional.of(screening));
+        when(seatRepository.findAllById(any())).thenReturn(List.of(seat));
+
+        // Simulate DB error when saving
+        when(bookingRepository.save(any(Booking.class))).thenThrow(new RuntimeException("Database Connection Error"));
+
+        // Act & Assert
+        RuntimeException exception = assertThrows(RuntimeException.class,
+                () -> bookingService.createBooking(createRequest));
+        assertEquals("Database Connection Error", exception.getMessage());
+    }
 }

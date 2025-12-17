@@ -60,3 +60,10 @@ junit.xml
 
 # Local development data (not for production)
 backend/src/main/resources/data.sql
+
+# Python bytecode & cache
+__pycache__/
+*.py[cod]
+*.pyo
+.venv/
+venv/

@@ -27,8 +27,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.NONE)
 @ActiveProfiles("test")
-@Import(TestContainersConfig.class)
-public class BookingConcurrencyIntegrationTest extends TestContainersConfig {
+public class BookingConcurrencyIntegrationTest {
 
     @Autowired
     private BookingService bookingService;
@@ -75,6 +74,9 @@ public class BookingConcurrencyIntegrationTest extends TestContainersConfig {
         user1.setUsername("user1");
         user1.setEmail("user1@test.com");
         user1.setPassword("password");
+        user1.setAddress("123 Test St");
+        user1.setPhoneNumber("1234567890");
+        user1.setRole(User.UserRole.CUSTOMER);
         user1Id = userRepository.save(user1).getId();
 
         // Setup User 2
@@ -82,6 +84,9 @@ public class BookingConcurrencyIntegrationTest extends TestContainersConfig {
         user2.setUsername("user2");
         user2.setEmail("user2@test.com");
         user2.setPassword("password");
+        user2.setAddress("456 Test Ave");
+        user2.setPhoneNumber("0987654321");
+        user2.setRole(User.UserRole.CUSTOMER);
         user2Id = userRepository.save(user2).getId();
 
         // Setup Movie
@@ -101,6 +106,7 @@ public class BookingConcurrencyIntegrationTest extends TestContainersConfig {
         // Setup Auditorium
         Auditorium auditorium = new Auditorium();
         auditorium.setName("Hall 1");
+        auditorium.setCapacity(100);
         auditorium = auditoriumRepository.save(auditorium);
 
         // Setup Screening
@@ -115,6 +121,7 @@ public class BookingConcurrencyIntegrationTest extends TestContainersConfig {
         seat.setAuditorium(auditorium);
         seat.setRowLabel("A");
         seat.setNumber(1);
+        seat.setSeatType(Seat.SeatType.NORMAL);
         seatId = seatRepository.save(seat).getId();
     }
 
