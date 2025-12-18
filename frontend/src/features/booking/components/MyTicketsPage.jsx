@@ -8,6 +8,7 @@ import { formatVND } from '@/utils/formatCurrency'
 import apiClient from '@/services/api'
 import { cancelBooking as cancelBookingApi } from '@/services/bookingApi'
 import { updatePaymentMethod as updatePaymentMethodApi } from '@/services/paymentApi'
+import useWebSocket from '@/hooks/useWebSocket'
 
 export default function MyTicketsPage() {
   const navigate = useNavigate()
@@ -76,6 +77,32 @@ export default function MyTicketsPage() {
     setActionError(null)
     setShowPaymentForm(false)
   }, [selectedBooking?.id])
+
+  // WebSocket for Real-time Payment Updates
+  const { subscribe, isConnected } = useWebSocket()
+
+  useEffect(() => {
+    if (!isConnected || !bookings || bookings.length === 0) return
+
+    const subscriptions = []
+
+    bookings.forEach((booking) => {
+      if (booking.bookingStatus === 'PENDING') {
+        const sub = subscribe(`/topic/booking/${booking.id}/payment`, (message) => {
+          console.log('Payment update received:', message)
+          refetch()
+          if (selectedBooking?.id === booking.id) {
+            refetchPayment()
+          }
+        })
+        if (sub) subscriptions.push(sub)
+      }
+    })
+
+    return () => {
+      subscriptions.forEach((sub) => sub.unsubscribe())
+    }
+  }, [bookings, isConnected, subscribe, refetch, refetchPayment, selectedBooking?.id])
 
   const formatTime = (dateString) => {
     const date = new Date(dateString)
@@ -264,8 +291,8 @@ export default function MyTicketsPage() {
                     <div
                       key={booking.id}
                       className={`p-4 rounded-lg border cursor-pointer transition-all ${selectedBooking?.id === booking.id
-                          ? 'border-blue-500 bg-blue-50'
-                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
                         }`}
                       onClick={() => handleBookingClick(booking)}
                     >
@@ -384,10 +411,10 @@ export default function MyTicketsPage() {
                                     <div className="text-xs text-gray-600 mt-2">
                                       <span className="font-medium">Trạng thái:</span>
                                       <span className={`ml-1 px-2 py-0.5 rounded ${ticket.status === 'ISSUED' ? 'bg-green-100 text-green-800' :
-                                          ticket.status === 'BOOKED' ? 'bg-yellow-100 text-yellow-800' :
-                                            ticket.status === 'USED' ? 'bg-gray-100 text-gray-800' :
-                                              ticket.status === 'CANCELLED' ? 'bg-red-100 text-red-800' :
-                                                'bg-gray-100 text-gray-800'
+                                        ticket.status === 'BOOKED' ? 'bg-yellow-100 text-yellow-800' :
+                                          ticket.status === 'USED' ? 'bg-gray-100 text-gray-800' :
+                                            ticket.status === 'CANCELLED' ? 'bg-red-100 text-red-800' :
+                                              'bg-gray-100 text-gray-800'
                                         }`}>
                                         {ticket.status === 'ISSUED' ? 'Đã phát hành' :
                                           ticket.status === 'BOOKED' ? 'Đã đặt' :

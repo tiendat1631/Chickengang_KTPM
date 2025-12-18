@@ -35,6 +35,12 @@ export default defineConfig({
           });
         },
       },
+      '/ws': {
+        target: 'http://backend:8080',
+        ws: true,
+        changeOrigin: true,
+        secure: false,
+      },
     },
   },
   build: {

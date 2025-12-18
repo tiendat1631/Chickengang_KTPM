@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '@/features/auth/hooks/useAuth.js';
 import apiClient from '@/services/api.js';
 import toast from 'react-hot-toast';
+import useWebSocket from '@/hooks/useWebSocket';
 import './AdminPaymentManagement.css';
 
 /**
@@ -32,10 +33,24 @@ const AdminPaymentManagement = () => {
     fetchPayments();
   }, [currentPage, filters]);
 
+  // WebSocket
+  const { subscribe, isConnected } = useWebSocket();
+
+  useEffect(() => {
+    if (isConnected) {
+      console.log("Listening for payment updates...");
+      const subscription = subscribe('/topic/payments', (message) => {
+        console.log("Global payment update received:", message);
+        fetchPayments();
+      });
+      return () => subscription.unsubscribe();
+    }
+  }, [isConnected, subscribe]);
+
   const fetchPayments = async () => {
     try {
       setIsLoading(true);
-      
+
       const params = {
         page: currentPage,
         size: pageSize,
@@ -43,7 +58,7 @@ const AdminPaymentManagement = () => {
       };
 
       const response = await apiClient.get('/v1/payments', { params });
-      
+
       // Handle ApiResponse structure from backend
       if (response.data && response.data.data) {
         const pageData = response.data.data;
@@ -55,10 +70,10 @@ const AdminPaymentManagement = () => {
         setTotalElements(0);
         setTotalPages(0);
       }
-      
+
     } catch (error) {
       console.error('Error fetching payments:', error);
-      
+
       if (error.response?.status === 401) {
         toast.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!');
       } else if (error.response?.status === 403) {
@@ -68,7 +83,7 @@ const AdminPaymentManagement = () => {
       } else {
         toast.error('Có lỗi xảy ra khi tải danh sách thanh toán!');
       }
-      
+
       setPayments([]);
       setTotalElements(0);
       setTotalPages(0);
@@ -109,18 +124,18 @@ const AdminPaymentManagement = () => {
 
   const handleCompletePayment = async (paymentId, status) => {
     const statusText = status === 'SUCCESS' ? 'xác nhận thanh toán' : 'từ chối thanh toán';
-    
+
     if (window.confirm(`Bạn có chắc chắn muốn ${statusText} này?`)) {
       try {
         setProcessingAction(paymentId);
-        
+
         await apiClient.patch(`/v1/payments/${paymentId}/complete?status=${status}`);
-        
+
         toast.success(`${status === 'SUCCESS' ? 'Xác nhận' : 'Từ chối'} thanh toán thành công!`);
         fetchPayments(); // Refresh the payment list
       } catch (error) {
         console.error('Error completing payment:', error);
-        
+
         if (error.response?.status === 401) {
           toast.error('Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại!');
         } else if (error.response?.status === 403) {
@@ -325,23 +340,23 @@ const AdminPaymentManagement = () => {
                 <td>{formatDate(payment.paymentDate)}</td>
                 <td>
                   <div className="action-buttons">
-                    <button 
+                    <button
                       className="btn btn-sm btn-outline"
                       onClick={() => handleViewDetails(payment.id)}
                     >
                       Chi tiết
                     </button>
-                    
+
                     {payment.status === 'PENDING' && (
                       <>
-                        <button 
+                        <button
                           className="btn btn-sm btn-success"
                           onClick={() => handleCompletePayment(payment.id, 'SUCCESS')}
                           disabled={processingAction === payment.id}
                         >
                           {processingAction === payment.id ? 'Đang xử lý...' : 'Xác nhận'}
                         </button>
-                        <button 
+                        <button
                           className="btn btn-sm btn-danger"
                           onClick={() => handleCompletePayment(payment.id, 'FAILED')}
                           disabled={processingAction === payment.id}
@@ -371,14 +386,14 @@ const AdminPaymentManagement = () => {
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="pagination">
-          <button 
+          <button
             className="btn btn-outline"
             onClick={() => handlePageChange(currentPage - 1)}
             disabled={currentPage === 0}
           >
             ← Trước
           </button>
-          
+
           <div className="page-numbers">
             {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
               const pageNum = Math.max(0, Math.min(totalPages - 1, currentPage - 2 + i));
@@ -393,8 +408,8 @@ const AdminPaymentManagement = () => {
               );
             })}
           </div>
-          
-          <button 
+
+          <button
             className="btn btn-outline"
             onClick={() => handlePageChange(currentPage + 1)}
             disabled={currentPage >= totalPages - 1}
@@ -410,7 +425,7 @@ const AdminPaymentManagement = () => {
           <div className="modal" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h2>Chi tiết thanh toán</h2>
-              <button 
+              <button
                 className="modal-close"
                 onClick={() => setShowPaymentDetails(null)}
               >
@@ -458,7 +473,7 @@ const AdminPaymentManagement = () => {
               </div>
             </div>
             <div className="modal-footer">
-              <button 
+              <button
                 className="btn btn-secondary"
                 onClick={() => setShowPaymentDetails(null)}
               >
