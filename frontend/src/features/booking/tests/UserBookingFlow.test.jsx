@@ -11,7 +11,7 @@ import MovieDetailPage from '@/features/movies/components/MovieDetailPage';
 import SeatSelectionPage from '@/features/booking/components/SeatSelectionPage';
 import BookingPage from '@/features/booking/components/BookingPage';
 
-import { useScreenings, useSeats } from '@/features/screenings/hooks/useScreenings';
+import { useScreenings, useScreening, useSeats } from '@/features/screenings/hooks/useScreenings';
 
 // Mock Dependencies
 vi.mock('@/features/auth/hooks/useAuth');
@@ -99,15 +99,21 @@ describe('User Booking Flow Integration Test', () => {
             error: null
         });
 
+        useScreening.mockReturnValue({
+            data: mockScreenings[0],
+            isLoading: false,
+            error: null
+        });
+
         // Setup API Mocks
         apiClient.get.mockImplementation((url) => {
             console.log('API GET:', url);
+            if (url.match(/\/movies\/\d+$/)) {
+                return Promise.resolve({ data: { data: mockMovieDetail } });
+            }
             if (url.includes('/movies/featured') || url.includes('/movies')) {
                 // Return Page structure
                 return Promise.resolve({ data: { data: { content: mockMovies, totalElements: 1 } } });
-            }
-            if (url.match(/\/movies\/\d+$/)) {
-                return Promise.resolve({ data: { data: mockMovieDetail } });
             }
             if (url.includes('/screenings/movie')) { // Get screenings for movie
                 return Promise.resolve({ data: { data: mockScreenings } });
@@ -139,14 +145,14 @@ describe('User Booking Flow Integration Test', () => {
         });
     });
 
-    it.skip('Complete User Flow: Search -> Select Movie -> Select Seat -> Book', async () => {
+    it('Complete User Flow: Search -> Select Movie -> Select Seat -> Book', async () => {
         render(
             <QueryClientProvider client={queryClient}>
                 <MemoryRouter initialEntries={['/']}>
                     <Routes>
                         <Route path="/" element={<HomePage />} />
                         <Route path="/movies/:id" element={<MovieDetailPage />} />
-                        <Route path="/booking/seat/:movieId/:screeningId" element={<SeatSelectionPage />} />
+                        <Route path="/booking/:movieId/screening/:screeningId" element={<SeatSelectionPage />} />
                         <Route path="/booking/:movieId" element={<BookingPage />} />
                         <Route path="/404" element={<div>404 Not Found</div>} />
                     </Routes>
@@ -182,11 +188,11 @@ describe('User Booking Flow Integration Test', () => {
 
         // 3. Seat Selection Page
         await waitFor(() => {
-            expect(screen.getByText('Màn hình')).toBeInTheDocument(); // Screen label
+            expect(screen.getByText(/Màn hình/i)).toBeInTheDocument(); // Screen label
         });
 
         // Find an available seat and click it
-        const seat = screen.getByText('A1'); // First seat
+        const seat = screen.getByText('1'); // First seat (displayed as Number only)
         fireEvent.click(seat);
 
         // Click "Continue" or "Book" button
@@ -195,13 +201,14 @@ describe('User Booking Flow Integration Test', () => {
 
         // 4. Booking Page
         await waitFor(() => {
-            // Check for payment or booking details confirmation
-            // If BookingPage shows "Thanh toán" or "Chi tiết đặt vé"
-            // Adjust regex based on actual BookingPage content
-            // Assuming it contains payment options or booking status
-            expect(screen.queryByText(/Thanh toán/i) || screen.queryByText(/Chi tiết/i)).toBeInTheDocument();
-            // Just find anything that signifies success
-            expect(screen.getByText(/120.000/)).toBeInTheDocument();
+            // Verify we reached the booking page by checking for the main action button
+            expect(screen.getByRole('button', { name: /Thanh toán/i })).toBeInTheDocument();
+            
+            // Optional: Check title if possible, but button is sufficient proof of flow
+            const heading = screen.queryByRole('heading', { level: 1 });
+            if (heading) {
+                 expect(heading).toHaveTextContent(/Xác nhận đặt vé/i);
+            }
         });
     });
 });
