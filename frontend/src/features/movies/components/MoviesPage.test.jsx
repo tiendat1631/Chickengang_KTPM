@@ -60,12 +60,9 @@ vi.mock('react-router-dom', async () => {
 
 describe('MoviesPage', () => {
     const mockMoviesData = {
-        content: [
-            { id: 1, title: 'Movie 1' },
-            { id: 2, title: 'Movie 2' }
-        ],
-        totalElements: 2,
-        totalPages: 1,
+        content: Array.from({ length: 20 }, (_, i) => ({ id: i + 1, title: `Movie ${i + 1}` })),
+        totalElements: 55,
+        totalPages: 3,
         currentPage: 0,
         pageSize: 20
     };
@@ -89,7 +86,7 @@ describe('MoviesPage', () => {
 
         expect(screen.getByTestId('movie-list')).toBeInTheDocument();
         expect(screen.getByText('Movie 1')).toBeInTheDocument();
-        expect(screen.getByText('Movie 2')).toBeInTheDocument();
+        expect(screen.getByText('Movie 20')).toBeInTheDocument();
     });
 
     it('shows loading state', () => {
