@@ -11,10 +11,12 @@
     "start": "vite",
     "test": "vitest",
     "lint": "eslint . --ext .js,.jsx",
-    "lint:fix": "eslint . --ext .js,.jsx --fix"
+    "lint:fix": "eslint . --ext .js,.jsx --fix",
+    "perf-test": "lhci autorun"
   },
   "dependencies": {
     "@hookform/resolvers": "^3.3.2",
+    "@stomp/stompjs": "^7.2.1",
     "@tailwindcss/postcss": "^4.1.17",
     "@tanstack/react-query": "^5.8.4",
     "ajv": "^8.17.1",
@@ -30,15 +32,22 @@
     "react-icons": "^4.12.0",
     "react-router-dom": "^6.20.1",
     "recharts": "^3.3.0",
+    "sockjs-client": "^1.6.1",
     "tailwindcss": "^4.1.17"
   },
   "devDependencies": {
+    "@lhci/cli": "^0.15.1",
+    "@testing-library/jest-dom": "^6.9.1",
+    "@testing-library/react": "^16.3.0",
+    "@testing-library/user-event": "^14.6.1",
     "@vitejs/plugin-react": "^4.2.1",
+    "@vitest/coverage-v8": "^3.2.4",
     "eslint": "^8.55.0",
     "eslint-plugin-jsdoc": "^48.0.0",
     "eslint-plugin-react": "^7.37.5",
     "eslint-plugin-react-hooks": "^4.6.0",
     "eslint-plugin-react-refresh": "^0.4.5",
+    "jsdom": "^27.3.0",
     "prettier": "^3.1.1",
     "vite": "^7.1.10",
     "vitest": "^3.2.4"

@@ -4,12 +4,12 @@
 -- Clear existing data (development only)
 SET FOREIGN_KEY_CHECKS=0;
 DELETE FROM movie;
-DELETE FROM `user`;
+DELETE FROM `users`;
 SET FOREIGN_KEY_CHECKS=1;
 
 -- Reset AUTO_INCREMENT counters
 ALTER TABLE movie AUTO_INCREMENT = 1;
-ALTER TABLE `user` AUTO_INCREMENT = 1;
+ALTER TABLE `users` AUTO_INCREMENT = 1;
 
 INSERT INTO movie (title, director, actors, genres, release_date, duration, language, rated, description, status) VALUES
 ('The Shawshank Redemption', 'Frank Darabont', 'Tim Robbins, Morgan Freeman', 'Drama', '1994-09-23', '142 min', 'English', 'R', 'Two imprisoned men bond over a number of years, finding solace and eventual redemption.', 'NOW_SHOWING'),
@@ -34,11 +34,11 @@ INSERT INTO movie (title, director, actors, genres, release_date, duration, lang
 ('The Hunger Games: The Ballad of Songbirds & Snakes', 'Francis Lawrence', 'Tom Blyth, Rachel Zegler', 'Action, Adventure, Drama', '2023-11-17', '157 min', 'English', 'PG-13', 'Years before he would become the tyrannical President of Panem, 18-year-old Coriolanus Snow is the last hope for his fading lineage.', 'NOW_SHOWING');
 
 -- Users: store BCrypt-hashed passwords to align with PasswordEncoder
--- Password for both users = "123456" (BCrypt pre-hashed)
+-- Password for both users = "password" (BCrypt pre-hashed)
 -- Hash generated with BCrypt (10 rounds). Update if encoder strength changes.
 SET @pwd := '$2a$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi';
 
-INSERT INTO `user` (email, password, phone_number, role, is_active, address, created_at, updated_at, username, date_of_birth) VALUES
+INSERT INTO `users` (email, password, phone_number, role, is_active, address, created_at, updated_at, username, date_of_birth) VALUES
 ('admin@example.com', @pwd, '0900000000', 'ADMIN', true, 'Admin HQ', NOW(), NOW(), 'admin', '1990-01-01'),
 ('johndoe@example.com', @pwd, '0911111111', 'CUSTOMER', true, '123 Main St', NOW(), NOW(), 'johndoe', '1995-05-10');
 
@@ -300,3 +300,49 @@ INSERT INTO screening (start_time, end_time, format, status, movie_id, auditoriu
 ('2024-12-24 18:00:00', '2024-12-24 21:01:00', 'ThreeD', 'ACTIVE', 8, 2),
 ('2024-12-24 22:00:00', '2024-12-25 01:01:00', 'IMAX', 'ACTIVE', 8, 3);
 
+
+-- Movie 10: Oppenheimer
+INSERT INTO screening (start_time, end_time, format, status, movie_id, auditorium_id) VALUES
+('2024-12-22 10:00:00', '2024-12-22 13:00:00', 'IMAX', 'ACTIVE', 10, 3),
+('2024-12-22 14:00:00', '2024-12-22 17:00:00', 'IMAX', 'ACTIVE', 10, 3),
+('2024-12-22 18:00:00', '2024-12-22 21:00:00', 'IMAX', 'ACTIVE', 10, 3);
+
+-- Movie 11: The Batman
+INSERT INTO screening (start_time, end_time, format, status, movie_id, auditorium_id) VALUES
+('2024-12-22 09:00:00', '2024-12-22 11:56:00', 'TwoD', 'ACTIVE', 11, 1),
+('2024-12-22 13:00:00', '2024-12-22 15:56:00', 'TwoD', 'ACTIVE', 11, 1);
+
+-- Movie 12: Spider-Man: No Way Home
+INSERT INTO screening (start_time, end_time, format, status, movie_id, auditorium_id) VALUES
+('2024-12-22 10:00:00', '2024-12-22 12:28:00', 'ThreeD', 'ACTIVE', 12, 2),
+('2024-12-22 14:00:00', '2024-12-22 16:28:00', 'ThreeD', 'ACTIVE', 12, 2);
+
+-- Movie 13: Everything Everywhere All at Once
+INSERT INTO screening (start_time, end_time, format, status, movie_id, auditorium_id) VALUES
+('2024-12-22 11:00:00', '2024-12-22 13:19:00', 'TwoD', 'ACTIVE', 13, 1),
+('2024-12-22 15:00:00', '2024-12-22 17:19:00', 'TwoD', 'ACTIVE', 13, 1);
+
+-- Movie 14: Top Gun: Maverick
+INSERT INTO screening (start_time, end_time, format, status, movie_id, auditorium_id) VALUES
+('2024-12-22 09:30:00', '2024-12-22 11:40:00', 'IMAX', 'ACTIVE', 14, 3),
+('2024-12-22 13:30:00', '2024-12-22 15:40:00', 'IMAX', 'ACTIVE', 14, 3);
+
+-- Movie 15: Avatar: The Way of Water
+INSERT INTO screening (start_time, end_time, format, status, movie_id, auditorium_id) VALUES
+('2024-12-22 09:00:00', '2024-12-22 12:12:00', 'ThreeD', 'ACTIVE', 15, 2),
+('2024-12-22 13:00:00', '2024-12-22 16:12:00', 'ThreeD', 'ACTIVE', 15, 2);
+
+-- Movie 16: Barbie
+INSERT INTO screening (start_time, end_time, format, status, movie_id, auditorium_id) VALUES
+('2024-12-22 10:00:00', '2024-12-22 11:54:00', 'TwoD', 'ACTIVE', 16, 1),
+('2024-12-22 14:00:00', '2024-12-22 15:54:00', 'TwoD', 'ACTIVE', 16, 1);
+
+-- Movie 19: Wonka
+INSERT INTO screening (start_time, end_time, format, status, movie_id, auditorium_id) VALUES
+('2024-12-22 09:00:00', '2024-12-22 10:56:00', 'TwoD', 'ACTIVE', 19, 2),
+('2024-12-22 13:00:00', '2024-12-22 14:56:00', 'TwoD', 'ACTIVE', 19, 2);
+
+-- Movie 20: The Hunger Games
+INSERT INTO screening (start_time, end_time, format, status, movie_id, auditorium_id) VALUES
+('2024-12-22 11:00:00', '2024-12-22 13:37:00', 'TwoD', 'ACTIVE', 20, 1),
+('2024-12-22 15:00:00', '2024-12-22 17:37:00', 'TwoD', 'ACTIVE', 20, 1);

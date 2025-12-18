@@ -23,37 +23,37 @@ public class BookingController {
 
     @PostMapping
     @PreAuthorize("hasAnyRole('CUSTOMER','ADMIN')")
-    public ResponseEntity<ApiResponse<BookingResponse>> createBooking(@Valid @RequestBody CreateBookingRequest createBookingRequest){
+    public ResponseEntity<ApiResponse<BookingResponse>> createBooking(
+            @Valid @RequestBody CreateBookingRequest createBookingRequest) {
         BookingResponse created = bookingService.createBooking(createBookingRequest);
         ApiResponse<BookingResponse> result = new ApiResponse<>(
                 HttpStatus.CREATED,
                 created,
                 "create success",
-                null
-        );
+                null);
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }
+
     @PatchMapping("/{id}")
-    public ResponseEntity<ApiResponse<BookingResponse>> updateBooking(@PathVariable Long id,@Valid @RequestBody PatchBooking patchBooking){
+    public ResponseEntity<ApiResponse<BookingResponse>> updateBooking(@PathVariable Long id,
+            @Valid @RequestBody PatchBooking patchBooking) {
         BookingResponse updated = bookingService.updateBooking(id, patchBooking);
         ApiResponse<BookingResponse> result = new ApiResponse<>(
                 HttpStatus.OK,
                 updated,
                 "update success",
-                null
-        );
+                null);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<ApiResponse<Void>> deleteBooking(@PathVariable Long id){
+    public ResponseEntity<ApiResponse<Void>> deleteBooking(@PathVariable Long id) {
         bookingService.deleteBooking(id);
         ApiResponse<Void> result = new ApiResponse<>(
                 HttpStatus.OK,
                 null,
                 "deleted",
-                null
-        );
+                null);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
@@ -69,8 +69,7 @@ public class BookingController {
                 HttpStatus.OK,
                 bookings,
                 "get bookings success",
-                null
-        );
+                null);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 
@@ -82,8 +81,7 @@ public class BookingController {
                 HttpStatus.OK,
                 cancelled,
                 "booking cancelled",
-                null
-        );
+                null);
         return ResponseEntity.status(HttpStatus.OK).body(result);
     }
 }

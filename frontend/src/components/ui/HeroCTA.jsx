@@ -5,10 +5,10 @@ import styles from './HeroCTA.module.css';
 /**
  * Hero Call-to-Action Buttons Component
  * @param {Object} props - Component props
- * @param {Function} [props.onWatchTrailer] - Watch trailer handler
- * @param {Function} [props.onBuyTickets] - Buy tickets handler
+ * @param {import('react').MouseEventHandler<HTMLButtonElement>} [props.onWatchTrailer] - Watch trailer handler
+ * @param {import('react').MouseEventHandler<HTMLButtonElement>} [props.onBuyTickets] - Buy tickets handler
  * @param {string} [props.className] - Additional CSS class
- * @returns {JSX.Element}
+ * @returns {import('react').JSX.Element}
  */
 const HeroCTA = ({ onWatchTrailer, onBuyTickets, className = '' }) => {
   const [ripple, setRipple] = useState(null);
@@ -19,9 +19,9 @@ const HeroCTA = ({ onWatchTrailer, onBuyTickets, className = '' }) => {
     const size = Math.max(rect.width, rect.height);
     const x = e.clientX - rect.left - size / 2;
     const y = e.clientY - rect.top - size / 2;
-    
+
     setRipple({ x, y, size });
-    
+
     setTimeout(() => setRipple(null), 600);
   };
 

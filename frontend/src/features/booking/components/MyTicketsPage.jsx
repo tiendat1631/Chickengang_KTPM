@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { useQuery } from '@tanstack/react-query'
-import { useAuth } from '@/hooks/useAuth'
+import { useAuth } from '@/features/auth/hooks/useAuth'
 import Header from '@/components/common/Header'
 import Breadcrumb from '@/components/ui/Breadcrumb'
 import { formatVND } from '@/utils/formatCurrency'
 import apiClient from '@/services/api'
 import { cancelBooking as cancelBookingApi } from '@/services/bookingApi'
 import { updatePaymentMethod as updatePaymentMethodApi } from '@/services/paymentApi'
+import useWebSocket from '@/hooks/useWebSocket'
 
 export default function MyTicketsPage() {
   const navigate = useNavigate()
@@ -77,11 +78,37 @@ export default function MyTicketsPage() {
     setShowPaymentForm(false)
   }, [selectedBooking?.id])
 
+  // WebSocket for Real-time Payment Updates
+  const { subscribe, isConnected } = useWebSocket()
+
+  useEffect(() => {
+    if (!isConnected || !bookings || bookings.length === 0) return
+
+    const subscriptions = []
+
+    bookings.forEach((booking) => {
+      if (booking.bookingStatus === 'PENDING') {
+        const sub = subscribe(`/topic/booking/${booking.id}/payment`, (message) => {
+          console.log('Payment update received:', message)
+          refetch()
+          if (selectedBooking?.id === booking.id) {
+            refetchPayment()
+          }
+        })
+        if (sub) subscriptions.push(sub)
+      }
+    })
+
+    return () => {
+      subscriptions.forEach((sub) => sub.unsubscribe())
+    }
+  }, [bookings, isConnected, subscribe, refetch, refetchPayment, selectedBooking?.id])
+
   const formatTime = (dateString) => {
     const date = new Date(dateString)
-    return date.toLocaleTimeString('vi-VN', { 
-      hour: '2-digit', 
-      minute: '2-digit' 
+    return date.toLocaleTimeString('vi-VN', {
+      hour: '2-digit',
+      minute: '2-digit'
     })
   }
 
@@ -187,11 +214,11 @@ export default function MyTicketsPage() {
   }
 
   // ProtectedRoute already handles authentication check
-  
+
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800">
-        <Header onSearch={() => {}} />
+        <Header onSearch={() => { }} />
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="text-white text-xl font-medium">Đang tải vé của bạn...</div>
         </div>
@@ -202,11 +229,11 @@ export default function MyTicketsPage() {
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800">
-        <Header onSearch={() => {}} />
+        <Header onSearch={() => { }} />
         <div className="flex items-center justify-center min-h-[60vh]">
           <div className="bg-white rounded-xl shadow-lg p-8 max-w-md mx-4 text-center">
             <div className="text-red-600 text-lg font-medium mb-4">Lỗi tải dữ liệu</div>
-            <button 
+            <button
               onClick={() => refetch()}
               className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all"
             >
@@ -221,17 +248,17 @@ export default function MyTicketsPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800">
       {/* Main Header */}
-      <Header onSearch={() => {}} />
-      
+      <Header onSearch={() => { }} />
+
       {/* Breadcrumb Navigation */}
       <div className="bg-gradient-to-r from-blue-800 to-gray-800">
-        <Breadcrumb 
+        <Breadcrumb
           items={[
             { label: "Trang chủ", href: "/" },
             { label: "Vé của tôi" }
           ]}
         />
-        
+
         {/* Page title and subtitle */}
         <div className="max-w-6xl mx-auto px-3 py-6 md:px-4">
           <h1 className="text-3xl md:text-4xl font-bold text-white mb-2 tracking-tight drop-shadow-lg">
@@ -258,16 +285,15 @@ export default function MyTicketsPage() {
                     Mỗi đặt chỗ có thể gồm nhiều vé
                   </p>
                 </div>
-                
+
                 <div className="p-6 space-y-4">
                   {bookings.map((booking) => (
-                    <div 
+                    <div
                       key={booking.id}
-                      className={`p-4 rounded-lg border cursor-pointer transition-all ${
-                        selectedBooking?.id === booking.id 
-                          ? 'border-blue-500 bg-blue-50' 
-                          : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
-                      }`}
+                      className={`p-4 rounded-lg border cursor-pointer transition-all ${selectedBooking?.id === booking.id
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-200 hover:border-gray-300 hover:bg-gray-50'
+                        }`}
                       onClick={() => handleBookingClick(booking)}
                     >
                       <div className="flex items-start justify-between">
@@ -278,7 +304,7 @@ export default function MyTicketsPage() {
                             </h4>
                             {getStatusBadge(booking, null)}
                           </div>
-                          
+
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-sm text-gray-600 mb-2">
                             <div><span className="font-medium">Mã đặt chỗ:</span> <span className="font-mono">{booking.bookingCode}</span></div>
                             <div><span className="font-medium">Số vé:</span> <span className="font-semibold text-blue-600">{booking.tickets?.length || booking.seats?.length || 0} vé</span></div>
@@ -286,18 +312,18 @@ export default function MyTicketsPage() {
                             <div><span className="font-medium">Phòng:</span> {booking.screening?.auditorium?.name || 'N/A'}</div>
                             <div><span className="font-medium">Tổng tiền:</span> {formatVND(booking.totalPrice)}</div>
                           </div>
-                          
+
                           {booking.seats && booking.seats.length > 0 && (
                             <div className="text-xs text-gray-600 mt-1">
                               <span className="font-medium">Ghế:</span> {booking.seats.map(seat => `${seat.rowLabel}${seat.number}`).join(', ')}
                             </div>
                           )}
-                          
+
                           <div className="text-xs text-gray-500">
                             Đặt lúc: {booking.createOn ? formatDate(booking.createOn) : 'N/A'}
                           </div>
                         </div>
-                        
+
                         <div className="text-right">
                           <div className="text-sm text-gray-500">Chi tiết →</div>
                         </div>
@@ -317,7 +343,7 @@ export default function MyTicketsPage() {
                       Chi tiết vé
                     </h3>
                   </div>
-                  
+
                   <div className="p-6 space-y-6">
                     {/* Booking Code */}
                     <div className="p-4 bg-green-50 rounded-lg border border-green-200">
@@ -370,7 +396,7 @@ export default function MyTicketsPage() {
                                   </div>
                                   {ticket.seat && (
                                     <div className="text-sm text-gray-700 mb-1">
-                                      <span className="font-medium">Ghế:</span> 
+                                      <span className="font-medium">Ghế:</span>
                                       <span className="ml-1 font-semibold text-gray-900">
                                         {ticket.seat.rowLabel}{ticket.seat.number}
                                       </span>
@@ -384,17 +410,16 @@ export default function MyTicketsPage() {
                                   {ticket.status && (
                                     <div className="text-xs text-gray-600 mt-2">
                                       <span className="font-medium">Trạng thái:</span>
-                                      <span className={`ml-1 px-2 py-0.5 rounded ${
-                                        ticket.status === 'ISSUED' ? 'bg-green-100 text-green-800' :
+                                      <span className={`ml-1 px-2 py-0.5 rounded ${ticket.status === 'ISSUED' ? 'bg-green-100 text-green-800' :
                                         ticket.status === 'BOOKED' ? 'bg-yellow-100 text-yellow-800' :
-                                        ticket.status === 'USED' ? 'bg-gray-100 text-gray-800' :
-                                        ticket.status === 'CANCELLED' ? 'bg-red-100 text-red-800' :
-                                        'bg-gray-100 text-gray-800'
-                                      }`}>
-                                        {ticket.status === 'ISSUED' ? 'Đã phát hành' : 
-                                         ticket.status === 'BOOKED' ? 'Đã đặt' : 
-                                         ticket.status === 'USED' ? 'Đã sử dụng' : 
-                                         ticket.status === 'CANCELLED' ? 'Đã hủy' : ticket.status}
+                                          ticket.status === 'USED' ? 'bg-gray-100 text-gray-800' :
+                                            ticket.status === 'CANCELLED' ? 'bg-red-100 text-red-800' :
+                                              'bg-gray-100 text-gray-800'
+                                        }`}>
+                                        {ticket.status === 'ISSUED' ? 'Đã phát hành' :
+                                          ticket.status === 'BOOKED' ? 'Đã đặt' :
+                                            ticket.status === 'USED' ? 'Đã sử dụng' :
+                                              ticket.status === 'CANCELLED' ? 'Đã hủy' : ticket.status}
                                       </span>
                                     </div>
                                   )}
@@ -503,7 +528,7 @@ export default function MyTicketsPage() {
 
                     {/* Action Buttons */}
                     <div className="space-y-3">
-                      <button 
+                      <button
                         className="w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-all"
                         onClick={handleBackToHome}
                       >
@@ -529,8 +554,8 @@ export default function MyTicketsPage() {
               <div className="text-6xl mb-4">🎬</div>
               <h3 className="text-xl font-semibold text-gray-600 mb-2">Chưa có vé nào</h3>
               <p className="text-gray-500 mb-6">Bạn chưa đặt vé nào. Hãy khám phá những bộ phim hay và đặt vé ngay!</p>
-              <Link 
-                to="/" 
+              <Link
+                to="/"
                 className="inline-block px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white rounded-lg font-semibold hover:from-blue-700 hover:to-purple-700 transition-all"
               >
                 Khám phá phim

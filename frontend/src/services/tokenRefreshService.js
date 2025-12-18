@@ -3,7 +3,7 @@
 import { getToken, getRefreshToken, parseJWT } from '@/lib/auth.js';
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? '/api' : 'http://localhost:8080');
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 /**
  * Token Refresh Service

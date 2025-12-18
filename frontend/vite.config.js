@@ -35,10 +35,22 @@ export default defineConfig({
           });
         },
       },
+      '/ws': {
+        target: 'http://backend:8080',
+        ws: true,
+        changeOrigin: true,
+        secure: false,
+      },
     },
   },
   build: {
     outDir: 'dist',
     sourcemap: true,
+  },
+  test: {
+    globals: true,
+    environment: 'jsdom',
+    setupFiles: './src/setupTests.js',
+    css: true,
   },
 })

@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import PropTypes from 'prop-types';
-import { useAuth } from '@/hooks/useAuth.js';
+import { useAuth } from '@/features/auth/hooks/useAuth.js';
 import SearchBar from './SearchBar';
-import UserMenu from './UserMenu';
+import UserMenu from '@/features/auth/components/UserMenu';
 import MobileNav from './MobileNav';
 import '@/styles/Header.css';
 

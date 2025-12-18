@@ -4,10 +4,8 @@ import axios from 'axios';
 import { getToken, removeToken } from '@/lib/auth.js';
 
 // API Configuration - Use proxy in development, direct URL in production
-//const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || (import.meta.env.DEV ? '/api' : 'http://localhost:8080');
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
-// Để debug xem nó nhận link nào
-console.log('Current API BASE URL:', API_BASE_URL);
+// API Configuration - Use environment variable or default to relative path
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 const API_TIMEOUT = parseInt(import.meta.env.VITE_API_TIMEOUT || '30000');
 
 // Request queue for handling concurrent requests during token refresh
@@ -109,9 +107,9 @@ apiClient.interceptors.response.use(
 
           console.warn(`${isBookingEndpoint ? 'Booking' : isPaymentEndpoint ? 'Payment' : 'API'} endpoint returned 401, attempting token refresh`);
 
-            const refreshResponse = await refreshClient.post('/auth/refresh', {
-                refreshToken,
-            });
+          const refreshResponse = await refreshClient.post('/v1/auth/refresh', {
+            refreshToken,
+          });
           const { accessToken } = refreshResponse.data.data;
 
           // Save new token to localStorage

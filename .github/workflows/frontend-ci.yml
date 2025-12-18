@@ -1,0 +1,46 @@
+name: Frontend CI
+
+on:
+  push:
+    branches: [ "main", "master", "develop" ]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend-ci.yml'
+  pull_request:
+    branches: [ "main", "master", "develop" ]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend-ci.yml'
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: '20'
+        # cache: 'npm' # Disabled to prevent caching bad optional dependencies
+
+    - name: Install dependencies
+      # Force fresh install to fix cross-platform issues (Rollup Linux binaries)
+      run: |
+        rm -rf package-lock.json node_modules
+        npm install
+
+    - name: Lint
+      run: npm run lint
+      continue-on-error: true
+
+    - name: Test
+      run: npm test -- --run
+
+    - name: Build
+      run: npm run build

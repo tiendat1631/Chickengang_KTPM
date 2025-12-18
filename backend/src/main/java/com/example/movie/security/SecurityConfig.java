@@ -18,7 +18,6 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-
 @EnableMethodSecurity
 @Configuration
 @EnableWebSecurity
@@ -26,10 +25,12 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 public class SecurityConfig {
     private final CustomAccessDeniedHandler customAccessDeniedHandler;
     private final CustomAuthenticationEntryPoint customAuthenticationEntryPoint;
+
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtFilter)
+            throws Exception {
         return http
-                .csrf(csrf->csrf.disable())
+                .csrf(csrf -> csrf.disable())
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .authorizeHttpRequests(auth -> auth
                         // all roles can crud movie
@@ -56,10 +57,9 @@ public class SecurityConfig {
                         // Allow viewing auditoriums without authentication (GET)
                         .requestMatchers(HttpMethod.GET, "/api/v1/auditoriums/**").permitAll()
                         // Admin-only operations for auditorium management
-                        .requestMatchers(HttpMethod.POST,"/api/v1/auditoriums/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.PATCH,"/api/v1/auditoriums/**").hasRole("ADMIN")
-                        .requestMatchers(HttpMethod.DELETE,"/api/v1/auditoriums/**").hasRole("ADMIN")
-
+                        .requestMatchers(HttpMethod.POST, "/api/v1/auditoriums/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.PATCH, "/api/v1/auditoriums/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/v1/auditoriums/**").hasRole("ADMIN")
 
                         // SCREENING
                         .requestMatchers(HttpMethod.GET, "/api/v1/screenings/**").permitAll()
@@ -70,22 +70,20 @@ public class SecurityConfig {
 
                         // BOOKING - Require authentication
                         .requestMatchers("/api/v1/bookings/**").authenticated()
-                        
+
                         // PAYMENT - Require authentication
                         .requestMatchers("/api/v1/payments/**").authenticated()
-                        
-                        .anyRequest().authenticated()
-                )
-                .exceptionHandling(ex->ex
-                        .accessDeniedHandler(customAccessDeniedHandler)
-                        .authenticationEntryPoint(customAuthenticationEntryPoint)
-                )
 
+                        .anyRequest().authenticated())
+                .exceptionHandling(ex -> ex
+                        .accessDeniedHandler(customAccessDeniedHandler)
+                        .authenticationEntryPoint(customAuthenticationEntryPoint))
 
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .httpBasic(Customizer.withDefaults())
                 .build();
     }
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -95,12 +93,25 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOriginPatterns(java.util.List.of("*"));
+        // Allow specific origins (local development and Docker)
+        // Allow specific origins (local development and Docker)
+        // configuration.addAllowedOrigin("http://localhost:3000");
+        // configuration.addAllowedOrigin("http://127.0.0.1:3000");
 
+        // Use allowedOriginPatterns instead of allowedOrigins to allow wildcard with
+        // credentials
+        configuration.addAllowedOriginPattern("*");
+
+        // Allow all HTTP methods
         configuration.addAllowedMethod("*");
+
+        // Allow all headers
         configuration.addAllowedHeader("*");
+
+        // Allow credentials (cookies, authorization headers)
         configuration.setAllowCredentials(true);
 
+        // Expose headers that frontend can access
         configuration.addExposedHeader("Authorization");
         configuration.addExposedHeader("Content-Type");
 

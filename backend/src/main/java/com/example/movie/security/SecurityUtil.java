@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Date;
 
 @Service
 @RequiredArgsConstructor
@@ -35,29 +36,30 @@ public class SecurityUtil {
     public static final MacAlgorithm JWT_ALGORITHM = MacAlgorithm.HS512;
 
     // sinh token with role-based expiration
-    public String createAccessToken (User user){
+    public String createAccessToken(User user) {
         Instant now = Instant.now();
 
-        // Use longer expiration for admin users (8 hours), shorter for regular users (1 hour)
-        long expirationSeconds = user.getRole().name().equals("ADMIN") 
-            ? jwtAdminAccessExpiration 
-            : jwtAccessExpiration;
-        
+        // Use longer expiration for admin users (8 hours), shorter for regular users (1
+        // hour)
+        long expirationSeconds = user.getRole().name().equals("ADMIN")
+                ? jwtAdminAccessExpiration
+                : jwtAccessExpiration;
+
         Instant validity = now.plus(expirationSeconds, ChronoUnit.SECONDS);
 
         // xây dựng payload
         JwtClaimsSet claims = JwtClaimsSet.builder()
-                .issuedAt(now) //thời điểm token được phát hành
+                .issuedAt(now) // thời điểm token được phát hành
                 .expiresAt(validity) // thời điểm token hết hạn
                 .subject(user.getUsername())
                 .claim(ROLE_KEY, user.getRole().name())
                 .build();
 
         JwsHeader jwsHeader = JwsHeader.with(JWT_ALGORITHM).build();
-        return jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader,claims)).getTokenValue();
+        return jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, claims)).getTokenValue();
     }
 
-    public String createRefreshToken (String subject){
+    public String createRefreshToken(String subject) {
         Instant now = Instant.now();
         Instant validity = now.plus(jwtRefreshExpiration, ChronoUnit.SECONDS);
 
@@ -73,5 +75,19 @@ public class SecurityUtil {
 
     public JwtDecoder getJwtDecoder() {
         return jwtDecoder;
+    }
+
+    public Date getExpirationDateFromToken(String token) {
+        try {
+            // Sử dụng jwtDecoder đã có sẵn trong class này (hoặc inject vào nếu chưa có)
+            Jwt jwt = jwtDecoder.decode(token);
+
+            Instant expiresAt = jwt.getExpiresAt();
+            return expiresAt != null ? Date.from(expiresAt) : new Date();
+        } catch (JwtException e) {
+            // Trường hợp token lỗi, đã hết hạn, hoặc malformed
+            // Trả về thời gian hiện tại để không lưu vào DB (hoặc xử lý tùy ý)
+            return new Date();
+        }
     }
 }

@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
-import MovieCard from '@/components/common/MovieCard.jsx';
-import SkeletonCard from '@/components/common/SkeletonCard.jsx';
+import MovieCard from '@/features/movies/components/MovieCard.jsx';
+import SkeletonCard from '@/features/movies/components/SkeletonCard.jsx';
 import '@/styles/MovieList.css';
 
 const MovieList = React.memo(({
@@ -22,7 +22,7 @@ const MovieList = React.memo(({
         <div className="error-icon">⚠️</div>
         <h3>Không thể tải danh sách phim</h3>
         <p>{error}</p>
-        <button 
+        <button
           className="btn btn-primary"
           onClick={() => window.location.reload()}
         >
@@ -89,7 +89,7 @@ const MovieList = React.memo(({
 
       {hasMore && !loading && onLoadMore && (
         <div className="movie-list-actions">
-          <button 
+          <button
             className="btn btn-outline btn-large"
             onClick={onLoadMore}
           >

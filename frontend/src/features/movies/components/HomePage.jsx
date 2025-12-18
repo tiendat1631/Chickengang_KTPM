@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom'
-import { useMovies } from '@/hooks/useMovies'
+import { useMovies } from '@/features/movies/hooks/useMovies'
 import Header from '@/components/common/Header'
 import HeroSection from './HeroSection.jsx'
 import MovieList from './MovieList.jsx'

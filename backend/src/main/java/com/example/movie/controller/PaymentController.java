@@ -21,83 +21,90 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins = "http://localhost:3000")
 @RestController
 public class PaymentController {
-    private final PaymentService paymentService;
+        private final PaymentService paymentService;
+        private final org.springframework.messaging.simp.SimpMessagingTemplate messagingTemplate;
 
-    @PostMapping("/confirm")
-    @PreAuthorize("hasRole('CUSTOMER') or hasRole('ADMIN')")
-    public ResponseEntity<ApiResponse<PaymentResponse>> confirmPayment(@Valid @RequestBody PaymentConfirmRequest request) {
-        PaymentResponse response = paymentService.confirmPayment(request);
-        ApiResponse<PaymentResponse> result = new ApiResponse<>(
-                HttpStatus.OK,
-                response,
-                "Payment confirmed successfully",
-                null
-        );
-        return ResponseEntity.status(HttpStatus.OK).body(result);
-    }
+        @PostMapping("/confirm")
+        @PreAuthorize("hasRole('CUSTOMER') or hasRole('ADMIN')")
+        public ResponseEntity<ApiResponse<PaymentResponse>> confirmPayment(
+                        @Valid @RequestBody PaymentConfirmRequest request) {
+                PaymentResponse response = paymentService.confirmPayment(request);
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @PatchMapping("/{paymentId}/complete")
-    public ResponseEntity<ApiResponse<PaymentResponse>> completePayment(
-            @PathVariable Long paymentId,
-            @RequestParam(defaultValue = "SUCCESS") String status) {
-        PaymentResponse response = paymentService.completePayment(paymentId, status);
-        ApiResponse<PaymentResponse> result = new ApiResponse<>(
-                HttpStatus.OK,
-                response,
-                "Payment completed successfully",
-                null
-        );
-        return ResponseEntity.status(HttpStatus.OK).body(result);
-    }
+                // Notify frontend
+                messagingTemplate.convertAndSend("/topic/booking/" + response.getBookingId() + "/payment", response);
+                messagingTemplate.convertAndSend("/topic/payments", response);
 
-    @PatchMapping("/{paymentId}")
-    @PreAuthorize("hasAnyRole('CUSTOMER','ADMIN')")
-    public ResponseEntity<ApiResponse<PaymentResponse>> updatePendingPayment(
-            @PathVariable Long paymentId,
-            @Valid @RequestBody PaymentUpdateRequest request) {
-        PaymentResponse response = paymentService.updatePendingPayment(paymentId, request);
-        ApiResponse<PaymentResponse> result = new ApiResponse<>(
-                HttpStatus.OK,
-                response,
-                "Payment updated successfully",
-                null
-        );
-        return ResponseEntity.status(HttpStatus.OK).body(result);
-    }
+                ApiResponse<PaymentResponse> result = new ApiResponse<>(
+                                HttpStatus.OK,
+                                response,
+                                "Payment confirmed successfully",
+                                null);
+                return ResponseEntity.status(HttpStatus.OK).body(result);
+        }
 
-    @GetMapping("/booking/{bookingId}")
-    public ResponseEntity<ApiResponse<PaymentResponse>> getPaymentByBookingId(@PathVariable Long bookingId) {
-        PaymentResponse response = paymentService.getPaymentByBookingId(bookingId);
-        ApiResponse<PaymentResponse> result = new ApiResponse<>(
-                HttpStatus.OK,
-                response,
-                "Get payment by booking success",
-                null
-        );
-        return ResponseEntity.status(HttpStatus.OK).body(result);
-    }
+        @PreAuthorize("hasRole('ADMIN')")
+        @PatchMapping("/{paymentId}/complete")
+        public ResponseEntity<ApiResponse<PaymentResponse>> completePayment(
+                        @PathVariable Long paymentId,
+                        @RequestParam(defaultValue = "SUCCESS") String status) {
+                PaymentResponse response = paymentService.completePayment(paymentId, status);
 
-    @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping
-    public ResponseEntity<ApiResponse<Page<PaymentResponse>>> getAllPayments(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "id,DESC") String sort) {
-        
-        String[] sortParams = sort.split(",");
-        Sort.Direction direction = sortParams.length > 1 && sortParams[1].equalsIgnoreCase("ASC") 
-                ? Sort.Direction.ASC 
-                : Sort.Direction.DESC;
-        Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParams[0]));
-        
-        Page<PaymentResponse> payments = paymentService.getAllPayments(pageable);
-        ApiResponse<Page<PaymentResponse>> result = new ApiResponse<>(
-                HttpStatus.OK,
-                payments,
-                "Get all payments success",
-                null
-        );
-        return ResponseEntity.status(HttpStatus.OK).body(result);
-    }
+                // Notify frontend
+                messagingTemplate.convertAndSend("/topic/booking/" + response.getBookingId() + "/payment", response);
+                messagingTemplate.convertAndSend("/topic/payments", response);
+
+                ApiResponse<PaymentResponse> result = new ApiResponse<>(
+                                HttpStatus.OK,
+                                response,
+                                "Payment completed successfully",
+                                null);
+                return ResponseEntity.status(HttpStatus.OK).body(result);
+        }
+
+        @PatchMapping("/{paymentId}")
+        @PreAuthorize("hasAnyRole('CUSTOMER','ADMIN')")
+        public ResponseEntity<ApiResponse<PaymentResponse>> updatePendingPayment(
+                        @PathVariable Long paymentId,
+                        @Valid @RequestBody PaymentUpdateRequest request) {
+                PaymentResponse response = paymentService.updatePendingPayment(paymentId, request);
+                ApiResponse<PaymentResponse> result = new ApiResponse<>(
+                                HttpStatus.OK,
+                                response,
+                                "Payment updated successfully",
+                                null);
+                return ResponseEntity.status(HttpStatus.OK).body(result);
+        }
+
+        @GetMapping("/booking/{bookingId}")
+        public ResponseEntity<ApiResponse<PaymentResponse>> getPaymentByBookingId(@PathVariable Long bookingId) {
+                PaymentResponse response = paymentService.getPaymentByBookingId(bookingId);
+                ApiResponse<PaymentResponse> result = new ApiResponse<>(
+                                HttpStatus.OK,
+                                response,
+                                "Get payment by booking success",
+                                null);
+                return ResponseEntity.status(HttpStatus.OK).body(result);
+        }
+
+        @PreAuthorize("hasRole('ADMIN')")
+        @GetMapping
+        public ResponseEntity<ApiResponse<Page<PaymentResponse>>> getAllPayments(
+                        @RequestParam(defaultValue = "0") int page,
+                        @RequestParam(defaultValue = "10") int size,
+                        @RequestParam(defaultValue = "id,DESC") String sort) {
+
+                String[] sortParams = sort.split(",");
+                Sort.Direction direction = sortParams.length > 1 && sortParams[1].equalsIgnoreCase("ASC")
+                                ? Sort.Direction.ASC
+                                : Sort.Direction.DESC;
+                Pageable pageable = PageRequest.of(page, size, Sort.by(direction, sortParams[0]));
+
+                Page<PaymentResponse> payments = paymentService.getAllPayments(pageable);
+                ApiResponse<Page<PaymentResponse>> result = new ApiResponse<>(
+                                HttpStatus.OK,
+                                payments,
+                                "Get all payments success",
+                                null);
+                return ResponseEntity.status(HttpStatus.OK).body(result);
+        }
 }

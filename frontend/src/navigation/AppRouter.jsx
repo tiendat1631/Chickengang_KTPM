@@ -23,7 +23,7 @@ import PaymentPage from '@/features/booking/components/PaymentPage.jsx';
 import BookingSuccessPage from '@/features/booking/components/BookingSuccessPage.jsx';
 import MyTicketsPage from '@/features/booking/components/MyTicketsPage.jsx';
 import CheckoutPage from '@/features/booking/components/CheckoutPage.jsx';
-import MovieDetailDemo from '@/components/MovieDetailDemo.jsx';
+
 
 // Admin Pages
 import AdminDashboard from '@/features/admin/components/AdminDashboard.jsx';
@@ -37,11 +37,11 @@ import AdminReports from '@/features/admin/components/AdminReports.jsx';
 
 // 404 Page Component
 const NotFoundPage = () => (
-  <div style={{ 
-    display: 'flex', 
-    flexDirection: 'column', 
-    alignItems: 'center', 
-    justifyContent: 'center', 
+  <div style={{
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
     minHeight: '100vh',
     textAlign: 'center',
     padding: '2rem'
@@ -51,13 +51,13 @@ const NotFoundPage = () => (
     <p style={{ color: '#666', marginBottom: '2rem' }}>
       Trang bạn đang tìm kiếm không tồn tại hoặc đã bị di chuyển.
     </p>
-    <a 
-      href="/" 
-      style={{ 
-        padding: '12px 24px', 
-        backgroundColor: '#667eea', 
-        color: 'white', 
-        textDecoration: 'none', 
+    <a
+      href="/"
+      style={{
+        padding: '12px 24px',
+        backgroundColor: '#667eea',
+        color: 'white',
+        textDecoration: 'none',
         borderRadius: '6px',
         fontWeight: '500'
       }}
@@ -68,7 +68,7 @@ const NotFoundPage = () => (
 );
 
 // Hooks
-import { useAuth } from '@/hooks/useAuth.js';
+import { useAuth } from '@/features/auth/hooks/useAuth.js';
 import AdminRoute from './AdminRoute.jsx';
 
 const queryClient = new QueryClient({
@@ -83,27 +83,27 @@ const queryClient = new QueryClient({
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
-  
+
   if (isLoading) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        minHeight: '100vh' 
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh'
       }}>
         <div>Đang tải...</div>
       </div>
     );
   }
-  
+
   if (!isAuthenticated) {
     // Store current location for redirect after login
     const currentPath = window.location.pathname + window.location.search;
     localStorage.setItem('intendedBookingUrl', currentPath);
     return <Navigate to="/login" replace />;
   }
-  
+
   return <>{children}</>;
 };
 
@@ -114,20 +114,20 @@ ProtectedRoute.propTypes = {
 // Public Route Component (redirect if authenticated)
 const PublicRoute = ({ children }) => {
   const { isAuthenticated, isLoading } = useAuth();
-  
+
   if (isLoading) {
     return (
-      <div style={{ 
-        display: 'flex', 
-        justifyContent: 'center', 
-        alignItems: 'center', 
-        minHeight: '100vh' 
+      <div style={{
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        minHeight: '100vh'
       }}>
         <div>Đang tải...</div>
       </div>
     );
   }
-  
+
   return !isAuthenticated ? <>{children}</> : <Navigate to="/" replace />;
 };
 
@@ -152,172 +152,172 @@ const AppRouter = () => {
             <Route path="movies/search" element={<SearchResultsPage />} />
             <Route path="movies/:id" element={<MovieDetailPage />} />
             <Route path="movies/:movieId/screenings" element={<ScreeningListPage />} />
-            
+
             {/* Auth Routes */}
-            <Route 
-              path="login" 
+            <Route
+              path="login"
               element={
                 <PublicRoute>
                   <LoginPage />
                 </PublicRoute>
-              } 
+              }
             />
-            <Route 
-              path="register" 
+            <Route
+              path="register"
               element={
                 <PublicRoute>
                   <RegisterPage />
                 </PublicRoute>
-              } 
+              }
             />
-            
+
             {/* Protected Routes */}
-            <Route 
-              path="booking/:movieId/screening/:screeningId" 
+            <Route
+              path="booking/:movieId/screening/:screeningId"
               element={
                 <ProtectedRoute>
                   <SeatSelectionPage />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="booking/:movieId" 
+            <Route
+              path="booking/:movieId"
               element={
                 <ProtectedRoute>
                   <BookingPage />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="booking/:movieId/payment" 
+            <Route
+              path="booking/:movieId/payment"
               element={
                 <ProtectedRoute>
                   <PaymentPage />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="booking/success/:bookingId" 
+            <Route
+              path="booking/success/:bookingId"
               element={
                 <ProtectedRoute>
                   <BookingSuccessPage />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="my-tickets" 
+            <Route
+              path="my-tickets"
               element={
                 <ProtectedRoute>
                   <MyTicketsPage />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="profile" 
+            <Route
+              path="profile"
               element={
                 <ProtectedRoute>
                   <UserProfile />
                 </ProtectedRoute>
-              } 
+              }
             />
-            <Route 
-              path="checkout" 
+            <Route
+              path="checkout"
               element={
                 <ProtectedRoute>
                   <CheckoutPage />
                 </ProtectedRoute>
-              } 
+              }
             />
-            
+
             {/* Demo Routes */}
-            <Route path="movie-hero-demo" element={<MovieDetailDemo />} />
-            
+
+
             {/* Admin Routes */}
-            <Route 
-              path="admin" 
+            <Route
+              path="admin"
               element={
                 <AdminRoute>
                   <ErrorBoundary>
                     <AdminDashboard />
                   </ErrorBoundary>
                 </AdminRoute>
-              } 
+              }
             />
-            <Route 
-              path="admin/movies" 
+            <Route
+              path="admin/movies"
               element={
                 <AdminRoute>
                   <ErrorBoundary>
                     <AdminMovieManagement />
                   </ErrorBoundary>
                 </AdminRoute>
-              } 
+              }
             />
-            <Route 
-              path="admin/users" 
+            <Route
+              path="admin/users"
               element={
                 <AdminRoute>
                   <ErrorBoundary>
                     <AdminUserManagement />
                   </ErrorBoundary>
                 </AdminRoute>
-              } 
+              }
             />
-            <Route 
-              path="admin/auditoriums" 
+            <Route
+              path="admin/auditoriums"
               element={
                 <AdminRoute>
                   <ErrorBoundary>
                     <AdminAuditoriumManagement />
                   </ErrorBoundary>
                 </AdminRoute>
-              } 
+              }
             />
-            <Route 
-              path="admin/screenings" 
+            <Route
+              path="admin/screenings"
               element={
                 <AdminRoute>
                   <ErrorBoundary>
                     <AdminScreeningManagement />
                   </ErrorBoundary>
                 </AdminRoute>
-              } 
+              }
             />
-            <Route 
-              path="admin/bookings" 
+            <Route
+              path="admin/bookings"
               element={
                 <AdminRoute>
                   <ErrorBoundary>
                     <AdminBookingManagement />
                   </ErrorBoundary>
                 </AdminRoute>
-              } 
+              }
             />
-            <Route 
-              path="admin/payments" 
+            <Route
+              path="admin/payments"
               element={
                 <AdminRoute>
                   <ErrorBoundary>
                     <AdminPaymentManagement />
                   </ErrorBoundary>
                 </AdminRoute>
-              } 
+              }
             />
-            <Route 
-              path="admin/reports" 
+            <Route
+              path="admin/reports"
               element={
                 <AdminRoute>
                   <ErrorBoundary>
                     <AdminReports />
                   </ErrorBoundary>
                 </AdminRoute>
-              } 
+              }
             />
           </Route>
-          
+
           {/* 404 Route */}
           <Route path="404" element={<NotFoundPage />} />
-          
+
           {/* Catch all route */}
           <Route path="*" element={<Navigate to="/404" replace />} />
         </Routes>
