@@ -1,23 +1,18 @@
-name: moviebooking
+name: moviebooking-staging
 
 services:
   db:
-    env_file:
-      - ./config/.env.development
     image: mysql:8.0
-    container_name: moviebooking-db
+    container_name: moviebooking-db-staging
     environment:
-      MYSQL_DATABASE: ${MYSQL_DATABASE:-moviebooking}
-      MYSQL_USER: ${MYSQL_USER:-movieuser}
-      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-password}
-      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-rootpassword}
-    ports:
-      - "3306:3306"
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-moviebooking_staging}
+      MYSQL_USER: ${MYSQL_USER:-staging_user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
     volumes:
-      - mysql-data:/var/lib/mysql
-      #- ./backend/src/main/resources/data.sql:/docker-entrypoint-initdb.d/data.sql:ro
+      - mysql-data-staging:/var/lib/mysql
     networks:
-      - moviebooking-network
+      - moviebooking-network-staging
     restart: unless-stopped
     healthcheck:
       test: [ "CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}" ]
@@ -28,28 +23,29 @@ services:
     deploy:
       resources:
         limits:
-          memory: 512M
+          memory: 768M
         reservations:
-          memory: 256M
+          memory: 384M
 
   backend:
     build:
       context: ./backend
       dockerfile: Dockerfile
-    container_name: moviebooking-backend
+    container_name: moviebooking-backend-staging
     env_file:
-      - ./config/.env.development
+      - ./config/.env.staging
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/${MYSQL_DATABASE:-moviebooking}
-      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-movieuser}
-      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD:-password}
+      SPRING_PROFILES_ACTIVE: staging
+      SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/${MYSQL_DATABASE:-moviebooking_staging}
+      SPRING_DATASOURCE_USERNAME: ${MYSQL_USER:-staging_user}
+      SPRING_DATASOURCE_PASSWORD: ${MYSQL_PASSWORD}
     ports:
       - "8080:8080"
     depends_on:
       db:
         condition: service_healthy
     networks:
-      - moviebooking-network
+      - moviebooking-network-staging
     restart: unless-stopped
     healthcheck:
       test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/actuator/health" ]
@@ -68,13 +64,16 @@ services:
     build:
       context: ./frontend
       dockerfile: Dockerfile
-    container_name: moviebooking-frontend
+      args:
+        - VITE_API_BASE_URL=${VITE_API_BASE_URL:-https://chickengang-staging.railway.app/api}
+        - VITE_ENV=staging
+    container_name: moviebooking-frontend-staging
     ports:
       - "3000:80"
     depends_on:
       - backend
     networks:
-      - moviebooking-network
+      - moviebooking-network-staging
     restart: unless-stopped
     healthcheck:
       test: [ "CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:80/health" ]
@@ -89,26 +88,10 @@ services:
         reservations:
           memory: 128M
 
-  k6:
-    image: grafana/k6:master-with-browser
-    container_name: moviebooking-k6
-    # Command to run the browser test automatically
-    command: run /scripts/browser_test.js
-    environment:
-      - K6_BROWSER_ENABLED=true
-      - K6_BROWSER_HEADLESS=true
-      - BASE_URL=http://frontend
-    volumes:
-      - ./performance:/scripts
-    networks:
-      - moviebooking-network
-    depends_on:
-      - frontend
-
 volumes:
-  mysql-data:
+  mysql-data-staging:
     driver: local
 
 networks:
-  moviebooking-network:
+  moviebooking-network-staging:
     driver: bridge

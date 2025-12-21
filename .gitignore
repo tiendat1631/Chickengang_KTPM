@@ -25,6 +25,14 @@ logs/
 .env.local
 .env.*.local
 
+# Config files with secrets (in config/ directory)
+config/.env.development
+config/.env.staging
+config/.env.production
+
+# Binary executables
+*.exe
+
 # Node modules (if any at root)
 node_modules/
 
