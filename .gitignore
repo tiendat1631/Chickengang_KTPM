@@ -67,3 +67,6 @@ __pycache__/
 *.pyo
 .venv/
 venv/
+
+# Binary executables
+cloudflared.exe
