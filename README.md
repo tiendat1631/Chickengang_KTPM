@@ -77,15 +77,29 @@
 
 ```
 Chickengang_KTPM/
-├── 📂 backend/            # Spring Boot REST API
-├── 📂 frontend/           # React + TypeScript Web App
-├── 📂 docs/               # Documentation & Design Specs
-│   ├── 📂 review-checklists/   # Test Review Checklists
-│   └── 📂 test_template/       # Test Cases & Reports
-├── 📂 functional_tests/   # E2E & Functional Tests (Selenium)
-├── 📂 performance/        # Performance Testing (k6)
-├── 📂 test_data/          # Test Data Sets
-└── 🐳 docker-compose.yml  # Container Orchestration
+├── 📂 backend/                 # Spring Boot REST API
+├── 📂 frontend/                # React + Vite Web App
+│
+├── 📂 docs/                    # 📚 Documentation
+│   ├── requirements/           # Use Cases, User Stories
+│   ├── design/                 # Architecture, Database, Screen Design
+│   ├── testing/                # Test Plan, Summary, Bug Reports
+│   └── agile/                  # Product Backlog, Definition of Done
+│
+├── 📂 tests/                   # 🧪 All Tests
+│   ├── e2e/                    # End-to-End Tests (Selenium)
+│   ├── performance/            # Performance Tests (k6)
+│   ├── security/               # Security Tests (OWASP ZAP)
+│   └── data/                   # Test Data & Fixtures
+│
+├── 📂 infra/                   # 🏗️ Infrastructure
+│   ├── docker/                 # Dockerfiles
+│   └── cloudflared/            # Cloudflare Tunnel
+│
+├── 📂 scripts/                 # 🔧 Utility Scripts
+│
+├── 🐳 docker-compose.yml       # Development
+└── 🐳 docker-compose.prod.yml  # Production
 ```
 
 ---
@@ -103,6 +117,9 @@ Chickengang_KTPM/
 # Clone repository
 git clone https://github.com/tiendat1631/Chickengang_KTPM.git
 cd Chickengang_KTPM
+
+# Copy environment file
+cp .env.example .env
 
 # Start all services
 docker-compose up -d
@@ -123,20 +140,32 @@ docker-compose up -d
 
 | Document | Description |
 |:---------|:------------|
-| [**Architecture Design**](./docs/Architecture_Design.md) | Thiết kế kiến trúc hệ thống và các thành phần |
-| [**Database Design**](./docs/Database_Design.md) | Thiết kế cơ sở dữ liệu, ERD và schema |
-| [**Screen Design**](./docs/Screen_Design.md) | Thiết kế giao diện màn hình |
-| [**Use Cases**](./docs/UseCase.md) | Yêu cầu chức năng và tương tác actor |
+| [**Architecture Design**](./docs/design/Architecture_Design.md) | Thiết kế kiến trúc hệ thống và các thành phần |
+| [**Database Design**](./docs/design/Database_Design.md) | Thiết kế cơ sở dữ liệu, ERD và schema |
+| [**Screen Design**](./docs/design/Screen_Design.md) | Thiết kế giao diện màn hình |
+
+### 📋 Requirements & Analysis
+
+| Document | Description |
+|:---------|:------------|
+| [**Use Cases**](./docs/requirements/UseCase.md) | Yêu cầu chức năng và tương tác actor |
+| [**Product Backlog**](./docs/agile/Product_Backlog.md) | User Stories với priority và story points |
 
 ### 🧪 Testing & Quality
 
 | Document | Description |
 |:---------|:------------|
-| [**Test Plan**](./docs/Test_Plan.md) | Chiến lược và phạm vi kiểm thử |
-| [**Test Summary**](./docs/Test_Summary.md) | Tổng hợp kết quả kiểm thử |
-| [**Bug Report**](./docs/Bug_Report.md) | Báo cáo lỗi phát hiện |
-| [**Review Checklists**](./docs/review-checklists/) | Test Review Checklists (CSV) |
-| [**Test Cases & Reports**](./docs/test_template/) | Test Cases theo Module |
+| [**Test Plan**](./docs/testing/Test_Plan.md) | Chiến lược và phạm vi kiểm thử |
+| [**Test Summary**](./docs/testing/Test_Summary.md) | Tổng hợp kết quả kiểm thử |
+| [**Bug Report**](./docs/testing/Bug_Report.md) | Báo cáo lỗi phát hiện |
+| [**Tests Guide**](./tests/README.md) | Hướng dẫn chạy tests |
+
+### 🔄 Agile Artifacts
+
+| Document | Description |
+|:---------|:------------|
+| [**Product Backlog**](./docs/agile/Product_Backlog.md) | User Stories với priority |
+| [**Definition of Done**](./docs/agile/Definition_of_Done.md) | Tiêu chí hoàn thành |
 
 ### 📖 Development Guides
 
@@ -144,7 +173,7 @@ docker-compose up -d
 |:---------|:------------|
 | [**Backend Guide**](./backend/README.md) | Hướng dẫn phát triển Backend |
 | [**Frontend Guide**](./frontend/README.md) | Hướng dẫn phát triển Frontend |
-| [**Functional Tests**](./functional_tests/README.md) | Hướng dẫn chạy Functional Tests |
+| [**Docs Index**](./docs/README.md) | Index tất cả tài liệu |
 
 ---
 
@@ -176,11 +205,11 @@ cd backend && ./mvnw test
 # Frontend Tests
 cd frontend && npm test
 
-# Functional Tests (Selenium)
-cd functional_tests && pytest
+# E2E Tests (Selenium)
+cd tests/e2e && pip install -r requirements.txt && pytest
 
 # Performance Tests (k6)
-cd performance && k6 run load_test.js
+cd tests/performance && k6 run booking_load_test.js
 ```
 
 ---

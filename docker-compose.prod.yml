@@ -88,7 +88,6 @@ services:
         reservations:
           memory: 128M
 
-  
 volumes:
   mysql-data-prod:
     driver: local
@@ -96,3 +95,6 @@ volumes:
 networks:
   moviebooking-network-prod:
     driver: bridge
+
+# deploy
+# .\cloudflared.exe tunnel --url http://localhost:80
